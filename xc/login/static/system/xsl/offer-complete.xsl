@@ -9,6 +9,8 @@
   <xsl:param name="defaults-doc-uri" select="'/main/getf/full/offer.xml'"/>
   <xsl:param name="defaults-doc" select="document($defaults-doc-uri)"/>
 
+  <xsl:param name="counter-doc" select="document('/main/plain_id?path=t2/c1.xml')"/>
+
   <xsl:include href="xc-utils.xsl"/>
 
 
@@ -22,8 +24,6 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="x:cgi"/>
-
   <xsl:template match="x:texts">
     <xsl:copy>
       <xsl:copy-of select="@*"/>
@@ -35,9 +35,11 @@
           <main>Unser Angebot</main>
         </xsl:with-param>
       </xsl:call-template>
-      <xsl:call-template name="complete">
+      <xsl:call-template name="completes">
         <xsl:with-param name="exs" select="x:sub"/>
-        <xsl:with-param name="val" select="$defaults-doc//x:sub"/>
+        <xsl:with-param name="val">
+          <sub>Angebot Nr. <xsl:value-of select="string($counter-doc)"/></sub>
+        </xsl:with-param>
         <xsl:with-param name="def">
           <sub>Angebot Nr. 000</sub>
         </xsl:with-param>

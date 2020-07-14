@@ -11,12 +11,23 @@
   <xsl:variable name="template-doc-uri" select="'/main/getf/types/offer.xml'"/>
   <xsl:variable name="template-doc" select="document($template-doc-uri)"/>
 
+  <xsl:variable name="counter-doc" select="document('/main/plain_id?path=t2/c1.xml')"/>
+
   <xsl:template match="/">
     <x>
       <cont>
         <xsl:apply-templates select="$template-doc" mode="to-xc"/>
       </cont>
     </x>
+  </xsl:template>
+
+  <xsl:template match="x:sub" mode="to-xcerp">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates mode="to-xcerp"/>
+      <xsl:text> </xsl:text>
+      <xsl:copy-of select="$counter-doc//x:counter"/>
+    </xsl:copy>
   </xsl:template>
 
 </xsl:stylesheet>

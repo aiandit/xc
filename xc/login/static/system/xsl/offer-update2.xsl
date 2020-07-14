@@ -12,8 +12,6 @@
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="x:cgi"/>
-
   <xsl:template match="x:sum-netto|x:sum-brutto|x:sum-taxes"/>
 
   <xsl:template match="x:calculation">

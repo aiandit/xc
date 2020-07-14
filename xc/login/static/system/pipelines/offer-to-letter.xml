@@ -3,6 +3,7 @@
   <steps>
     <step>offer-reset.xsl</step>
     <step>offer-complete.xml</step>
+    <step>offer-calculation-to-table.xsl</step>
     <step>offer-to-letter.xsl</step>
   </steps>
 </x>

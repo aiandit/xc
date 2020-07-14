@@ -88,6 +88,22 @@
     </xsl:if>
   </xsl:template>
 
+  <xsl:template name="completes">
+    <xsl:param name="exs"/>
+    <xsl:param name="val"/>
+    <xsl:param name="def"/>
+    <xsl:if test="not($exs)">
+      <xsl:choose>
+        <xsl:when test="$val">
+          <xsl:copy-of select="$val"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:copy-of select="$def"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:if>
+  </xsl:template>
+
   <xsl:template name="pluralize">
     <xsl:param name="word"/>
     <xsl:param name="n"/>
@@ -134,6 +150,20 @@
     <xsl:apply-templates mode="to-xhtml"/>
   </xsl:template>
 
-  <xsl:template match="x:cgi"/>
+  <xsl:template match="text()" mode="xml-dump">
+    <span>
+      <xsl:value-of select="."/>
+    </span>
+  </xsl:template>
+
+  <xsl:template match="*" mode="xml-dump">
+    <xsl:text>&lt;</xsl:text>
+    <xsl:value-of select="name()"/>
+    <xsl:text>&gt;</xsl:text>
+    <xsl:apply-templates mode="xml-dump"/>
+    <xsl:text>&lt;/</xsl:text>
+    <xsl:value-of select="name()"/>
+    <xsl:text>&gt;</xsl:text>
+  </xsl:template>
 
 </xsl:stylesheet>

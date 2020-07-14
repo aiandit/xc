@@ -16,9 +16,6 @@
     </xsl:copy>
   </xsl:template>
 
-  <!--  <xsl:template match="tradeitem/cost"/> -->
-
-  <xsl:template match="x:cgi"/>
 
   <xsl:template match="x:tradeitem">
     <xsl:copy>

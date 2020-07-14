@@ -7,42 +7,98 @@
 
   <xsl:output method="xml" encoding="utf-8"/>
 
-  <xsl:param name="template-doc-uri" select="'/main/getf/templates/html/offer.html'"/>
-  <xsl:param name="template-doc" select="document($template-doc-uri)"/>
-
-  <xsl:variable name="this" select="/"/>
-
-  <xsl:include href="view-utils.xsl"/>
+  <xsl:template match="text()"/>
 
   <xsl:template match="/">
     <div>
-      <xsl:if test="not($template-doc)">
-        <div>
-          <p>
-            <span style="color: red;"> Failed to load template document <xsl:value-of select="$template-doc-uri"/> </span>
-          </p>
-        </div>
-        <xsl:message> Failed to load template document <xsl:value-of select="$template-doc-uri"/>
-        </xsl:message>
-      </xsl:if>
-      <xsl:apply-templates select="$template-doc/*/xhtml:body/*"/>
+      <xsl:apply-templates/>
     </div>
   </xsl:template>
 
-  <xsl:template match="xhtml:tr[@data-content='tradeitems-headline']">
+  <xsl:template match="x:offer">
+    <div title="Angebot" class="offer">
+      <div>
+        <xsl:apply-templates select="x:address"/>
+        <xsl:apply-templates select="x:texts/x:sub"/>
+        <xsl:apply-templates select="x:texts/x:main"/>
+        <xsl:apply-templates select="x:texts/x:body"/>
+        <xsl:apply-templates select="x:calculation"/>
+        <xsl:apply-templates select="x:texts/x:post"/>
+        <xsl:apply-templates select="x:texts/x:closing"/>
+      </div>
+    </div>
+  </xsl:template>
+
+  <xsl:template match="x:body|x:closing|x:post">
+    <div class="{local-name()}">
+      <p>
+        <xsl:apply-templates mode="to-xhtml"/>
+      </p>
+    </div>
+  </xsl:template>
+
+  <xsl:template match="x:main">
+    <h4 style="clear: both"><xsl:value-of select="."/></h4>
+  </xsl:template>
+
+  <xsl:template match="x:sub">
+    <h4 class="fright" style="clear: both"><xsl:apply-templates mode="get-text"/></h4>
+    <!--       <xsl:if test="x:counter">
+         <form action="/main/counter" method="post">
+        <input type="hidden" value="on" name="incr"/>
+        <input type="hidden" value="/t2/c1.xml" name="path"/>
+        <input type="hidden" name="csrfmiddlewaretoken" value="{/*/x:cgi/x:csrfmiddlewaretoken}"/>
+        <input type="submit" value="Renew Number"/>
+      </form>
+    </xsl:if> -->
+  </xsl:template>
+
+  <xsl:template match="x:counter" mode="get-text">
+    <span class="counter"><xsl:value-of select="."/></span>
+  </xsl:template>
+
+  <xsl:template match="x:address">
+    <table class="address fright" style="clear: both">
+      <xsl:apply-templates/>
+    </table>
+  </xsl:template>
+
+  <xsl:template match="x:address/x:*">
     <tr>
-      <td></td>
-      <th class="aleft">Posten</th>
-      <th class="aright">
-        Anzahl
-      </th>
-      <th class="aright">
-        Preis
-      </th>
-      <th class="aright">
-        Gesamt
-      </th>
+      <td>
+        <xsl:apply-templates select="." mode="get-text"/>
+      </td>
     </tr>
+  </xsl:template>
+  <xsl:template match="x:address/x:firstname">
+    <tr>
+      <td>
+        <xsl:apply-templates select="." mode="get-text"/>
+        <xsl:text> </xsl:text>
+        <xsl:apply-templates select="../x:lastname" mode="get-text"/>
+      </td>
+    </tr>
+  </xsl:template>
+  <xsl:template match="x:address/x:name"/>
+  <xsl:template match="x:address/x:lastname"/>
+
+  <xsl:template match="x:calculation">
+    <table class="calculation">
+      <tr>
+<!--        <td></td> -->
+        <th class="aleft" colspan="2">Posten</th>
+        <th class="aright">
+          Anzahl
+        </th>
+        <th class="aright">
+          Preis
+        </th>
+        <th class="aright">
+          Gesamt
+        </th>
+      </tr>
+      <xsl:apply-templates/>
+    </table>
   </xsl:template>
 
   <xsl:template match="*" mode="as-price">
@@ -54,38 +110,35 @@
     </span>
   </xsl:template>
 
-  <xsl:template match="*" mode="as-number">
+  <xsl:template match="*" mode="as-number" name="as-number">
+    <xsl:param name="cont" select="."/>
     <span class="number">
-      <xsl:value-of select="number(.)"/>
+      <xsl:value-of select="number($cont)"/>
     </span>
   </xsl:template>
 
-  <xsl:template match="xhtml:tr[@data-content='tradeitems']">
-    <xsl:for-each select="$this/*/x:cont/x:offer/x:calculation/x:tradeitem">
-      <tr>
-        <td class="aleft" style="width:1.8em;">
-          <xsl:number format="0"/>.
-        </td>
-        <td>
-          <xsl:value-of select="x:desc"/>
-        </td>
-        <td class="aright ntd">
-          <xsl:apply-templates select="x:amount" mode="as-number"/>
-        </td>
-        <td class="aright ntd">
-          <xsl:apply-templates select="x:price" mode="as-price"/>
-        </td>
-        <td class="aright ntd">
-          <xsl:apply-templates select="x:cost" mode="as-price"/>
-        </td>
-      </tr>
-    </xsl:for-each>
+  <xsl:template match="x:tradeitem">
+    <tr>
+      <td class="aleft">
+        <xsl:number format="0"/>.
+      </td>
+      <td>
+        <xsl:value-of select="x:desc"/>
+      </td>
+      <td class="aright ntd">
+        <xsl:apply-templates select="x:amount" mode="as-number"/>
+      </td>
+      <td class="aright ntd">
+        <xsl:apply-templates select="x:price" mode="as-price"/>
+      </td>
+      <td class="aright ntd">
+        <xsl:apply-templates select="x:cost" mode="as-price"/>
+      </td>
+    </tr>
   </xsl:template>
 
-  <xsl:template match="xhtml:tr[@data-content='sum-netto']">
+  <xsl:template match="x:sum-netto">
     <tr>
-      <td>
-      </td>
       <td>
         Netto
       </td>
@@ -93,31 +146,37 @@
       </td>
       <td>
       </td>
+      <td>
+      </td>
       <td class="aright">
-        <xsl:apply-templates select="$this/*/x:cont/x:offer/x:calculation/x:sum-netto" mode="as-price"/>
+        <xsl:apply-templates select="." mode="as-price"/>
       </td>
     </tr>
   </xsl:template>
 
-  <xsl:template match="xhtml:tr[@data-content='sum-taxes']">
+  <xsl:template match="x:sum-taxes">
     <tr>
       <td>
+        USt.
+        <xsl:call-template name="as-number">
+          <xsl:with-param name="cont" select="../x:uststz * 100"/>
+        </xsl:call-template>
+        <xsl:text>%</xsl:text>
       </td>
-      <td>USt. <xsl:value-of select="$this/*/x:cont/x:offer/x:calculation/x:uststz*100"/>%</td>
+      <td>
+      </td>
       <td>
       </td>
       <td>
       </td>
       <td class="aright">
-        <xsl:apply-templates select="$this/*/x:cont/x:offer/x:calculation/x:sum-taxes" mode="as-price"/>
+        <xsl:apply-templates select="." mode="as-price"/>
       </td>
     </tr>
   </xsl:template>
 
-  <xsl:template match="xhtml:tr[@data-content='sum-brutto']">
+  <xsl:template match="x:sum-brutto">
     <tr>
-      <td>
-      </td>
       <th class="aleft">
         Brutto
       </th>
@@ -125,11 +184,11 @@
       </td>
       <td>
       </td>
-      <td class="aright">
-        <b>
-          <xsl:apply-templates select="$this/*/x:cont/x:offer/x:calculation/x:sum-brutto" mode="as-price"/>
-        </b>
+      <td>
       </td>
+      <th class="aright">
+        <xsl:apply-templates select="." mode="as-price"/>
+      </th>
     </tr>
   </xsl:template>
 

@@ -1,0 +1,4 @@
+<xc>
+  <xcontent>{{ xcontent|safe }}</xcontent>
+  <xcontent-cdata>{{ xcontent_cdata|safe }}</xcontent-cdata>
+</xc>

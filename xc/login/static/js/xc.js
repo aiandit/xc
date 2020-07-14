@@ -265,8 +265,10 @@ var processXData = function(ev, request, done) {
     getXData(ev, request, function(xcontdoc) {
         if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE) {
             xc.curdoc = xcontdoc
+        } else if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
+            xc.curdoc = xcontdoc
         } else {
-            xc.curdoc = request.responseXML
+            xc.curdoc = xc.getXDoc('<x>no valid data</x>')
         }
         updateXDataView(ev, function(res) {
             done(res)

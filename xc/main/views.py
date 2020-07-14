@@ -172,7 +172,6 @@ class DeleteData(XCForm):
     required_css_class = 'required'
 
     path = forms.CharField(max_length=1024, label='Path')
-    confirm = forms.BooleanField(label='Confirm')
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
 
     def clean(self):
@@ -192,33 +191,27 @@ def ajax_delete(request):
 
     if request.method == "GET":
         reqDict = request.GET
-        rdata = DeleteData(reqDict)
-        res = rdata.is_valid()
-        cdata = rdata.cleaned_data
-        rdata = DeleteData(initial=reqDict)
     elif request.method == "POST":
         reqDict = request.POST
-        rdata = DeleteData(reqDict)
 
-    if request.method == "POST":
-        res = rdata.is_valid()
-        if not res:
-            errmsg = 'The form data is invalid'
+    rdata = DeleteData(reqDict)
+    res = rdata.is_valid()
+    cdata = rdata.cleaned_data
+    path = cdata['path']
+
+    if not res:
+        errmsg = 'The form data is invalid'
+    elif request.method == "POST":
+        lsl = workdir.deletedoc(path, {'user': request.user.username, 'comment': cdata['comment']})
+        print('Operation deletedoc(%s) returned: %s (type %s)' % (path, lsl, type(lsl)))
+        if lsl != 0:
+            errmsg = 'doc deletion failed'
         else:
-            cdata = rdata.cleaned_data
-            path = cdata['path']
-
-            lsl = workdir.deletedoc(path, {'user': request.user.username, 'comment': cdata['comment']})
-            print('Operation deletedoc(%s) returned: %s (type %s)' % (path, lsl, type(lsl)))
-            if lsl != 0:
-                errmsg = 'doc deletion failed'
-            else:
-                return redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
+            return redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
 
-    path = cdata['path']
     data = {
         'status': lsl,
         'errs': errors
@@ -1597,7 +1590,7 @@ def counter(request):
 
 cre = re.compile(r'>[0-9]+<')
 
-def ajax_counter(request):
+def ajax_counter(request, plain=False):
 
     lsl = ''
 
@@ -1680,4 +1673,83 @@ def ajax_counter(request):
     xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
     dx = dictxml(xcontext)
     context = { 'context_xml': dx, 'forms': [ rdata], 'xcontent': xcontent, 'xcontent_cdata': xmlesc(content) }
+    return render(request, 'common/xcerp-msg.xml' if not plain else 'common/xcerp-atom.xml',
+                  context, content_type="application/xml")
+
+def plain_counter(request):
+    return ajax_counter(request, plain=True)
+
+
+def cid(request):
+    context = {'xapp': 'main', 'view': 'cid', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
+    return render(request, 'common/wframe.html', context)
+
+cre = re.compile(r'>[0-9]+<')
+
+def ajax_cid(request, plain=False):
+
+    lsl = ''
+
+    errmsg = ''
+    errors = []
+    xcontent = ''
+    content = ''
+
+    if request.method == "GET":
+        reqDict = request.GET
+        rdata = PathData(reqDict)
+    elif request.method == "POST":
+        reqDict = request.POST
+        rdata = PathData(reqDict)
+
+    def mkcounter(val):
+        return ('<counter xmlns="http://ai-and-it.de/xmlns/2020/xcerp">%d</counter>' % (val,)).encode('ascii')
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+
+        lock = workdir.getlock(path)
+        if lock is None:
+            errmsg = 'Lock could not be obtained'
+        else:
+            r = getxmlifposs(path)
+            if r[0]:
+                r = r[3]
+    #                    print('Count XML:', r)
+                counts = cre.findall(r)
+                if len(counts) > 0:
+    #                        print('Count String:', counts)
+                    count = int(counts[0][1:-1])
+    #                        print('Count Value:', count)
+                    workdir.replacedoc(path, mkcounter(count+1),
+                                       {'user': request.user.username, 'comment': 'counter cid'})
+                    workdir.rellock(lock)
+                    return redirect(reverse('main:%s_counter' % ('plain' if plain else 'ajax',)) + '?path=%s' % (path,))
+                else:
+                    errmsg = 'The counter is invalid'
+            else:
+                errmsg = 'The counter is invalid'
+            workdir.rellock(lock)
+
+            xcontent = getxmlifposs(path)[3]
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = {
+        'errs': errors
+    }
+    data = { **data, **get_lsl(path) }
+    xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata], 'xcontent': xcontent, 'xcontent_cdata': xmlesc(content) }
+    return render(request, 'common/xcerp-msg.xml' if not plain else 'common/xcerp-atom.xml',
+                  context, content_type="application/xml")
+
+def plain_cid(request):
+    return ajax_cid(request, plain=True)
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")

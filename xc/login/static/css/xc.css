@@ -3,7 +3,7 @@ html {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    margin: 0.25em;
+    margin: 0.25em 0em 1em 0em;
 }
 
 html, body, ul, ol, div, td, p, form, fieldset, input {
@@ -16,8 +16,12 @@ ul, ol {
     margin-left: 1em;
 }
 
-p, td, input {
+td, input {
     padding: 0.25em 0em;
+}
+
+p {
+    padding: 0.25em 0em 1em 0em;
 }
 
 body, fieldset, div.messages, div#content {
@@ -79,6 +83,17 @@ table.actions td {
 table.actions tr {
     display: grid;
     grid-template-columns: auto auto auto auto;
+}
+
+table.calculation {
+    border-collapse: unset;
+    padding: 0.25em 0em 1em 0em;
+}
+table.calculation td {
+    padding: 0.05em 1.25em 0.05em 0em;
+}
+table.calculation th {
+    padding: 0.05em 1.25em 0.05em 0em;
 }
 
 .xc-nocatch {
@@ -166,6 +181,11 @@ table.collection td {
     padding: 0.2em;
     background: lightblue;
     float: right;
+}
+
+.fright {
+    float: right;
+    clear: left;
 }
 
 .address {

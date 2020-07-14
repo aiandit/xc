@@ -37,6 +37,13 @@
     </xsl:copy>
   </xsl:template>
 
+  <xsl:template match="*[count(text()[normalize-space(.) != ''])>0]">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+    </xsl:copy>
+  </xsl:template>
+
   <xsl:template match="*[not(*)]">
     <xsl:copy>
       <xsl:copy-of select="@*"/>

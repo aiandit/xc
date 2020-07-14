@@ -5,7 +5,6 @@
     <step>offer-calculation-complete.xsl</step>
     <step>offer-update.xsl</step>
     <step>offer-update2.xsl</step>
-    <step>offer-calculation-to-table.xsl</step>
     <step>offer-complete.xsl</step>
   </steps>
 </x>

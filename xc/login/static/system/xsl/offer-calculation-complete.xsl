@@ -22,8 +22,6 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="x:cgi"/>
-
   <xsl:template match="x:calculation">
     <xsl:copy>
       <xsl:copy-of select="@*"/>

@@ -28,6 +28,11 @@ urlpatterns = [
 
     path('counter', views.counter, name='counter'),
     path('ajax_counter', views.ajax_counter, name='ajax_counter'),
+    path('plain_counter', views.plain_counter, name='plain_counter'),
+
+    path('id', views.cid, name='cid'),
+    path('ajax_id', views.ajax_cid, name='ajax_cid'),
+    path('plain_id', views.plain_cid, name='plain_cid'),
 
     path('get', views.get, name='get'),
     path('ajax_get', views.get, name='ajax_get'),
