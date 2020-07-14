@@ -1,0 +1,8 @@
+<x>
+<!--  <xslbase>/main/getf</xslbase> -->
+  <steps>
+    <step>offer-reset.xsl</step>
+    <step>offer-complete.xml</step>
+    <step>offer-to-letter.xsl</step>
+  </steps>
+</x>

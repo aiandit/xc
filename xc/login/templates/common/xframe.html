@@ -1,0 +1,11 @@
+{% extends "common/base.html" %}{% load static %}
+
+{% block init %}var xframe_view = '{{ view }}'; var xframe_xapp = '{{ xapp }}'; xframes.cgij = '{{ cgij|safe }}'; xframes.staticurl = "{% static "/" %}"; {% endblock %}
+{% block init2 %}{{ jsinit }}{% endblock %}
+{% block title %}TITLE{% endblock %}
+
+{% block SIDEBAR %}SIDEBAR{% endblock %}
+
+{% block content %}
+CONTENT
+{% endblock %}

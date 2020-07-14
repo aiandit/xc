@@ -1,0 +1,17 @@
+[Unit]
+Description=XCerp
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStartPre=
+ExecStart=/usr/bin/uwsgi --emperor /etc/uwsgi/vassals --uid www-data --gid www-data
+ExecStartPost=
+ExecStop=
+ExecReload=
+
+[Install]
+WantedBy=multi-user.target

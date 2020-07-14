@@ -1,0 +1,11 @@
+<x>
+  <cont>
+    <elements>
+      <address name="Address"/>
+      <offer name="Offer">
+      </offer>
+      <invoice name="Invoice">
+      </invoice>
+    </elements>
+  </cont>
+</x>

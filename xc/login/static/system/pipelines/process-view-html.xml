@@ -1,0 +1,6 @@
+<x>
+  <!--  <xslbase>/main/getf</xslbase> -->
+  <steps>
+    <step>process-view-html.xsl</step>
+  </steps>
+</x>

@@ -1,0 +1,52 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Test Template</title>
+  </head>
+  <body>
+
+    <div class="letter">
+      <div style="float: right;">
+        <table class="address">
+          <tr>
+            <th>
+              <span data-replace-element="firstname">Vorname</span> <span data-replace-element="lastname">Nachnahme</span>
+            </th>
+          </tr>
+          <tr data-repeat-element="street">
+            <td>
+              <span data-replace-element="street">Anschrift1-N</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span data-replace-element="city">Stadt</span>
+            </td>
+          </tr>
+          <tr data-repeat-element="country">
+            <td>
+              <span data-replace-element="country">Land</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div style="margin-right: auto">
+        <h3>
+          <span data-replace-element="main">Betreff</span>
+        </h3>
+      </div>
+      <div style="margin-left: auto">
+        <h4>
+          <span data-replace-element="sub">Rechnung/Angebot Nr.</span>
+        </h4>
+      </div>
+
+      <div>
+        <span data-replace-element="body">Text</span>
+      </div>
+
+      <div style="margin-right: auto">
+        <span data-replace-element="closing">MfG</span>
+      </div>
+    </div>
+  </body>
+</html>

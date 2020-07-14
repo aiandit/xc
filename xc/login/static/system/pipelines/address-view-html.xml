@@ -1,0 +1,7 @@
+<x>
+<!--  <xslbase>/main/getf</xslbase> -->
+  <steps>
+    <step>address-complete.xsl</step>
+    <step>address-view-html.xsl</step>
+  </steps>
+</x>

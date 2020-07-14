@@ -1,0 +1,6 @@
+<x>
+<!--  <xslbase>/main/getf</xslbase> -->
+  <steps>
+    <step>xsvg.renderdoc</step>
+  </steps>
+</x>

@@ -1,0 +1,68 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Test Template</title>
+  </head>
+  <body>
+
+    <div class="offer">
+      <div style="float: right;">
+        <table class="address">
+          <tr>
+            <th>
+              <span data-replace-element="firstname">Vorname</span> <span data-replace-element="lastname">Nachnahme</span>
+            </th>
+          </tr>
+          <tr data-repeat-element="street">
+            <td>
+              <span data-replace-element="street">Anschrift1-N</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span data-replace-element="city">Stadt</span>
+            </td>
+          </tr>
+          <tr data-repeat-element="country">
+            <td>
+              <span data-replace-element="country">Land</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <h2 data-insert-html="main">Beschreibung</h2>
+      <h4 data-insert-html="sub">Beschreibung</h4>
+      <p data-insert-html="desc">Beschreibung</p>
+      <div>
+        <table>
+          <tr data-content="tradeitems-headline">
+            <th>Desc.</th>
+            <th>Desc.</th>
+            <th>Desc.</th>
+          </tr>
+          <tr data-content="tradeitems">
+            <td>1</td>
+            <td>1</td>
+            <td>1</td>
+          </tr>
+          <tr data-content="sum-netto">
+            <td>1</td>
+            <td>1</td>
+            <td>1</td>
+          </tr>
+          <tr data-content="sum-taxes">
+            <td>1</td>
+            <td>1</td>
+            <td>1</td>
+          </tr>
+          <tr data-content="sum-brutto">
+            <td>1</td>
+            <td>1</td>
+            <td>1</td>
+          </tr>
+        </table>
+      </div>
+      <p data-insert-html="post">Beschreibung</p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+<x>
+<!--  <xslbase>/main/getf</xslbase> -->
+  <steps>
+    <step>offer-normalize-numbers.xsl</step>
+    <step>offer-update.xsl</step>
+    <step>offer-update2.xsl</step>
+    <step>offer-edit.xsl</step>
+  </steps>
+</x>

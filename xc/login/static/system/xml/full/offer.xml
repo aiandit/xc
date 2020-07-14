@@ -1,0 +1,22 @@
+<offer xmlns="http://ai-and-it.de/xmlns/2020/xc">
+  <texts>
+    <main>Unser neues Angebot für Sie</main>
+    <sub>Angebot Nr. 2020.002</sub>
+    <body>Gerne unterbreiten wir Ihnen folgendes Angebot:</body>
+    <post>Wir warten auf Ihre Rückmeldung und verbleiben bis dahin
+      wie telefonisch besprochen.
+    </post>
+    <closing>Mit freundlichen Grüßen</closing>
+  </texts>
+  <address>
+    <name>peters</name>
+    <firstname>Carl</firstname>
+    <lastname>Mayers</lastname>
+    <street>34th street</street>
+    <street>Postbox 2323</street>
+    <city>New York, NY</city>
+    <country>USA</country>
+  </address>
+  <calculation>
+  </calculation>
+</offer>

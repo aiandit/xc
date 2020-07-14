@@ -1,0 +1,29 @@
+<offer xmlns="http://ai-and-it.de/xmlns/2020/xc">
+  <texts>
+  </texts>
+  <address>
+    <firstname>Carl</firstname>
+    <lastname>Meyers</lastname>
+    <street>34th street</street>
+    <street>Postbox 2323</street>
+    <city>New York, NY</city>
+    <country>USA</country>
+  </address>
+  <calculation>
+    <tradeitem>
+      <desc>Bretter 18mm, 2m</desc>
+      <amount>2</amount>
+      <price>10</price>
+    </tradeitem>
+    <tradeitem>
+      <desc>Bretter 27mm, 2m</desc>
+      <amount>2</amount>
+      <price>17</price>
+    </tradeitem>
+    <tradeitem>
+      <desc>Schrauben</desc>
+      <amount>120</amount>
+      <price>0.05</price>
+    </tradeitem>
+  </calculation>
+</offer>

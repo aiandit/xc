@@ -1,0 +1,34 @@
+#! /bin/bash
+
+# https://uwsgi-docs.readthedocs.io/en/latest/tutorials/Django_and_nginx.html
+
+set -x
+
+mydir=$(readlink -f $(dirname $BASH_SOURCE)/..)
+
+XCERP_HOME=$mydir
+
+sed -e "s§/path/to/your/project§$XCERP_HOME§" $mydir/ci/xc_uwsgi.ini > xc_uwsgi.ini
+
+sudo mkdir -p /etc/uwsgi/vassals
+ln -sfT $mydir/xc_uwsgi.ini /etc/uwsgi/vassals/xc_uwsgi.ini
+
+
+sed -e "s§/path/to/your/project§$XCERP_HOME§" $mydir/ci/xc_nginx.conf > xc_nginx.conf
+
+ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
+
+cd /etc/nginx/sites-enabled && ln -sf ../sites-available/xc_nginx.conf
+
+ln -sfT $mydir/ci/xc.service /etc/systemd/system/xc.service
+
+mkdir -p /etc/xc
+echo "$mydir" > /etc/xc/allowed_path.txt
+echo "/usr/share/fonts" >> /etc/xc/allowed_path.txt
+
+adduser www-data root
+chmod g+w $mydir
+
+cd $mydir/ && $mydir/manage.py migrate
+
+sed -i -e 's/DEBUG = True/#DEBUG = True/' xc/settings.py

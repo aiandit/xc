@@ -1,0 +1,32 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Address Test Template</title>
+  </head>
+  <body>
+<!--    <h4>Address <span data-replace-element="name">text</span></h4> -->
+    <div>
+      <table class="address">
+        <tr>
+          <th>
+            <span data-replace-element="firstname">Vorname</span> <span data-replace-element="lastname">Nachnahme</span>
+          </th>
+        </tr>
+        <tr data-repeat-element="street">
+          <td>
+            <span data-replace-element="street">Anschrift1-N</span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span data-replace-element="city">Stadt</span>
+          </td>
+        </tr>
+        <tr data-repeat-element="country">
+          <td>
+            <span data-replace-element="country">Land</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

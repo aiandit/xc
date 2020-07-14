@@ -1,0 +1,651 @@
+var xc = xc || {}
+
+if (typeof xframe == "undefined") {
+    xframe = 'index'
+}
+
+var frames = [
+    {target: 'content',
+     filters: [
+         'xc.xsl'
+     ]},
+    {target: 'title',
+     filters: [
+         'xc-title.xsl'
+     ]}
+]
+
+var myframes = xframes.mkXframes(frames, '/src/xsl/')
+
+var unescapeXML = function(x) {
+    return x.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+}
+
+var extractXPath_XPath = function(doc, xpath, toDoc, wrap, done) {
+    var rtype = toDoc ? XPathResult.UNORDERED_NODE_ITERATOR_TYPE : XPathResult.STRING_TYPE
+    var r = doc.evaluate(xpath, doc, null, rtype, null)
+    var n = toDoc ? r.iterateNext() : unescapeXML(r.stringValue)
+    done(n)
+    // want a document as result...
+}
+
+var extractXPath = function(doc, xpath, toDoc, wrap, done) {
+    var output = toDoc ? 'xml' : 'text'
+    var indoc = '<x><xpath-expr>' + xpath + '</xpath-expr><output>' + output + '</output><wrap>' + wrap + '</wrap></x>'
+    var filters = ['gen-get-xpath.xsl']
+    if (xlp.isMozilla) {
+        filters = ['gen-get-xpath.xsl', 'patch-ns.xsl']
+    }
+    var genxsl = xlp.mkXLP(filters, xframes.spath('xsl/'))
+    genxsl.transform(indoc, function(gxsl) {
+        var seltrans = xlp.mkXLP([gxsl], '')
+        seltrans.transform(doc, toDoc, function(result) {
+            if (xlp.isMozilla) {
+                if (!toDoc) {
+                    result.textContent = unescapeXML(result.textContent)
+                }
+            }
+            done(result)
+        })
+    })
+}
+
+var getActionLSL = function(cname, done) {
+    var classes = ['filters',
+                   'pipelines',
+                   'constructor-filters',
+                   'constructor-pipelines',
+                   'types'
+                  ]
+    var URLs = ['/main/ajax_find?findsys=1&find=' + cname + '-*.xsl',
+                '/main/ajax_find?findsys=1&findpath=1&find=*/pipelines/' + cname + '-*.xml',
+                '/main/ajax_find?findsys=1&find=create-*.xsl',
+                '/main/ajax_find?findsys=1&findpath=1&find=*/pipelines/create-*.xml',
+                '/main/ajax_find?findsys=1&findpath=1&find=*/types/*.xml'
+               ]
+    xlp.mloadXML(URLs, function(results) {
+        xlp.amap(results, function(res, done) {
+            extractXPath(res, '/*/dict/data/findlist', true, '', function(ressel) {
+                done(ressel.documentElement.outerHTML)
+            })
+        }, function(findlists) {
+            findlists = Object.keys(findlists).map(function(k) {
+                return xc.getXDoc(findlists[k], classes[k])
+            })
+            var findlists = findlists.join('\n')
+            console.log('action findlist XML: ' + findlists)
+            done(0, findlists)
+        })
+    })
+}
+
+xc.xslpath = '/main/getf/'
+
+xc.isXC = function(dclass) {
+    return !(dclass == 'svg' || dclass == 'html')
+}
+
+xc.mkViewTransform = function(transformName, done) {
+    var res = {}
+    xlp.loadXML('/main/getf/pipelines/' + transformName + '.xml', function(st, t) {
+        if (isErrorResponse(t)) {
+            xlp.loadXML(xc.xslpath + transformName + '.xsl', function(st, t) {
+                if (isErrorResponse(t)) {
+                    console.error('mkTransform: No transformation functions found for "' + transformName + '"')
+                    var viewTransform = xlp.mkXLP(['default-view-html.xsl'], '/main/getf/xsl/')
+                    done(viewTransform)
+                    //done(res)
+                } else {
+                    var viewTransform = xlp.mkXLP([t.responseXML], '/main/getf')
+                    done(viewTransform)
+                }
+            })
+        } else {
+            xlp.readXLP(t.responseXML, '/main/getf/',  function(viewTransform) {
+                done(viewTransform)
+            })
+        }
+    })
+}
+
+xc.classViewFunctions = {}
+xc.mkClassViewFunction = function(dclass, mode, done) {
+    var transformName = dclass + '-view' + '-' + mode
+    xc.mkViewTransform(transformName, function(viewTransform) {
+
+        getActionLSL(dclass, function(s, alistresp) {
+            var frames = [
+                {target: 'document',
+                 xlp: viewTransform,
+                 filters: []},
+                {target: 'document-actions',
+                 xlp: xlp.mkXLP(['docactions-html.xsl'], '/main/getf/xsl/')},
+                {target: 'document-info',
+                 xlp: xlp.mkXLP(['xc-document-info.xsl', 'docinfo-html.xsl'], '/main/getf/xsl/')}
+            ]
+            var sframes = xframes.mkXframes(frames, xc.xslpath)
+
+            var infoxml = '<viewclass>' + dclass + '</viewclass>'
+            infoxml += '<viewmode>' + mode + '</viewmode>'
+            infoxml += '<action-findlist>' + alistresp + '</action-findlist>'
+
+            res = {
+                render: function(xcontdoc, done) {
+
+                    var indoc = xc.getCurDoc(xcontdoc, xc.cgiParams() + infoxml)
+
+                    sframes.render(indoc, function(res) {
+                        console.log('Class render complete')
+                        console.log(res)
+                        done(sframes)
+                    })
+
+                }
+            }
+
+            done(res)
+
+        })
+    })
+}
+
+xc.getClassViewFunction = function(dclass, mode, done) {
+    var key = dclass + '-' + mode
+    var incache = xc.classViewFunctions[key]
+    if (typeof incache == 'undefined') {
+        xc.mkClassViewFunction(dclass, mode, function(res) {
+            incache = res
+            xc.classViewFunctions[key] = res
+            done(res)
+        })
+    } else {
+        done(incache)
+    }
+}
+
+var updateXView = function(ev) {
+    updateXDataView(ev, function() {
+        console.log('XView render by event ' + ev + ' complete')
+    })
+}
+
+var updateXDataView = function(ev, done) {
+    updateTree(ev)
+
+    var lastStep = function(r) {
+        updateTree(ev)
+        done(r)
+    }
+
+    var xcontdoc = xc.getCurDocText(xc.curdoc)
+
+    var editForm = document.forms['xc-form-edit']
+    if (editForm) {
+        editForm.data.value = xcontdoc
+    }
+
+    if (!xcontdoc.startsWith('<')) {
+        console.log('No XML data')
+        xcontdoc = xc.getXDoc(xcontdoc, 'text')
+    }
+
+    var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
+    xinfo.transform(xcontdoc, false, function(jinfo) {
+        var info = JSON.parse(jinfo.textContent)
+        var dclass = 'default'
+        if (info.class.length>0) {
+            dclass = info.class
+        } else {
+            console.log('No Xdata class found')
+        }
+        var mode = 'html'
+        var modeForm = document.forms['xc-control']
+        if (modeForm) {
+            mode = modeForm.elements['mode'].value
+        }
+        xc.getClassViewFunction(dclass, mode, function(res) {
+            res.render(xcontdoc, function(res) {
+                console.log('Done with class based render cycle')
+                lastStep(res)
+            })
+        })
+    })
+
+}
+
+var getXDataXML = function(inxml) {
+    var doc = null
+    var indoc = xlp.parseXMLC(inxml)
+    if (indoc != undefined) {
+        doc = indoc
+    } else {
+        var rootnode = inxml.match(/<[a-zA-Z0-9-_]+/)
+        if (rootnode == null || rootnode.length == 0) {
+            rootnode = 'x'
+        } else {
+            rootnode = rootnode[0].substr(1) + 's'
+        }
+        indoc = xlp.parseXMLC(xc.getXDoc(inxml, rootnode))
+        if (indoc != undefined) {
+            doc = indoc
+        }
+    }
+    return doc
+}
+
+var getXData = function(ev, request, done) {
+    extractXPath(request.responseXML, '/*/xcontent', true, '', function(xcontdoc) {
+        if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE && xcontdoc.childElementCount > 0
+            && xcontdoc.documentElement.childElementCount >= 1) {
+            if (xcontdoc.documentElement.childElementCount == 1) {
+                extractXPath(request.responseXML, '/*/xcontent/*', true, '', function(xcontdoc) {
+                    done(xcontdoc)
+                })
+            } else {
+                done(xlp.parseXML(xc.getXDoc(xcontdoc.documentElement.innerHTML,
+                                                xcontdoc.documentElement.firstElementChild.nodeName + 's')))
+            }
+        } else {
+            extractXPath(request.responseXML, '/*/xcontent-cdata/text()', false, '', function(xcontdoc) {
+                if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
+                    var indoc = getXDataXML(xcontdoc.textContent)
+                    if (indoc != null) {
+                        done(indoc)
+                    } else {
+                        done(xcontdoc)
+                    }
+                }
+            })
+        }
+    })
+}
+
+var processXData = function(ev, request, done) {
+    xc.curresp = request.responseXML
+    getXData(ev, request, function(xcontdoc) {
+        if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE) {
+            xc.curdoc = xcontdoc
+        } else {
+            xc.curdoc = request.responseXML
+        }
+        updateXDataView(ev, function(res) {
+            done(res)
+        })
+    })
+}
+
+var handleLinkClick = function(ev) {
+    // console.log('A: ' + ev.target.href + ' has been clicked')
+    // console.log(ev.target)
+    if (ev.target.href.startsWith('javascript:')) {
+        return true;
+    } else {
+        // console.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
+        myframes.renderGET(ev.target, xframes.ajaxPathName(ev.target.href), function(request) {
+            // console.log('A: link click is handled completely')
+            renderPostProc(ev, request)
+        })
+        return false
+    }
+}
+
+var dohandleFormSubmit = function(form, ev) {
+    console.log('Form ' + form.name + ' has been submitted')
+    // console.log(form)
+    // console.log(form.action)
+    if (form.attributes.action == undefined || form.attributes.action.value.length == 0) {
+        return true
+    } else if (form.action.startsWith('javascript:')) {
+        var this_ = form
+        var evres = eval(form.action.substr(11))
+        console.log(evres)
+        var res = evres(ev)
+        return false
+    } else {
+        if (form.method == 'post') {
+            myframes.renderPOST(form, xframes.ajaxPathName(form.action), function(request) {
+                // console.log('A form POST submit is handled completely')
+                renderPostProc(ev, request)
+            })
+        } else {
+            myframes.renderGET(form, xframes.ajaxPathName(form.action), function(request) {
+                // console.log('A form GET submit is handled completely')
+                renderPostProc(ev, request)
+            })
+        }
+        return false
+    }
+}
+var handleFormSubmit = function(ev) {
+    return dohandleFormSubmit(ev.target, ev)
+}
+
+var runxc = function(x, ev) {
+    console.log('run: x ' + x)
+    console.log('run: ev ' + ev)
+
+    console.log('run: xframe ' + xframe)
+
+    var paramss = ''
+    if (xframes.cgij.length > 0) {
+        var params = JSON.parse(xframes.cgij)
+        for (k in params) {
+            paramss += '&' + k + '=' + params[k]
+        }
+        paramss = '?' + paramss.substr(1)
+    }
+
+    var ajaxurl = '/' + xframe_xapp + '/ajax_' + xframe_view + paramss
+
+    console.log('run: ajax URL ' + ajaxurl)
+
+    myframes.renderGET(document, ajaxurl, function(res) {
+        console.log('done xerp load')
+        renderPostProc(ev, res)
+    })
+
+    window.addEventListener( "popstate", function ( event ) {
+//        console.log('popstate')
+//        window.location = event.state
+    })
+    window.addEventListener( "pageshow", function ( event ) {
+//        console.log('pageshow')
+//        window.location = event.state
+    })
+
+    return false
+}
+
+var renderPostProc = function(ev, request) {
+    console.log('render: ' + request)
+    xframes.pushhist(request)
+    if (!isNonXMLResponse(request)) {
+        processXData(ev, request, function() {
+            console.log('processXData done')
+        })
+    } else {
+        console.error('Got non XML response')
+    }
+}
+
+var setFormCallback = function(handle) {
+    var forms = document.querySelectorAll('form')
+    var ffunc = function(ev) {
+        console.log(name + ': form submit  event for: ' + ev);
+	xc.clearIntervals();
+        var res = handle(ev)
+        console.log(name + ': form submit  event returned: ' + res);
+        return res
+    }
+//    console.log(name + ': ' + forms.length + ' forms found');
+    for (var k=0; k < forms.length; ++k) {
+//        console.log(name + ': set form submit event for: ' + forms[k].id);
+        forms[k].onsubmit = ffunc;
+    }
+}
+
+var setLinkCallback = function(handle) {
+    var forms = document.querySelectorAll('a')
+    var ffunc = function(ev) {
+        console.log('link click event for: ' + ev);
+        if (ev.target.classList.contains('xc-nocatch')) return true
+	xc.clearIntervals();
+        var res = handle(ev)
+        console.log(name + ': link click event handler returned: ' + res);
+        return res
+    }
+    Object.keys(forms).forEach(function(k) {
+        var oldHandler = forms[k].onclick
+        forms[k].onclick = function(x, y) {
+            var res = ffunc(x, y)
+            // if (res) {
+            //     console.log('link click event handled OK: ' + res)
+            // }
+            // else {
+            //     var res = oldHandler(x, y)
+            //     console.log('call old handler: ' + res)
+            // }
+            return res
+        }
+    })
+}
+
+xc.intervals = {}
+xc.setInterval = function(key, inter) {
+    xc.intervals[key] = inter
+}
+xc.clearInterval = function(key) {
+    if (key in xc.intervals) {
+	clearInterval(xc.intervals[key])
+	delete xc.intervals[key]
+    }
+}
+xc.clearIntervals = function() {
+    Object.keys(xc.intervals).forEach(function(k) {
+	xc.clearInterval(k)
+    })
+}
+
+var ppPolls = function() {
+    var tms = document.querySelectorAll('.poll')
+    tms.forEach(function(el) {
+	var getf = function() {
+	    var parts = el.dataset.pollUrl.split('?')
+	    var rdata = parts[1] + '&csrfmiddlewaretoken=' + document.forms[0].csrfmiddlewaretoken.value
+	    var headers = {'Content-type': 'application/x-www-form-urlencoded'}
+	    xlp.sendPost(parts[0], rdata, headers, function(st, res) {
+		if (st == 0) {
+		    if (res.responseXML != undefined) {
+			extractXPath(res.responseXML, '/*/xcontent-cdata', false, '', function(res) {
+			    el.innerHTML = '<code>' + res.textContent + '</code>'
+			})
+		    } else {
+			el.innerHTML = '<code>' + res.responseText + '</code>'
+		    }
+		}
+	    })
+	}
+	getf()
+	xc.setInterval('poll-'+ el.attributes.id.value, setInterval(getf, el.dataset.pollInterval))
+    })
+}
+
+var ppTimestamps = function() {
+    var tms = document.querySelectorAll('span.unixtm')
+    tms.forEach(function(el) {
+        if (el.dataset.unixtm != 1) {
+            var flval = Number(el.innerHTML)
+            var d = new Date(flval*1000)
+            var sd = d.toISOString()
+            var ts = d.toLocaleTimeString()
+
+            el.innerHTML = '<span title="' + d + '">' + sd.substr(0, 10) + ' ' + ts + '</span>'
+            el.dataset.unixtm = 1
+        }
+    })
+}
+
+var ppMarkup = function() {
+    var tms = document.querySelectorAll('.markup')
+    tms.forEach(function(el) {
+        if (el.dataset.markupDone != 1) {
+            el.dataset.markupDone = 1
+            el.innerHTML = el.innerText
+        }
+    })
+}
+
+var displayNumber = function(str) {
+    return String(str).replace('.', ',')
+}
+
+var ppUnits = function() {
+    var tms = document.querySelectorAll('span.unit')
+    tms.forEach(function(el) {
+        if (el.dataset.unit != el.dataset.targetunit) {
+            console.log('GG: ' + el.innerHTML)
+            var flval = Number(el.innerHTML.substr(0, el.innerHTML.search(/&| /)))
+            if (el.dataset.unit == 'B' && el.dataset.targetunit == 'KB') {
+                el.innerHTML = '<span title="' + flval + el.dataset.unit + '">'
+                    + displayNumber((Math.ceil(100*flval/1024)/100).toFixed(2)) + '&#xa0;' + el.dataset.targetunit + '</span>'
+            }
+            el.dataset.unit = el.dataset.targetunit
+        }
+    })
+    var tms = document.querySelectorAll('span.number')
+    tms.forEach(function(el) {
+        var flval = el.innerHTML
+        el.innerHTML = '<span title="' + flval + '">' + displayNumber(flval) + '</span>'
+    })
+}
+
+xc.getCGIXML = function(form, exclude) {
+    if (exclude == undefined) {
+        exclude = {data:1}
+    }
+    var cgiData = xlp.mkFormDataDict(form)
+    // console.log(cgiData)
+    var cgixml = {}
+    Object.keys(cgiData).forEach(function(k) {
+        if (k in exclude) return
+        var r = '<' + k + '>' + cgiData[k] + '</' + k + '>\n'
+        // console.log(k)
+        // console.log(r)
+        cgixml[k] = r
+    })
+    // console.log(cgixml)
+    return Object.values(cgixml).join('')
+}
+
+xc.cgiParams = function(ev, exclude) {
+    if (exclude == undefined) {
+        exclude = {data:1}
+    }
+    var res = Object.keys(document.forms).map(function(k) {
+        var f = document.forms[k]
+        return '<cgi>' + xc.getCGIXML(f) + '</cgi>'
+    })
+    return res.join('\n')
+}
+
+xc.createElement = function(ev, name) {
+    var frames = [
+        {target: 'document',
+         filters: [
+             'create-' + name + '.xsl'
+         ]}
+    ]
+    var sframes = xframes.mkXframes(frames, '/main/ajax_runwhich?action=get&submit=1&which=*/xsl/')
+    var inxml = '<x>' + xc.cgiParams() + '</x>'
+    console.log(inxml)
+    var indoc = xlp.parseXML(inxml)
+    sframes.render(indoc, function(res) {
+        console.log('Done with xc.createElement ' + name)
+        updateTree(ev)
+    })
+}
+
+xc.getXDoc = function(xcontdoc, nodename) {
+    return '<' + nodename + ' xmlns="http://ai-and-it.de/xmlns/2020/xc">' + xcontdoc + '</' + nodename + '>'
+}
+
+xc.getCurDocText = function(xcontdoc) {
+    var xcont = ''
+    if (xcontdoc.documentElement != undefined) {
+        xcont = xcontdoc.documentElement.outerHTML
+    } else if (xcontdoc.textContent != undefined) {
+        xcont = xcontdoc.textContent
+    }
+    return xcont
+}
+
+xc.getCurDoc = function(xcontdoc, infoxml) {
+    if (infoxml == undefined) {
+        infoxml = ''
+    }
+    var xcont = typeof xcontdoc == "string" ? xcontdoc : xc.getCurDocText(xcontdoc)
+    var indoc = xc.getXDoc('<cont>' + xcont + '</cont>' + infoxml, 'x')
+    return indoc
+}
+
+xc.performAction = function(ev, name) {
+    var filters = [ name, 'xc-cleanup.xsl', 'xc-pretty.xsl' ]
+    var inxml = xc.getXDoc(xc.cgiParams() + '<cont>' +
+                              xc.curdoc.documentElement.outerHTML + '</cont>', 'x')
+    var genxsl = xlp.mkXLP(filters, xc.xslpath)
+    genxsl.transform(inxml, function(res) {
+        xc.curdoc = res
+        console.log('Done with performAction ' + name)
+        updateXDataView(ev, function(res) {
+            console.log('Perform action complete')
+        })
+    })
+}
+
+xc.createDoctype = function(ev, name) {
+    var filters = [ 'xc-cleanup.xsl', 'xc-pretty.xsl' ]
+    var genxsl = xlp.mkXLP(filters, xc.xslpath)
+    xlp.loadXML('/main/getf' + name, function(dt) {
+        var inxml = xc.getXDoc(xc.cgiParams() + '<cont>' +
+                                  dt.documentElement.outerHTML + '</cont>', 'x')
+        genxsl.transform(inxml, function(res) {
+            xc.curdoc = res
+            console.log('Done with performAction ' + name)
+            updateXDataView(ev, function(res) {
+                console.log('Perform action complete')
+            })
+        })
+    })
+}
+
+var xcRender = function(done) {
+    var frames = [
+        {target: 'xc-controls',
+         filters: [
+             'xc-generate.xsl'
+         ]}
+    ]
+    var sframes = xframes.mkXframes(frames, xframes.spath('xsl/'))
+    sframes.render(xc.curdoc, function(res) {
+        console.log('Done with xc render')
+        console.log(res)
+        done(status, res)
+    })
+}
+
+var updateTree = function() {
+    setFormCallback(handleFormSubmit)
+    setLinkCallback(handleLinkClick)
+
+    var forms = document.querySelectorAll('.oc-head')
+    Object.keys(forms).forEach(function(k) {
+        var f = forms[k]
+        var t = f.nextElementSibling
+        var iso = t.classList.contains('oc-open')
+        f.onclick = function() {
+            if (t.style.visibility == 'visible' || (t.style.visibility == "" && iso)) {
+                t.style.visibility = 'hidden'
+                t.style.display = 'none'
+            } else {
+                t.style.visibility = 'visible'
+                t.style.display = t.dataset.display || 'block'
+            }
+        }
+    })
+
+    ppMarkup()
+    ppTimestamps()
+    ppUnits()
+    ppPolls()
+//    document.forms[0].scrollIntoView()
+}
+
+var isNonXMLResponse = function(request) {
+    return (request.responseXML === null
+            || request.responseXML.documentElement === null)
+}
+
+var isErrorResponse = function(request) {
+    return (isNonXMLResponse(request)
+            || request.responseXML.documentElement.nodeName == "xc")
+}

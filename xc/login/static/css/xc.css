@@ -1,0 +1,330 @@
+html {
+    font-family: sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0.25em;
+}
+
+html, body, ul, ol, div, td, p, form, fieldset, input {
+    border: 0px;
+    padding: 0px;
+    margin: 0px;
+}
+
+ul, ol {
+    margin-left: 1em;
+}
+
+p, td, input {
+    padding: 0.25em 0em;
+}
+
+body, fieldset, div.messages, div#content {
+    padding: 0.5em;
+}
+
+fieldset table {
+    display: inline;
+}
+
+code {
+    white-space: pre;
+    max-width: 50rem;
+    max-height: 70rem;
+    overflow: scroll;
+    display: block;
+}
+
+td.unit-value {
+    text-align: right;
+}
+
+fieldset td {
+    border: 1px solid grey;
+    border-radius: 0.3em;
+    padding: 0.2em;
+    empty-cells: hide;
+    background: lightblue;
+}
+
+.xc-form textarea {
+    width: 60em;
+    height: 16em;
+    clear: left;
+    float: left;
+}
+.xc-form textarea[name='comment'] {
+    width: 60em;
+    height: 3em;
+    clear: left;
+    float: left;
+}
+
+.action {
+    border: 0.1rem solid blue;
+    padding: 0.2em;
+    border-radius: 0.3rem;
+    background: aliceblue;
+    font-size: 0.8rem;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+table.actions td {
+    padding: 0.2em;
+    empty-cells: hide;
+    font-size: 80%;
+}
+table.actions tr {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+}
+
+.xc-nocatch {
+    background: #ecb4b4;
+}
+
+.xc-controls {
+    border: 1px solid blue;
+    border-radius: 0.3em;
+    padding: 0.2em;
+    background: aliceblue;
+    float: right;
+}
+
+div.messages {
+    background: aliceblue;
+    border: 0.1em solid grey;
+    border-radius: 0.3em;
+}
+
+div.errors {
+    background: aliceblue;
+}
+
+div#sidebar {
+    display: none;
+}
+
+fieldset {
+    border: 0.3em outset grey;
+    border-radius: 0.3em;
+}
+
+input {
+    border: 0.1em solid grey;
+    border-radius: 0.2em;
+    background-clip: content-box;
+}
+
+.errorlist {
+    color: #f060a0;
+    background-color: aliceblue;
+    padding: 0.5em;
+}}
+
+input.required {
+    background-color: aliceblue;
+}
+
+input.error {
+    background-color: #f060a0;
+    background-clip: content-box;
+}
+
+input[type='button'], input[type='submit'], input[type='reset'] {
+    background-color: aliceblue;
+    padding: 0.5em;
+    margin: 0.1em;
+    background-clip: border-box;
+}
+
+input[type='text'], input[type='text'].required, input[type='password'], input[type='password'].required, input[type='email'], input[type='email'].required {
+    background-color: aliceblue;
+    padding: 0.5em;
+    margin: 0.1em;
+    background-clip: content-box;
+}
+
+input#id_code {
+    width: 24em;
+}
+
+table.collection {
+    border-spacing: 0px;
+}
+
+table.collection td {
+    border-bottom: 1px solid gray;
+    padding: 0.25em;
+}
+
+.info-actions {
+    border: 0.2em outset blue;
+    border-radius: 0.3em;
+    padding: 0.2em;
+    background: lightblue;
+    float: right;
+}
+
+.address {
+    font-family: serif;
+    border: 0.2em outset grey;
+    border-radius: 0.3em;
+    padding: 0.2em;
+    background: lightgrey;
+}
+.address th {
+    text-align: left;
+}
+
+.offer {
+    font-family: serif;
+    border: 0.2em outset grey;
+    border-radius: 0.3em;
+    padding: 0.2em;
+    background: aliceblue;
+}
+
+.aright {
+    text-align: right;
+}
+.aleft {
+    text-align: left;
+}
+
+td.ntd {
+    padding-left: 1.8em;
+}
+
+.template-written {
+    display: none;
+}
+
+.pad {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    border: 0.2em outset grey;
+    border-radius: 0.3em;
+    padding: 0.2em;
+    background: aliceblue;
+}
+
+.everon {
+    display: grid;
+    grid-template-columns: auto 3em auto;
+    grid-template-areas:
+        "acts1      xc     acts2"
+        "docinfo docinfo docinfo";
+}
+
+#pad-acts1 {
+    grid-area: acts1;
+}
+#pad-XC {
+    grid-area: xc;
+}
+#pad-acts2 {
+    grid-area: acts2;
+}
+#pad-docinfo {
+    grid-area: docinfo;
+}
+
+.actions {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table, tr, th, td {
+    font-size: inherit;
+}
+#document-actions {
+    max-width: 30rem;
+    font-size: 0.9rem;
+    float: left;
+}
+.docinfo {
+    font-size: 0.9rem;
+    font-stretch: condensed;
+    float: left;
+    clear: both;
+}
+.docform {
+    font-size: 0.9rem;
+    font-stretch: condensed;
+    float: left;
+    clear: both;
+}
+
+.oc-head {
+    background: aliceblue;
+    border: 0.1rem outset grey;
+    border-radius: 0.3em;
+    padding: 0.3rem;
+    margin: 0.2rem;
+    top: 0.5rem;
+}
+h4,h5,div{
+    visibility: visible;
+}
+.oc-body {
+    background: aliceblue;
+    visibility: hidden;
+    display: none;
+}
+
+.oc-open.oc-body {
+    background: aliceblue;
+    visibility: visible;
+    display: block;
+}
+
+.msgs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto;
+}
+.msg {
+    background: aliceblue;
+    border: 0.1rem outset #ff3060;
+    border-radius: 0.3em;
+    padding: 0.3rem;
+    margin-left: 0rem;
+    display: grid;
+    grid-template-columns: 0.08fr auto;
+}
+.msg.own {
+    border: 0.1rem outset lightblue;
+}
+.msg-from {
+    background: lightgrey;
+    border: 0.2rem outset #ff3060;
+    border-radius: 2em;
+    padding: 0.3rem;
+    margin-right: 1rem;
+    margin-top: 0.25rem;
+}
+.msg-text {
+    background: lightgrey;
+    border: 0.1rem outset #ff3060;
+    border-radius: 0.5em;
+    padding: 0.3rem;
+    white-space: pre;
+    min-height: 2em;
+}
+.msg.own .msg-text {
+    grid-column-start: 2;
+}
+.msg-time {
+    float: right;
+    font-size: 0.5rem;
+    clear: both;
+    margin-top: auto;
+    margin-bottom: 0em;
+}
+.cboth {
+    clear both;
+}

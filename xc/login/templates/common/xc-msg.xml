@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+{% load static %}<xc>
+  <csrf>
+    {% csrf_token %}</input>
+  </csrf>
+  {{ userxml|safe }}
+  <links>
+    <login>{% url 'login:login' %}</login>
+    <logout>{% url 'login:logout' %}</logout>
+    <profile>{% url 'login:profile' %}</profile>
+    <edit-profile>{% url 'login:edit_profile' %}</edit-profile>
+    <delete-profile>{% url 'login:deleteprofile' %}</delete-profile>
+    <set-password>{% url 'login:set_password' %}</set-password>
+    <register>{% url 'register:register' %}</register>
+    <activate>{% url 'register:activate' %}</activate>
+    <resend-activation>{% url 'register:resend_activation' %}</resend-activation>
+    <resendpassword>{% url 'login:resendpassword' %}</resendpassword>
+    <path>{% url 'main:path' %}</path>
+    <newdoc>{% url 'main:newdoc' %}</newdoc>
+    <view>{% url 'main:view' %}</view>
+    <msgs>{% url 'msgs:index' %}</msgs>
+  </links>
+  <forms>
+    {% for form in forms %}
+    <form id="xc-form-{{ form.name }}" action="{{ form.name }}" method="{{ form.method }}" title="{{ form.title }}">
+      {{ form.asxml|safe }}
+    </form>
+    {% endfor %}
+  </forms>
+  {{ context_xml|safe }}
+  <xcontent>{{ xcontent|safe }}</xcontent>
+  <xcontent-cdata>{{ xcontent_cdata|safe }}</xcontent-cdata>
+</xc>

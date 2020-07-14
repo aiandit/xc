@@ -1,0 +1,33 @@
+{% load static %}
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <link rel="stylesheet" href="{% static "css/xc.css" %}"/>
+    <title id="title">{% block title %}My amazing site{% endblock %}</title>
+    <script src="{% static "js/opentype.min.js" %}" type="text/javascript"></script>
+    <script id="script-xlp" src="{% static "js/xlp.js" %}" type="text/javascript"></script>
+    <script id="script-wframes" src="{% static "js/xframes.js" %}" type="text/javascript"></script>
+    <script id="script-inline" type="text/javascript">
+      {% block init %}
+      {% endblock %}
+      {% block init2 %}
+      {% endblock %}
+    </script>
+    <script id="script-xerp" src="{% static "js/xc.js" %}" type="text/javascript"></script>
+  </head>
+  <body onload="runxc(this, event)">
+    <div id="sidebar">
+      {% block sidebar %}
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/blog/">Blog</a></li>
+      </ul>
+      {% endblock %}
+    </div>
+
+    <div id="content">
+      {% block content %}{% endblock %}
+    </div>
+    <div id="canvas-svg">
+    </div>
+  </body>
+</html>
