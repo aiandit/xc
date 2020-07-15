@@ -29,5 +29,5 @@
   </forms>
   {{ context_xml|safe }}
   <xcontent>{{ xcontent|safe }}</xcontent>
-  <xcontent-cdata>{{ xcontent_cdata|safe }}</xcontent-cdata>
+  <xcontent-cdata mime-type="{{ mimetype }}">{{ xcontent_cdata|safe }}</xcontent-cdata>
 </xc>

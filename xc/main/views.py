@@ -397,6 +397,7 @@ def ajax_edit(request):
     xcontent = ''
     path = ''
     fdata = ''
+    mtype = ''
 
     if request.method == "GET":
         reqDict = request.GET
@@ -430,6 +431,7 @@ def ajax_edit(request):
         elif request.method == 'GET':
             fdata = workdir.getdoc(path)
             (filename, file_extension) = os.path.splitext(path)
+            mtype = mimetypes.guess_type(path)[0]
             if is_binary_string(fdata):
                 errmsg = 'File is binary'
                 formpath = os.path.dirname(path)
@@ -455,7 +457,7 @@ def ajax_edit(request):
 
     xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': dict, 'data': data, 'user': userdict(request.user)}
     dx = dictxml(xcontext)
-    context = { 'context_xml': dx, 'forms': [ rdata, ControlForm()], 'xcontent_cdata': xmlesc(xcontent) }
+    context = { 'context_xml': dx, 'forms': [ rdata, ControlForm()], 'xcontent_cdata': xmlesc(xcontent), 'mimetype': mtype}
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
@@ -1114,7 +1116,8 @@ def getp(request, path):
         return HttpResponse(fstr, content_type="application/xml")
     else:
         if len(lsl) > 0 and len(lsl['info']) > 0 and lsl['info']['type'] == '-':
-            return HttpResponse(fdata, content_type=mimetypes.guess_type(lsl['info']['name']))
+            mtype = mimetypes.guess_type(lsl['info']['name'])
+            return HttpResponse(fdata, content_type=mtype[0])
             #                return HttpResponse(fdata, content_type="application/octet-stream")
         else:
             print('The file is not a file:', path)
@@ -1419,6 +1422,7 @@ class ActionData(XCForm):
     required_css_class = 'required'
 
     path = forms.CharField(max_length=1024, label='Path')
+    next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action')
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
 
     def clean(self):
@@ -1457,6 +1461,9 @@ def ajax_action(request):
         else:
             cdata = rdata.cleaned_data
             path = cdata['path']
+            next_ = cdata['next_']
+            if len(next_) == 0:
+                next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
 
             lsl = workdir.stat(path)
             print(lsl)
@@ -1469,7 +1476,7 @@ def ajax_action(request):
             else:
                 result = workdir.execute([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
                 if result.returncode == 0:
-                    pass
+                    return redirect(next_)
                 else:
                     errmsg = 'Run command failed'
 
@@ -1513,7 +1520,7 @@ def ps(request):
     context = {'xapp': 'main', 'view': 'ps', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/xframe.html', context)
 
-def ajax_ps(request):
+def ajax_ps(request, plain=False):
 
     lsl = ''
 
@@ -1567,7 +1574,11 @@ def ajax_ps(request):
     xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
     dx = dictxml(xcontext)
     context = { 'context_xml': dx, 'forms': [ rdata], 'xcontent': xcontent, 'xcontent_cdata': xmlesc(content) }
-    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+    return render(request, 'common/xc-msg.xml' if not plain else 'common/xc-atom.xml',
+                  context, content_type="application/xml")
+
+def plain_ps(request):
+    return ajax_ps(request, plain=True)
 
 
 class CounterData(PathData):

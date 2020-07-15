@@ -178,6 +178,7 @@ var updateXDataView = function(ev, done) {
     }
 
     var xcontdoc = xc.getCurDocText(xc.curdoc)
+    var mode = 'html'
 
     var editForm = document.forms['xc-form-edit']
     if (editForm) {
@@ -186,30 +187,37 @@ var updateXDataView = function(ev, done) {
 
     if (!xcontdoc.startsWith('<')) {
         console.log('No XML data')
-        xcontdoc = xc.getXDoc(xcontdoc, 'text')
-    }
 
-    var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
-    xinfo.transform(xcontdoc, false, function(jinfo) {
-        var info = JSON.parse(jinfo.textContent)
-        var dclass = 'default'
-        if (info.class.length>0) {
-            dclass = info.class
-        } else {
-            console.log('No Xdata class found')
-        }
-        var mode = 'html'
-        var modeForm = document.forms['xc-control']
-        if (modeForm) {
-            mode = modeForm.elements['mode'].value
-        }
-        xc.getClassViewFunction(dclass, mode, function(res) {
-            res.render(xcontdoc, function(res) {
+	var dclass = xc.curtype.replace('/', '_')
+        xc.getClassViewFunction(dclass, mode, function(xcontdoc) {
+	    res.render(xcontdoc, function(res) {
                 console.log('Done with class based render cycle')
                 lastStep(res)
-            })
+	    })
         })
-    })
+
+    } else {
+	var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
+	xinfo.transform(xcontdoc, false, function(jinfo) {
+            var info = JSON.parse(jinfo.textContent)
+            var dclass = 'default'
+            if (info.class.length>0) {
+		dclass = info.class
+            } else {
+		console.log('No Xdata class found')
+            }
+            var modeForm = document.forms['xc-control']
+            if (modeForm) {
+		mode = modeForm.elements['mode'].value
+            }
+            xc.getClassViewFunction(dclass, mode, function(res) {
+		res.render(xcontdoc, function(res) {
+                    console.log('Done with class based render cycle')
+                    lastStep(res)
+		})
+            })
+	})
+    }
 
 }
 
@@ -246,14 +254,19 @@ var getXData = function(ev, request, done) {
                                                 xcontdoc.documentElement.firstElementChild.nodeName + 's')))
             }
         } else {
+	    var mimetype = xlp.xPath_selectString(request.responseXML, '/*/xcontent-cdata/@mime-type')
             extractXPath(request.responseXML, '/*/xcontent-cdata/text()', false, '', function(xcontdoc) {
                 if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
-                    var indoc = getXDataXML(xcontdoc.textContent)
-                    if (indoc != null) {
-                        done(indoc)
-                    } else {
-                        done(xcontdoc)
-                    }
+		    if (mimetype.length > 0) {
+                        done(xcontdoc, mimetype)
+		    } else {
+			var indoc = getXDataXML(xcontdoc.textContent)
+			if (indoc != null) {
+                            done(indoc)
+			} else {
+                            done(xcontdoc)
+			}
+		    }
                 }
             })
         }
@@ -262,11 +275,12 @@ var getXData = function(ev, request, done) {
 
 var processXData = function(ev, request, done) {
     xc.curresp = request.responseXML
-    getXData(ev, request, function(xcontdoc) {
+    getXData(ev, request, function(xcontdoc, mimetype) {
         if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE) {
             xc.curdoc = xcontdoc
         } else if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
             xc.curdoc = xcontdoc
+	    xc.curtype = mimetype
         } else {
             xc.curdoc = xc.getXDoc('<x>no valid data</x>')
         }
@@ -428,6 +442,19 @@ xc.clearIntervals = function() {
     })
 }
 
+var psMultiField = function(x) {
+    var data = x.textContent
+    if (data.length == 0) return ''
+    var items = data.split('\n')[1].split(' ')
+    items = items.filter( (k) => k.length > 0 )
+    return '<td>' + items.join('</td><td>') + '</td>'
+}
+var psSingleField = function(x) {
+    var data = x.textContent
+    if (data.length == 0) return ''
+    return '<span>' + data.split('\n')[1] + '</span>'
+}
+
 var ppPolls = function() {
     var tms = document.querySelectorAll('.poll')
     tms.forEach(function(el) {
@@ -439,7 +466,9 @@ var ppPolls = function() {
 		if (st == 0) {
 		    if (res.responseXML != undefined) {
 			extractXPath(res.responseXML, '/*/xcontent-cdata', false, '', function(res) {
-			    el.innerHTML = '<code>' + res.textContent + '</code>'
+			    var ppfun = eval(el.dataset.postprocess)
+			    var resHTML = ppfun(res)
+			    el.innerHTML = resHTML
 			})
 		    } else {
 			el.innerHTML = '<code>' + res.responseText + '</code>'
@@ -448,7 +477,8 @@ var ppPolls = function() {
 	    })
 	}
 	getf()
-	xc.setInterval('poll-'+ el.attributes.id.value, setInterval(getf, el.dataset.pollInterval))
+	var pollid = el.attributes.id != undefined ? el.attributes.id.value : 'id' + String(Math.random() * 1e16).substr(0, 8)
+	xc.setInterval('poll-'+ pollid, setInterval(getf, el.dataset.pollInterval))
     })
 }
 
@@ -573,7 +603,7 @@ xc.getCurDoc = function(xcontdoc, infoxml) {
 xc.performAction = function(ev, name) {
     var filters = [ name, 'xc-cleanup.xsl', 'xc-pretty.xsl' ]
     var inxml = xc.getXDoc(xc.cgiParams() + '<cont>' +
-                              xc.curdoc.documentElement.outerHTML + '</cont>', 'x')
+                           xc.getCurDocText(xc.curdoc) + '</cont>', 'x')
     var genxsl = xlp.mkXLP(filters, xc.xslpath)
     genxsl.transform(inxml, function(res) {
         xc.curdoc = res
@@ -650,4 +680,23 @@ var isNonXMLResponse = function(request) {
 var isErrorResponse = function(request) {
     return (isNonXMLResponse(request)
             || request.responseXML.documentElement.nodeName == "xc")
+}
+
+xc.csv2xml = function(text, done) {
+    console.log('xc.csv2xml')
+
+    extractXPath(text, '/*/x:cont/text()', false, '', function(xcontdoc) {
+        if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
+	    var indoc = xcontdoc.textContent
+	    var lines = text.split('\n')
+
+	    lines = lines.map(function(l) {
+		var items = l.split(';')
+		return '<td>' + items.join('</td></td>') + '</td>'
+	    })
+
+	    done('<table><tr>' + lines.join('</tr></tr>') + '</tr></table>')
+	}
+    })
+
 }

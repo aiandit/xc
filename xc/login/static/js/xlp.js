@@ -268,9 +268,13 @@ xlp.transform = function(xslt, xml) {
     return result
 }
 
-xlp.selectSingleNode = function(doc, xpath) {
+xlp.xPath_selectSingleNode = function(doc, xpath) {
     var res = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null)
     return res.iterateNext()
+}
+xlp.xPath_selectString = function(doc, xpath) {
+    var res = doc.evaluate(xpath, doc, null, XPathResult.STRING_TYPE, null)
+    return res.stringValue
 }
 
 xlp.transformToFragment = function(xslt, xml) {

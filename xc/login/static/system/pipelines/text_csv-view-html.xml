@@ -1,0 +1,7 @@
+<x>
+  <!--  <xslbase>/main/getf</xslbase> -->
+  <steps>
+    <step>xc.csv2xml</step>
+    <step>cvs-view-html.xsl</step>
+  </steps>
+</x>

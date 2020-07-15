@@ -25,6 +25,7 @@ urlpatterns = [
 
     path('ps', views.ps, name='ps'),
     path('ajax_ps', views.ajax_ps, name='ajax_ps'),
+    path('plain_ps', views.plain_ps, name='plain_ps'),
 
     path('counter', views.counter, name='counter'),
     path('ajax_counter', views.ajax_counter, name='ajax_counter'),
