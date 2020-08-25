@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 import login
+import main
 
 urlpatterns = [
     path('login/', include('login.urls', namespace='login')),
@@ -25,4 +26,5 @@ urlpatterns = [
     path('msgs/', include('msgs.urls', namespace='msgs')),
     path('admin/', admin.site.urls),
     path('favicon.ico', login.views.favicon),
+    path('', main.views.home),
 ]

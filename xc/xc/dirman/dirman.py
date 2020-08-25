@@ -75,6 +75,10 @@ def getlsl(path, relpath = '.', dironly=False):
         ftype = si['type']
         if ftype == 'd':
             fnames = [ f.name for f in os.scandir(path) ]
+            #            ftimes = [ f.stat().st_atime for f in os.scandir(path) ]
+            #            sind = sorted(range(len(ftimes)), key=lambda k: ftimes[k], reverse=True if sort == 'descend' else False)
+            #            fnames = [ fnames[k] for k in sind ]
+            #            print("Sort %s index: %s, sorted list: %s" % (sort, sind, fnames))
             subinfos = [ getfinfo(os.path.join(path, f), os.path.join(relpath, f), False)[0] for f in fnames ]
             res['finfo'] = subinfos
     else:
@@ -169,7 +173,7 @@ class DirManager:
         info = getfinfo(self.getpath(path), path)[0]
         return {'info': info}
 
-    def lsl(self, path):
+    def lsl(self, path, sort='ascend'):
         if self.normalizepath(path) is None:
             return {}
         info = getlsl(self.getpath(path), self.normalizepath(path))

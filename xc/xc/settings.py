@@ -129,8 +129,9 @@ USE_TZ = True
 #STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 # es gibt nur ein static, login/static
 
-STATIC_URL = '/src/'
+STATIC_URL = '/static/'
 
+MAIN_FRAME = 'xframe-main.html'
 
 DEFAULT_FROM_EMAIL = 'info@example.com'
 
@@ -141,6 +142,6 @@ EMAIL_USE_TLS = True
 #EMAIL_USE_SSL = True
 
 
-XC_WORKDIR = '/var/lib/xc/test'
+XC_WORKDIR = '/var/lib/xc/umweltmodul'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200

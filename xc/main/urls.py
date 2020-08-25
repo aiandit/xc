@@ -3,7 +3,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.home, name='home'),
+    path('home', views.home, name='home'),
+    path('ajax_home', views.ajax_home, name='ajax_home'),
+
     path('index', views.index, name='index'),
     path('path', views.path, name='path'),
     path('newdoc', views.newdoc, name='newdoc'),

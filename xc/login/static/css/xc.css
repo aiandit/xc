@@ -28,16 +28,24 @@ body, fieldset, div.messages, div#content {
     padding: 0.5em;
 }
 
+div.main {
+    color: wheat;
+}
+
 fieldset table {
     display: inline;
 }
 
-code {
+code.list {
     white-space: pre;
     max-width: 50rem;
     max-height: 70rem;
     overflow: scroll;
     display: block;
+}
+
+code {
+    white-space: pre;
 }
 
 td.unit-value {
@@ -97,7 +105,6 @@ table.calculation th {
 }
 
 .xc-nocatch {
-    background: #ecb4b4;
 }
 
 .xc-controls {
@@ -260,6 +267,12 @@ td.ntd {
 
 table, tr, th, td {
     font-size: inherit;
+}
+#document {
+    color: wheat;
+}
+#content {
+    color: wheat;
 }
 #document-actions {
     max-width: 30rem;

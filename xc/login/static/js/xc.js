@@ -15,7 +15,7 @@ var frames = [
      ]}
 ]
 
-var myframes = xframes.mkXframes(frames, '/src/xsl/')
+var myframes = xframes.mkXframes(frames, '/static/xsl/')
 
 var unescapeXML = function(x) {
     return x.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
@@ -173,7 +173,7 @@ var updateXDataView = function(ev, done) {
     updateTree(ev)
 
     var lastStep = function(r) {
-        updateTree(ev)
+        updateTreeFinal(ev)
         done(r)
     }
 
@@ -296,8 +296,9 @@ var handleLinkClick = function(ev) {
     if (ev.target.href.startsWith('javascript:')) {
         return true;
     } else {
+	xc.clearIntervals();
         // console.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
-        myframes.renderGET(ev.target, xframes.ajaxPathName(ev.target.href), function(request) {
+        myframes.renderLink(ev.target, xframes.ajaxPathName(ev.target.href), function(request) {
             // console.log('A: link click is handled completely')
             renderPostProc(ev, request)
         })
@@ -318,17 +319,10 @@ var dohandleFormSubmit = function(form, ev) {
         var res = evres(ev)
         return false
     } else {
-        if (form.method == 'post') {
-            myframes.renderPOST(form, xframes.ajaxPathName(form.action), function(request) {
-                // console.log('A form POST submit is handled completely')
-                renderPostProc(ev, request)
-            })
-        } else {
-            myframes.renderGET(form, xframes.ajaxPathName(form.action), function(request) {
-                // console.log('A form GET submit is handled completely')
-                renderPostProc(ev, request)
-            })
-        }
+        myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
+            // console.log('A form POST submit is handled completely')
+            renderPostProc(ev, request)
+        })
         return false
     }
 }
@@ -355,7 +349,7 @@ var runxc = function(x, ev) {
 
     console.log('run: ajax URL ' + ajaxurl)
 
-    myframes.renderGET(document, ajaxurl, function(res) {
+    myframes.renderLink(document, ajaxurl, function(res) {
         console.log('done xerp load')
         renderPostProc(ev, res)
     })
@@ -372,9 +366,11 @@ var runxc = function(x, ev) {
     return false
 }
 
-var renderPostProc = function(ev, request) {
+var renderPostProc = function(ev, request, subreq) {
     console.log('render: ' + request)
-    xframes.pushhist(request)
+    if (subreq == undefined) {
+	xframes.pushhist(request)
+    }
     if (!isNonXMLResponse(request)) {
         processXData(ev, request, function() {
             console.log('processXData done')
@@ -405,7 +401,6 @@ var setLinkCallback = function(handle) {
     var ffunc = function(ev) {
         console.log('link click event for: ' + ev);
         if (ev.target.classList.contains('xc-nocatch')) return true
-	xc.clearIntervals();
         var res = handle(ev)
         console.log(name + ': link click event handler returned: ' + res);
         return res
@@ -477,8 +472,39 @@ var ppPolls = function() {
 	    })
 	}
 	getf()
-	var pollid = el.attributes.id != undefined ? el.attributes.id.value : 'id' + String(Math.random() * 1e16).substr(0, 8)
-	xc.setInterval('poll-'+ pollid, setInterval(getf, el.dataset.pollInterval))
+	if (el.attributes.id == undefined) {
+	    el.setAttribute('id', 'id' + String(Math.random() * 1e16).substr(0, 8))
+	}
+	var pollid = el.attributes.id.value
+	if (el.dataset.pollRunning == undefined) {
+	    xc.setInterval('poll-'+ pollid, setInterval(getf, el.dataset.pollInterval))
+	    el.dataset.pollRunning = true
+	}
+    })
+}
+
+var ppViews = function(ev) {
+    var tms = document.querySelectorAll('.view')
+    tms.forEach(function(el) {
+	var getf = function() {
+	    var url = el.dataset.viewUrl
+	    var localframes = [
+		{target: el.dataset.viewTarget,
+		 filters: [
+		     el.dataset.viewFilter
+		 ]}
+	    ]
+	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
+            mylframes.renderLink(ev.target, xframes.ajaxPathName(xlp.getbase() + url), function(request) {
+		console.log('VIEW: sub view ' + url + ' is handled completely')
+		renderPostProc(ev, request, true)
+            })
+	    el.dataset.viewDone = '1'
+	}
+	if (el.dataset.viewDone != '1') {
+	    getf()
+	}
+        return false
     })
 }
 
@@ -515,11 +541,14 @@ var ppUnits = function() {
     var tms = document.querySelectorAll('span.unit')
     tms.forEach(function(el) {
         if (el.dataset.unit != el.dataset.targetunit) {
-            console.log('GG: ' + el.innerHTML)
+//            console.log('GG: ' + el.innerHTML)
             var flval = Number(el.innerHTML.substr(0, el.innerHTML.search(/&| /)))
             if (el.dataset.unit == 'B' && el.dataset.targetunit == 'KB') {
                 el.innerHTML = '<span title="' + flval + el.dataset.unit + '">'
                     + displayNumber((Math.ceil(100*flval/1024)/100).toFixed(2)) + '&#xa0;' + el.dataset.targetunit + '</span>'
+            } else if (el.dataset.unit == 'B' && el.dataset.targetunit == 'MB') {
+                el.innerHTML = '<span title="' + flval + el.dataset.unit + '">'
+                    + displayNumber((Math.ceil(100*flval/(1024*1024))/100).toFixed(2)) + '&#xa0;' + el.dataset.targetunit + '</span>'
             }
             el.dataset.unit = el.dataset.targetunit
         }
@@ -645,7 +674,7 @@ var xcRender = function(done) {
     })
 }
 
-var updateTree = function() {
+var updateTree = function(ev) {
     setFormCallback(handleFormSubmit)
     setLinkCallback(handleLinkClick)
 
@@ -668,8 +697,13 @@ var updateTree = function() {
     ppMarkup()
     ppTimestamps()
     ppUnits()
-    ppPolls()
 //    document.forms[0].scrollIntoView()
+}
+
+var updateTreeFinal = function(ev) {
+    updateTree(ev)
+    ppPolls()
+    ppViews(ev)
 }
 
 var isNonXMLResponse = function(request) {
@@ -682,20 +716,22 @@ var isErrorResponse = function(request) {
             || request.responseXML.documentElement.nodeName == "xc")
 }
 
-xc.csv2xml = function(text, done) {
-    console.log('xc.csv2xml')
+xc.csv2xml = function(text) {
+    var lines = text.split('\n')
+    lines = lines.map(function(l) {
+	var items = l.split(';')
+	return '<td>' + items.join('</td><td>') + '</td>'
+    })
+    return '<table><tr>' + lines.join('</tr><tr>') + '</tr></table>'
+}
 
+xc.csv2xmlfilt = function(text, done) {
+    console.log('xc.csv2xml')
     extractXPath(text, '/*/x:cont/text()', false, '', function(xcontdoc) {
         if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
 	    var indoc = xcontdoc.textContent
-	    var lines = text.split('\n')
-
-	    lines = lines.map(function(l) {
-		var items = l.split(';')
-		return '<td>' + items.join('</td></td>') + '</td>'
-	    })
-
-	    done('<table><tr>' + lines.join('</tr></tr>') + '</tr></table>')
+	    var xml = xc.csv2xml(indoc)
+	    done(xml)
 	}
     })
 

@@ -1,0 +1,152 @@
+/*
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Condensed:300,300i,700');
+*/
+
+body {
+    color: wheat;
+	margin: 0;
+	font-family: 'Roboto Condensed','Open Sans Condensed', Helvetica, Arial, sans-serif!important;
+}
+h1 {
+	color: white;
+	font-size: 3em;
+	line-height: 0;
+}
+table, table td {
+	border: 1px solid none;
+	border-collapse: collapse;
+}
+button {
+	color: white;
+	border: 1px solid #718834;
+	background: -webkit-linear-gradient(top, #486130 0%,#718834 100%);
+	text-shadow: 0 1px 1px #000;
+	border-radius: 13px;
+	padding: 8px 30px;
+	font-weight: 600;
+	cursor: pointer;
+	text-transform: uppercase;
+	font-size: 11px;
+}
+.logo {
+	width: 200px;
+	float: right;
+}
+.head-table {
+	width: 100%;
+	background: #282e1f;
+	height: 150px;
+	border-bottom: 5px solid #718834;
+}
+.head-table td {
+	text-align: center;
+	vertical-align: bottom;
+	padding: 1.5em 3em;
+	width: 33%;
+
+}
+.label {
+	display: none;
+}
+.file-area {
+	width: 100%;
+	position: relative;
+	max-width: 300px;
+	margin: 0 auto;
+	margin-bottom: 2em;
+	padding: 30px;
+	border: 2px dashed rgba(255, 255, 255, 0.4);
+	text-align: center;
+	background: rgba(255, 255, 255, 0.1);
+}
+.file-area input[type="file"] {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	opacity: 0;
+	cursor: pointer;
+}
+.file-name {
+	width: 100%;
+	text-align: center;
+	background: none;
+	border: none;
+	color: white;
+	font-size: 16px;
+}
+.chart-table {
+	width: 95%;
+	margin: 0 auto;
+}
+.chart-table td:first-child {
+	padding-top: 5em;
+}
+.chart-table td:last-child {
+	padding-bottom: 3em;
+}
+.highcharts-container {
+	padding-bottom: 2em;
+}
+.chart-container tspan {
+	font-family: 'Roboto Condensed','Open Sans Condensed', Helvetica, Arial, sans-serif!important;
+	font-size: 16px;
+	color: #282e1f!important;
+}
+.chart-container .highcharts-title tspan {
+	font-family: 'Roboto Condensed','Open Sans Condensed', Helvetica, Arial, sans-serif!important;
+	font-size: 30px!important;
+	font-weight: 700;
+}
+.highcharts-button-box {
+	height: 28px;
+}
+.highcharts-credits,
+.highcharts-legend-item {
+	opacity: 0;
+}
+#container_3 .highcharts-credits {
+	opacity: 1;
+}
+#container_0 {
+	width: 100%;
+}
+#container_0 th,
+#container_0 td {
+	text-align: center;
+	vertical-align: top;
+	padding: 0.5em 1em;
+}
+#container_0 tr:nth-child(odd) {
+	background: #ebf7e6;
+}
+#container_0 tr:nth-child(even) {
+	background: white;
+}
+footer {
+	bottom: 0;
+	position: fixed;
+	font-size: 13px;
+	background: #718834;
+	width: 100%;
+	padding: 1em 0;
+	color: white;
+}
+.oc-head, .oc-body {
+    background: #718834;
+}
+a:visited {
+    color: #f06060;
+}
+a {
+    color: wheat;
+}
+
+.measurement-result-file-list {
+    height: 16em;
+    overflow: scroll;
+}

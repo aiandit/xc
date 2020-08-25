@@ -19,12 +19,37 @@ from xc.dirman import xslt
 
 import json, os, mimetypes, zipfile, csv, io, re
 
+def home(request):
+    context = {'xapp': 'main', 'view': 'home', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
+
 def index(request):
-    context = {'xapp': 'main', 'view': 'index', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    context = {'xapp': 'main', 'view': 'home', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
+
+def ajax_home(request):
+    lsl = {}
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    data = {
+        'lsl': lsl,
+        'errs': errors,
+    }
+    xcontext = {'xapp': 'main', 'view': 'home', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
 
 def path(request):
-    context = {'xapp': 'main', 'view': 'index', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
+    context = {'xapp': 'main', 'view': 'path', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/xframe.html', context)
 
 # https://stackoverflow.com/questions/898669/how-can-i-detect-if-a-file-is-binary-non-text-in-python#7392391

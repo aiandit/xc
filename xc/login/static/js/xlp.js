@@ -111,7 +111,7 @@ xlp.sendRequest = function(URL, method, callback, headers, data) {
     for (k in headers) {
         request.setRequestHeader(k, headers[k])
     }
-    console.log('XMLHttpRequest send: ' + method + ' ' + URL + ', headers: ' + headers + ', data: ' + data)
+//    console.log('XMLHttpRequest send: ' + method + ' ' + URL + ', headers: ' + headers + ', data: ' + data)
     request.send(data)
 }
 
@@ -180,8 +180,8 @@ xlp.reqXML = function(src, obj) {
         } else {
             obj.data = xlp.mkFormData(src)
         }
-        console.log('reqXML: data')
-        console.log(obj.data)
+//        console.log('reqXML: data')
+//        console.log(obj.data)
     }
     var cur_callback = obj.callback
     obj.callback = function(status, request) {
@@ -376,7 +376,7 @@ xlp.mkXSL = function(xslt, xsltbase) {
         xlp.getxsl(xslt, xsltbase, function(xsl) {
             xlp.getdoc(xml, {}, function(xmldoc) {
                 var res
-                console.log('XSLT: ' + xslt)
+//                console.log('XSLT: ' + xslt)
                 if (toDoc) {
                     res = xlp.transform(xsl, xmldoc)
                 } else {
@@ -537,6 +537,12 @@ xlp.mloadXML = function(URLs, done) {
             done(doc)
         })
     }, done)
+}
+
+xlp.getbase = function() {
+    var getUrl = window.location
+    var baseUrl = getUrl.protocol + '//' + getUrl.host + '/'
+    return baseUrl
 }
 
 xlp.init = function() {

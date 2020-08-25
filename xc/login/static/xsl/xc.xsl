@@ -28,6 +28,9 @@
           <table class="actions">
           <tr>
             <td>
+              <a href="/main/home">Home</a>
+            </td>
+            <td>
               <a href="/main/path">Root</a>
             </td>
             <td>
@@ -76,19 +79,67 @@
         </div>
       </div>
     </div>
-    <div>
+    <div class="main">
       <h2 title="XC view: {dict/xapp}/{dict/view}">
         <xsl:apply-templates select="dict" mode="xc-title"/>
       </h2>
       <xsl:apply-templates select="dict"/>
     </div>
+    <xsl:apply-templates select="dict" mode="doc-xcont"/>
+    <xsl:apply-templates select="dict" mode="post-xcont"/>
+  </xsl:template>
+
+  <xsl:template match="text()" mode="doc-xcont"/>
+  <xsl:template match="dict" mode="doc-xcont">
     <div class="document {xcontent/*/class[1]}">
       <h4>Document View</h4>
       <div id="document">
         <xsl:apply-templates select="/*" mode="showxcontent"/>
       </div>
     </div>
-    <xsl:apply-templates select="dict" mode="post-xcont"/>
+  </xsl:template>
+
+  <xsl:template match="dict[view = 'home']" mode="doc-xcont">
+    <table>
+      <tr>
+	<td style="vertical-align: top;">
+	  <form action="/main/action" method="post">
+	    <input type="hidden" name="path" value="bin/start-measurement.sh"/>
+	    <input type="submit" value="Start Measurement"/>
+	    <input type="hidden" name="next_" value="/main/ajax_home"/>
+	    <xsl:copy-of select="/*/csrf/*"/>
+	  </form>
+	  <form action="/main/action" method="post">
+	    <input type="hidden" name="path" value="bin/stop-measurement.sh"/>
+	    <input type="submit" value="Stop Measurement"/>
+	    <input type="hidden" name="next_" value="/main/ajax_home"/>
+	    <xsl:copy-of select="/*/csrf/*"/>
+	  </form>
+	</td>
+	<td>
+	  <div class="view"
+	       data-view-url="/main/view?path=measurement.xml"
+	       data-view-target="measurement-view"
+	       data-view-filter="process-view-html.xsl"
+	       data-view-done="0"
+	       >
+	    <div id="measurement-view">
+	    </div>
+	  </div>
+	</td>
+	<td style="height: 20em; overflow: scroll;">
+	  <div class="view"
+	       data-view-url="/main/path?path=measurements&amp;sort=descend"
+	       data-view-target="measurements-view"
+	       data-view-filter="measurements-view-html.xsl"
+	       data-view-done="0"
+	       >
+	    <div id="measurements-view">
+	    </div>
+	  </div>
+	</td>
+      </tr>
+    </table>
   </xsl:template>
 
   <xsl:template match="text()" mode="post-xcont"/>
@@ -272,6 +323,14 @@
       </fieldset>
     </form>
   </xsl:template>
+
+
+  <xsl:template match="dict[xapp = 'main' and view = 'home']" mode="xc-title">XC Home</xsl:template>
+  <xsl:template match="dict[xapp = 'main' and view = 'home']">
+    <div class="xc-home">
+    </div>
+  </xsl:template>
+
 
   <xsl:template match="dict[xapp = 'login' and (view = 'index' or view = 'login')]" mode="xc-title">XC Login</xsl:template>
   <xsl:template match="dict[xapp = 'login' and (view = 'index' or view = 'login')]">

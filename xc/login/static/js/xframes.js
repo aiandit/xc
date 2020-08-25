@@ -94,31 +94,33 @@ xframes.mkXframes = function(frames, xsltbase) {
         })
         console.log('Xframes renderings lanched')
     }
-    var renderGET = function(src, url, done) {
-        method = 'GET'
+    var renderRespHandler = function(status, request, done) {
+        var indoc = request.responseXML
+        if ((typeof indoc == "undefined") || (indoc === null)) {
+            console.error('Xframes: no XML response from ' + src + '(' + url + ')')
+        } else {
+            render(indoc, function(res) {
+                done(request, res)
+            })
+        }
+    }
+    var renderLink = function(src, url, done) {
+        xlp.reqXML(src, {URL: url, method: 'GET', callback: (a,b)=>renderRespHandler(a,b,done)})
+    }
+    var renderFormSubmit = function(src, url, done) {
+        var method = 'GET'
         if (typeof src.method != "undefined") {
             method = src.method
         }
-        xlp.reqXML(src, {URL: url, method: method, callback: function(status, request) {
-//        xlp.sendRequest(inurl, 'GET', function(status, request) {
-            var indoc = request.responseXML
-            if ((typeof indoc == "undefined") || (indoc === null)) {
-                console.error('Xframes: no XML response from ' + src + '(' + url + ')')
-            } else {
-                render(indoc, function(res) {
-                    done(request, res)
-                })
-            }
-        }})
+        xlp.reqXML(src, {URL: url, method: method, callback: (a,b)=>renderRespHandler(a,b,done)})
     }
-    var renderPOST = renderGET
     var Xframes = {
         frames: frames,
         xsltbase: xsltbase,
         xlps: xlps,
         render: render,
-        renderGET: renderGET,
-        renderPOST: renderPOST
+        renderLink: renderLink,
+        renderFormSubmit: renderFormSubmit
     }
     return Xframes
 }
