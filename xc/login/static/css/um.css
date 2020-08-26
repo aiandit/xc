@@ -4,12 +4,19 @@
 */
 
 body {
-    color: wheat;
 	margin: 0;
 	font-family: 'Roboto Condensed','Open Sans Condensed', Helvetica, Arial, sans-serif!important;
 }
+div.app {
+	color: wheat;
+}
+div#result-view {
+	color: black;
+}
+h1,h2,h3,h4,h5,h6,div,td,th,table {
+	color: inherit;
+}
 h1 {
-	color: white;
 	font-size: 3em;
 	line-height: 0;
 }
@@ -145,7 +152,9 @@ a:visited {
 a {
     color: wheat;
 }
-
+div#result-view a {
+    color: blue;
+}
 .measurement-result-file-list {
     height: 16em;
     overflow: scroll;

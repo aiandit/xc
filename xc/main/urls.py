@@ -41,6 +41,19 @@ urlpatterns = [
     path('get', views.get, name='get'),
     path('ajax_get', views.get, name='ajax_get'),
 
+    path('nlines', views.nlines, name='nlines'),
+    path('ajax_nlines', views.nlines, name='ajax_nlines'),
+
+    path('head', views.get_head, name='head'),
+    path('ajax_head', views.get_head, name='ajax_head'),
+
+    path('tail', views.get_tail, name='tail'),
+    path('ajax_tail', views.get_tail, name='ajax_tail'),
+
+    path('range/<path:path>', views.get_rangep, name='get_rangep'),
+    path('range', views.get_range, name='range'),
+    path('ajax_range', views.get_range, name='ajax_range'),
+
     path('getf', views.getf, name='getf'),
     path('ajax_getf', views.getf, name='ajax_getf'),
 

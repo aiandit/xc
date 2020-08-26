@@ -1102,33 +1102,32 @@ def getxmlifposs(path):
     isXML = False
     fstr = ''
     try:
-        Npdata = 128
-        if Npdata > lsl['info']['statdict']['st_size']:
-            Npdata = lsl['info']['statdict']['st_size']
-        fpeek = fdata[0:Npdata]
-        #                print('peek %d data B: "%s"' % (Npdata, fpeek))
-        canDecodePeek = False
-        for i in range(4):
-            try:
-                fps = fpeek[0:Npdata-i].decode('utf-8')
-                canDecodePeek = True
-            except:
-                pass
-            if canDecodePeek:
-                break
-        if canDecodePeek:
-            fstr = fdata.decode('utf-8')
-            fps = fps.lstrip()
-            #                    print('peek %d data B: "%s"' % (Npdata, fps))
-            if fps[0] == '<':
-                #                        print('data is XML and decoded successfully')
-                isXML = True
-                if fps[0:5] == '<?xml':
-                    enddecl = fstr.find('?>')
-                    fstr = fstr[enddecl+2:]
+       Npdata = 128
+       if Npdata > lsl['info']['statdict']['st_size']:
+           Npdata = lsl['info']['statdict']['st_size']
+       fpeek = fdata[0:Npdata]
+       #                print('peek %d data B: "%s"' % (Npdata, fpeek))
+       canDecodePeek = False
+       for i in range(4):
+           try:
+               fps = fpeek[0:Npdata-i].decode('utf-8')
+               canDecodePeek = True
+           except:
+               pass
+           if canDecodePeek:
+               break
+       if canDecodePeek:
+           fstr = fdata.decode('utf-8')
+           fps = fps.lstrip()
+           #                    print('peek %d data B: "%s"' % (Npdata, fps))
+           if fps[0] == '<':
+               #                        print('data is XML and decoded successfully')
+               isXML = True
+               if fps[0:5] == '<?xml':
+                   enddecl = fstr.find('?>')
+                   fstr = fstr[enddecl+2:]
     except BaseException as ex:
-        print('Data fpeek failed')
-        print(ex)
+        print('Data fpeek "%s" (%d chars) failed: %s' % (path,len(fdata),ex))
     return (isXML, lsl, fdata, fstr)
 
 def getp(request, path):
@@ -1203,6 +1202,254 @@ def get(request):
     dx = dictxml(xcontext)
     context = { 'context_xml': dx, 'forms': [ rdata] }
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
+def getrange(request, path, mode, start, end):
+
+    lsl = {}
+
+    errmsg = ''
+    errors = []
+
+    lsl = get_lsl(path)['lsl']
+    print(lsl)
+
+    if len(lsl) > 0 and len(lsl['info']) > 0 and lsl['info']['type'] == '-':
+        mtype = mimetypes.guess_type(lsl['info']['name'])
+        if mode == 'head':
+            fdata = workdir.head(path, end)
+        elif mode == 'tail':
+            fdata = workdir.tail(path, start)
+        elif mode == 'range':
+            fdata = workdir.range(path, start, end)
+        return HttpResponse(fdata, content_type=mtype[0])
+        #                return HttpResponse(fdata, content_type="application/octet-stream")
+    else:
+        print('The file is not a file:', path)
+        errmsg = 'The file was not found'
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = {
+        'errs': errors
+    }
+    data = { **data, **lsl }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ PathData(initial={'path': path}) ] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
+
+class HeadTailData(PathData):
+    name = 'headtail'
+    path = forms.CharField(required=False, max_length=1024, label='Mode')
+    n = forms.IntegerField(label='Number', required=False)
+
+class SecData(PathData):
+    name = 'section'
+    path = forms.CharField(required=False, max_length=1024, label='Mode')
+    start = forms.IntegerField(label='Start', required=False)
+    end = forms.IntegerField(label='End', required=False)
+
+
+def get_head(request):
+
+    lsl = {}
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = HeadTailData(reqDict)
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+        n = cdata['n']
+        if n is None:
+            n = 10
+        return getrange(request, path, 'head', None, n)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    actions = fileactions
+    try:
+        if lsl['info']['type'] == 'd':
+            actions = diractions
+    except:
+        pass
+
+    data = {
+        'lsl': lsl,
+        'errs': errors,
+        'dir-actions': actions
+    }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
+def get_tail(request):
+
+    lsl = {}
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = HeadTailData(reqDict)
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+        n = cdata['n']
+        if n is None:
+            n = 10
+        return getrange(request, path, 'tail', n, None)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    actions = fileactions
+    try:
+        if lsl['info']['type'] == 'd':
+            actions = diractions
+    except:
+        pass
+
+    data = {
+        'lsl': lsl,
+        'errs': errors,
+        'dir-actions': actions
+    }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
+def get_range(request):
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = SecData(reqDict)
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+        return get_rangep(request, path)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = { 'errs': errors }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
+def get_rangep(request, path):
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = SecData(reqDict)
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        start = cdata['start']
+        end = cdata['end']
+
+        return getrange(request, path, 'range', start, end)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = { 'errs': errors }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
+def nlines(request):
+
+    lsl = {}
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = PathData(reqDict)
+    n = 0
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+
+        n = workdir.nlines(path)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    actions = fileactions
+    try:
+        if lsl['info']['type'] == 'd':
+            actions = diractions
+    except:
+        pass
+
+    data = {
+        'n': n,
+        'errs': errors
+    }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata] }
+    return render(request, 'common/xc-atom.xml', context, content_type="application/xml")
 
 
 class FindData(XCForm):

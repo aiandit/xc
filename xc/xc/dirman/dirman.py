@@ -281,6 +281,26 @@ class DirManager:
         file.close()
         return content
 
+    def getlines(self, name):
+        file = open(self.getpath(name), 'r', encoding='utf8')
+        content = file.read()
+        return content.split('\n')
+
+    def nlines(self, name):
+        return len(self.getlines(name))
+
+    def head(self, name, n):
+        print('retrieve first %d lines of %s' % (n, name))
+        return '\n'.join(self.getlines(name)[0:n])
+
+    def tail(self, name, n):
+        print('retrieve last %d lines of %s' % (n, name))
+        return '\n'.join(self.getlines(name)[-n-1:])
+
+    def range(self, name, m, n):
+        print('retrieve range %d-%d of lines of %s' % (m, n, name))
+        return '\n'.join(self.getlines(name)[m:n])
+
     def renamedoc(self, name1, name2):
         stat = 0
         try:

@@ -722,7 +722,7 @@ xc.csv2xml = function(text) {
 	var items = l.split(';')
 	return '<td>' + items.join('</td><td>') + '</td>'
     })
-    return '<table><tr>' + lines.join('</tr><tr>') + '</tr></table>'
+    return '<table xmlns="http://www.w3.org/1999/xhtml"><tr>' + lines.join('</tr><tr>') + '</tr></table>'
 }
 
 xc.csv2xmlfilt = function(text, done) {
