@@ -1,0 +1,44 @@
+
+* Administration
+
+** Create Users
+
+*** Create user through the web interface
+
+    1. Go to [[http://localhost/login/]] and then click on ~Register~.
+    2. Enter your desired username and password, and your email. An
+       email with and activation code will be sent to your email
+       address.
+    3. Click on the activation link in the email or enter the
+       activative code manually in the activation form at
+       [[http://localhost/register/activate]]
+
+*** Create User from the command line
+
+Super users can be created from the command line with:
+
+#+BEGIN_SRC sh
+./manage.py createsuperuser --username admin --email info@exampl.com
+#+END_SRC
+
+*** Create User via the Admin panel
+
+You must login as a super user to use this method
+
+    1. Point your browser to the admin panel at
+       http://localhost/admin/
+    2. Click on ~Users~
+    3. Click on ~Add User~
+    4. Fill in the desired username and password, and click ~SAVE~
+    5. On the following page, fill in the personal details, names and
+       email address, and click ~SAVE~
+
+** Manage Users
+
+You must login as a super user to use this method
+
+    1. Point your browser to the admin panel at
+       http://localhost/admin/
+    2. Click on ~Users~
+
+Here you can manage users and their permissions as desired.
