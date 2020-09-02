@@ -299,7 +299,7 @@ class DirManager:
 
     def range(self, name, m, n):
         print('retrieve range %d-%d of lines of %s' % (m, n, name))
-        return '\n'.join(self.getlines(name)[m:n])
+        return self.getlines(name)[m:n]
 
     def renamedoc(self, name1, name2):
         stat = 0

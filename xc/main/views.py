@@ -17,7 +17,7 @@ from xc import settings
 
 from xc.dirman import xslt
 
-import json, os, mimetypes, zipfile, csv, io, re
+import json, os, mimetypes, zipfile, csv, io, re, gzip, brotli
 
 def home(request):
     context = {'xapp': 'main', 'view': 'home', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
@@ -50,7 +50,7 @@ def ajax_home(request):
 
 def path(request):
     context = {'xapp': 'main', 'view': 'path', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 # https://stackoverflow.com/questions/898669/how-can-i-detect-if-a-file-is-binary-non-text-in-python#7392391
 textchars = bytearray({7,8,9,10,12,13,27} | set(range(0x20, 0x100)) - {0x7f})
@@ -139,7 +139,7 @@ class NewdocData(XCForm):
 
 def newdoc(request):
     context = {'xapp': 'main', 'view': 'newdoc', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_newdoc(request):
 
@@ -205,7 +205,7 @@ class DeleteData(XCForm):
 
 def delete(request):
     context = {'xapp': 'main', 'view': 'delete', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_delete(request):
 
@@ -265,7 +265,7 @@ class NewdirData(XCForm):
 
 def newdir(request):
     context = {'xapp': 'main', 'view': 'newdir', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_newdir(request):
 
@@ -337,7 +337,7 @@ class ViewData(PathData):
 
 def view(request):
     context = {'xapp': 'main', 'view': 'view', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 
 def ajax_view(request):
@@ -411,7 +411,7 @@ class EditData(XCForm):
 
 def edit(request):
     context = {'xapp': 'main', 'view': 'edit', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_edit(request):
 
@@ -504,7 +504,7 @@ class FileuploadData(XCForm):
 
 def fileupload(request):
     context = {'xapp': 'main', 'view': 'fileupload', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_fileupload(request):
 
@@ -589,7 +589,7 @@ class MoveData(XCForm):
 
 def move(request):
     context = {'xapp': 'main', 'view': 'move', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_move(request):
 
@@ -694,7 +694,7 @@ class CloneData(XCForm):
 
 def clone(request):
     context = {'xapp': 'main', 'view': 'clone', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_clone(request):
 
@@ -771,7 +771,7 @@ class TransformData(XCForm):
 
 def transform(request):
     context = {'xapp': 'main', 'view': 'transform', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_transform(request):
 
@@ -861,7 +861,7 @@ class WhichData(XCForm):
 
 def which(request):
     context = {'xapp': 'main', 'view': 'which', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_which(request):
 
@@ -941,7 +941,7 @@ class RunwhichData(XCForm):
 
 def runwhich(request):
     context = {'xapp': 'main', 'view': 'runwhich', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_runwhich(request):
 
@@ -1020,7 +1020,7 @@ class GetfData(XCForm):
 
 def getf(request):
     context = {'xapp': 'main', 'view': 'getf', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_getf(request):
 
@@ -1203,8 +1203,9 @@ def get(request):
     context = { 'context_xml': dx, 'forms': [ rdata] }
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
+import time
 
-def getrange(request, path, mode, start, end):
+def getrange(request, path, mode, start, end, transpose=False):
 
     lsl = {}
 
@@ -1221,8 +1222,40 @@ def getrange(request, path, mode, start, end):
         elif mode == 'tail':
             fdata = workdir.tail(path, start)
         elif mode == 'range':
-            fdata = workdir.range(path, start, end)
-        return HttpResponse(fdata, content_type=mtype[0])
+            t0 = time.time()
+            linesel = workdir.range(path, start, end)
+            # if transpose:
+            #     crr = csv.reader(linesel, delimiter=';')
+            #     t1 = time.time()
+            #     fdatat = zip(*crr)
+            #     output = io.StringIO()
+            #     csv.writer(output, delimiter=';').writerows(fdatat)
+            #     fdata = output.getvalue()
+            #     t2 = time.time()
+            #     print('Transpose: %g' % (t2-t1))
+            # else:
+            fdata = '\n'.join(linesel)
+            t1 = time.time()
+            print('Load %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
+        aenc = request.headers['Accept-Encoding']
+#        fdata = gzip.compress(fdata.encode('utf8'), compresslevel=1)
+#        t1 = time.time()
+#        print('Compress %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
+
+        # https://hacks.mozilla.org/2015/11/better-than-gzip-compression-with-brotli/
+        if 'br' in aenc:
+            fdata = brotli.compress(fdata.encode('utf8'), quality=1)
+            t1 = time.time()
+            print('Compress %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
+        resp = HttpResponse(fdata, content_type=mtype[0])
+        #        resp['Content-Encoding'] = 'gzip'
+        if 'br' in aenc:
+            resp['Content-Encoding'] = 'br'
+        dlfname = os.path.basename(path)
+        filename, file_extension = os.path.splitext(dlfname)
+        dlfname = '%s-range%d-%d%s' % (filename, start, end, file_extension)
+        resp['Content-Disposition'] = 'attachment; filename="%s"' % (dlfname,)
+        return resp
         #                return HttpResponse(fdata, content_type="application/octet-stream")
     else:
         print('The file is not a file:', path)
@@ -1478,7 +1511,7 @@ def mkfindlist(findlist):
 
 def find(request):
     context = {'xapp': 'main', 'view': 'find', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_find(request):
 
@@ -1630,7 +1663,7 @@ class GetfontData(GetfData):
 
 def getfont(request):
     context = {'xapp': 'main', 'view': 'getfont', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_getfont(request):
 
@@ -1703,7 +1736,7 @@ class ActionData(XCForm):
 
 def action(request):
     context = {'xapp': 'main', 'view': 'action', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_action(request):
 
@@ -1790,7 +1823,7 @@ class PsData(XCForm):
 
 def ps(request):
     context = {'xapp': 'main', 'view': 'ps', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_ps(request, plain=False):
 
@@ -1869,7 +1902,7 @@ class CounterData(PathData):
 
 def counter(request):
     context = {'xapp': 'main', 'view': 'counter', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 cre = re.compile(r'>[0-9]+<')
 

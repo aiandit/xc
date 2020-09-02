@@ -451,7 +451,7 @@ var psSingleField = function(x) {
 }
 
 var ppPolls = function() {
-    var tms = document.querySelectorAll('.poll')
+    var tms = document.querySelectorAll('.xc-sl-poll')
     tms.forEach(function(el) {
 	var getf = function() {
 	    var parts = el.dataset.pollUrl.split('?')
@@ -484,7 +484,7 @@ var ppPolls = function() {
 }
 
 var ppViews = function(ev) {
-    var tms = document.querySelectorAll('.view')
+    var tms = document.querySelectorAll('.xc-sl-view')
     tms.forEach(function(el) {
 	var getf = function() {
 	    var url = el.dataset.viewUrl
@@ -723,6 +723,22 @@ xc.csv2xml = function(text) {
 	return '<td>' + items.join('</td><td>') + '</td>'
     })
     return '<table xmlns="http://www.w3.org/1999/xhtml"><tr>' + lines.join('</tr><tr>') + '</tr></table>'
+}
+
+xc.readCSV = function(text) {
+    var lines = text.split('\n')
+    var allitems = Array(lines[0].split(';').length)
+    for (var i = 0; i < allitems.length; ++i) {
+	allitems[i] = []
+    }
+    lines.forEach(function(l) {
+	var items = l.split(';')
+	for (var i = 0; i < items.length; ++i) {
+	    allitems[i].push(Number(items[i]))
+	}
+    })
+//    console.log('Read ' + lines.length + ' lines, total items: ' + allitems.length*lines.length)
+    return allitems
 }
 
 xc.csv2xmlfilt = function(text, done) {

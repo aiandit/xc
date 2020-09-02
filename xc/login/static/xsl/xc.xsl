@@ -22,7 +22,10 @@
   </xsl:template>
 
   <xsl:template match="xc">
-    <div class="pad">
+    <xsl:variable name="loggedin-css">
+      <xsl:if test="dict/user/is_authenticated = 'True'"> logged-in</xsl:if>
+    </xsl:variable>
+    <div class="xc-pad {dict/view}{$loggedin-css}">
       <div class="everon">
         <div id="pad-acts1">
           <table class="actions">
@@ -71,7 +74,7 @@
           </table>
         </div>
         <h3 id="pad-XC" class="oc-head">XC</h3>
-        <div id="pad-docinfo" class="oc-body oc-open">
+        <div id="pad-docinfo" class="oc-body">
           <xsl:apply-templates select="dict/data/lsl/info" mode="lsl-info"/>
           <div id="document-info"></div>
           <div id="document-actions"></div>
@@ -80,7 +83,7 @@
       </div>
     </div>
     <div class="main">
-      <h2 title="XC view: {dict/xapp}/{dict/view}">
+      <h2 class="xc-title {dict/view}" title="XC view: {dict/xapp}/{dict/view}">
         <xsl:apply-templates select="dict" mode="xc-title"/>
       </h2>
       <xsl:apply-templates select="dict"/>
@@ -92,7 +95,7 @@
   <xsl:template match="text()" mode="doc-xcont"/>
   <xsl:template match="dict" mode="doc-xcont">
     <div class="document {xcontent/*/class[1]}">
-      <h4>Document View</h4>
+<!--      <h4>Document View</h4> -->
       <div id="document">
         <xsl:apply-templates select="/*" mode="showxcontent"/>
       </div>
@@ -100,6 +103,15 @@
   </xsl:template>
 
   <xsl:template match="dict[view = 'home']" mode="doc-xcont">
+    <div class="view"
+	 data-view-url="/main/view?path=measurement.xml"
+	 data-view-target="measurement-view"
+	 data-view-filter="measurement-view-html.xsl"
+	 data-view-done="0"
+	 >
+      <div id="measurement-view">
+      </div>
+    </div>
     <table>
       <tr>
 	<td style="vertical-align: top;">
@@ -117,15 +129,6 @@
 	  </form>
 	</td>
 	<td>
-	  <div class="view"
-	       data-view-url="/main/view?path=measurement.xml"
-	       data-view-target="measurement-view"
-	       data-view-filter="process-view-html.xsl"
-	       data-view-done="0"
-	       >
-	    <div id="measurement-view">
-	    </div>
-	  </div>
 	</td>
 	<td style="height: 20em; overflow: scroll;">
 	  <div class="view"

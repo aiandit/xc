@@ -10,8 +10,12 @@ html, body, ul, ol, div, td, p, form, fieldset, input {
     border: 0px;
     padding: 0px;
     margin: 0px;
+    visibility: inherit;
 }
 
+html, body, ul, ol, div, td, p, form, fieldset, input, a, div, p, span {
+    visibility: inherit;
+}
 ul, ol {
     margin-left: 1em;
 }
@@ -229,7 +233,7 @@ td.ntd {
     display: none;
 }
 
-.pad {
+.xc-pad {
     position: absolute;
     top: 1em;
     right: 1em;
@@ -237,6 +241,14 @@ td.ntd {
     border-radius: 0.3em;
     padding: 0.2em;
     background: aliceblue;
+}
+
+.xc-pad.home.logged-in {
+    visibility: hidden;
+}
+
+.xc-pad:hover {
+    visibility: visible;
 }
 
 .everon {
@@ -300,9 +312,7 @@ table, tr, th, td {
     margin: 0.2rem;
     top: 0.5rem;
 }
-h4,h5,div{
-    visibility: visible;
-}
+
 .oc-body {
     background: aliceblue;
     visibility: hidden;
@@ -310,7 +320,6 @@ h4,h5,div{
 }
 
 .oc-open.oc-body {
-    background: aliceblue;
     visibility: visible;
     display: block;
 }
