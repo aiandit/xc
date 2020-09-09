@@ -290,15 +290,16 @@ class DirManager:
         return len(self.getlines(name))
 
     def head(self, name, n):
-        print('retrieve first %d lines of %s' % (n, name))
-        return '\n'.join(self.getlines(name)[0:n])
+#        print('retrieve first %d lines of %s' % (n, name))
+        return self.getlines(name)[0:n]
 
     def tail(self, name, n):
-        print('retrieve last %d lines of %s' % (n, name))
-        return '\n'.join(self.getlines(name)[-n-1:])
+#        print('retrieve last %d lines of %s' % (n, name))
+        lines = self.getlines(name)
+        return (lines[-n:], len(lines))
 
     def range(self, name, m, n):
-        print('retrieve range %d-%d of lines of %s' % (m, n, name))
+#        print('retrieve range %d-%d of lines of %s' % (m, n, name))
         return self.getlines(name)[m:n]
 
     def renamedoc(self, name1, name2):

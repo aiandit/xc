@@ -1,5 +1,7 @@
 var xc = xc || {}
 
+xc.docs = {}
+
 if (typeof xframe == "undefined") {
     xframe = 'index'
 }
@@ -115,7 +117,7 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
 
         getActionLSL(dclass, function(s, alistresp) {
             var frames = [
-                {target: 'document',
+                {target: 'xc-document',
                  xlp: viewTransform,
                  filters: []},
                 {target: 'document-actions',
@@ -210,6 +212,7 @@ var updateXDataView = function(ev, done) {
             if (modeForm) {
 		mode = modeForm.elements['mode'].value
             }
+	    xc.docs[dclass] = xcontdoc
             xc.getClassViewFunction(dclass, mode, function(res) {
 		res.render(xcontdoc, function(res) {
                     console.log('Done with class based render cycle')
@@ -437,15 +440,13 @@ xc.clearIntervals = function() {
     })
 }
 
-var psMultiField = function(x) {
-    var data = x.textContent
+var psMultiField = function(data) {
     if (data.length == 0) return ''
     var items = data.split('\n')[1].split(' ')
     items = items.filter( (k) => k.length > 0 )
     return '<td>' + items.join('</td><td>') + '</td>'
 }
-var psSingleField = function(x) {
-    var data = x.textContent
+var psSingleField = function(data) {
     if (data.length == 0) return ''
     return '<span>' + data.split('\n')[1] + '</span>'
 }
@@ -454,22 +455,29 @@ var ppPolls = function() {
     var tms = document.querySelectorAll('.xc-sl-poll')
     tms.forEach(function(el) {
 	var getf = function() {
-	    var parts = el.dataset.pollUrl.split('?')
-	    var rdata = parts[1] + '&csrfmiddlewaretoken=' + document.forms[0].csrfmiddlewaretoken.value
-	    var headers = {'Content-type': 'application/x-www-form-urlencoded'}
-	    xlp.sendPost(parts[0], rdata, headers, function(st, res) {
+	    var ppFun = eval(el.dataset.postprocess)
+	    var handleData = function(text) {
+		el.innerHTML = ppFun(text)
+	    }
+	    var handleResult = function(st, res) {
 		if (st == 0) {
 		    if (res.responseXML != undefined) {
-			extractXPath(res.responseXML, '/*/xcontent-cdata', false, '', function(res) {
-			    var ppfun = eval(el.dataset.postprocess)
-			    var resHTML = ppfun(res)
-			    el.innerHTML = resHTML
-			})
+			extractXPath(res.responseXML, '/*/xcontent-cdata', false, '', function(x) {handleData(x.textContent)})
 		    } else {
-			el.innerHTML = '<code>' + res.responseText + '</code>'
+			handleData(res.responseText)
 		    }
 		}
-	    })
+	    }
+	    var url = el.dataset.pollUrl
+	    var method = el.dataset.pollMethod || 'get'
+	    if (method.toLowerCase() == 'post') {
+		var parts = url.split('?')
+		var rdata = parts[1] + '&csrfmiddlewaretoken=' + document.forms[0].csrfmiddlewaretoken.value
+		var headers = {'Content-type': 'application/x-www-form-urlencoded'}
+		xlp.sendPost(parts[0], rdata, headers, handleResult)
+	    } else {
+		xlp.sendGet(url, handleResult)
+	    }
 	}
 	getf()
 	if (el.attributes.id == undefined) {
@@ -487,6 +495,7 @@ var ppViews = function(ev) {
     var tms = document.querySelectorAll('.xc-sl-view')
     tms.forEach(function(el) {
 	var getf = function() {
+	    var viewName = el.dataset.viewName || 'unknown-view'
 	    var url = el.dataset.viewUrl
 	    var localframes = [
 		{target: el.dataset.viewTarget,
@@ -497,6 +506,7 @@ var ppViews = function(ev) {
 	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
             mylframes.renderLink(ev.target, xframes.ajaxPathName(xlp.getbase() + url), function(request) {
 		console.log('VIEW: sub view ' + url + ' is handled completely')
+		xc.docs[viewName] = request.requestXML
 		renderPostProc(ev, request, true)
             })
 	    el.dataset.viewDone = '1'
@@ -560,6 +570,20 @@ var ppUnits = function() {
     })
 }
 
+var ppSliders = function() {
+    var tms = document.querySelectorAll('.xc-slider')
+    tms.forEach(function(el) {
+	var rin = el.querySelector('[type="range"]')
+	var tin = el.querySelector('[type="text"]')
+	rin.onchange = rin.oninput = function(x, ev) {
+	    tin.value = rin.value
+	}
+	tin.onchange = tin.oninput = function(x, ev) {
+	    rin.value = tin.value
+	}
+    })
+}
+
 xc.getCGIXML = function(form, exclude) {
     if (exclude == undefined) {
         exclude = {data:1}
@@ -575,7 +599,7 @@ xc.getCGIXML = function(form, exclude) {
         cgixml[k] = r
     })
     // console.log(cgixml)
-    return Object.values(cgixml).join('')
+    return xc.getXDoc(Object.values(cgixml).join(''), 'cgi')
 }
 
 xc.cgiParams = function(ev, exclude) {
@@ -591,7 +615,7 @@ xc.cgiParams = function(ev, exclude) {
 
 xc.createElement = function(ev, name) {
     var frames = [
-        {target: 'document',
+        {target: 'xc-document',
          filters: [
              'create-' + name + '.xsl'
          ]}
@@ -697,6 +721,7 @@ var updateTree = function(ev) {
     ppMarkup()
     ppTimestamps()
     ppUnits()
+    ppSliders()
 //    document.forms[0].scrollIntoView()
 }
 
@@ -751,4 +776,23 @@ xc.csv2xmlfilt = function(text, done) {
 	}
     })
 
+}
+
+xc.findParentByClass = function(x, cls) {
+    if (x.classList.contains(cls)) {
+	return x
+    } else if (x.parentElement != undefined) {
+	return xc.findParentByClass(x.parentElement, cls)
+    }
+    return undefined
+}
+
+xc.showSection = function(which, x) {
+    var cont = xc.findParentByClass(x, 'xc-sections')
+    var sects = cont.parentElement.querySelectorAll('.xc-section')
+    sects.forEach(function(sec) {
+	sec.style.display = 'none'
+    })
+    var sec = cont.parentElement.querySelector('#' + which)
+    sec.style.display = 'block'
 }

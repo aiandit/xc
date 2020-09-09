@@ -1217,12 +1217,18 @@ def getrange(request, path, mode, start, end, transpose=False):
 
     if len(lsl) > 0 and len(lsl['info']) > 0 and lsl['info']['type'] == '-':
         mtype = mimetypes.guess_type(lsl['info']['name'])
+        t0 = time.time()
         if mode == 'head':
             fdata = workdir.head(path, end)
+            start = end - len(fdata)
         elif mode == 'tail':
-            fdata = workdir.tail(path, start)
+            (fdata, nmax) = workdir.tail(path, start)
+            start = nmax - start
+            end = nmax
+#            print(len(fdata))
+#            print(fdata)
+            fdata = '\n'.join(fdata)
         elif mode == 'range':
-            t0 = time.time()
             linesel = workdir.range(path, start, end)
             # if transpose:
             #     crr = csv.reader(linesel, delimiter=';')

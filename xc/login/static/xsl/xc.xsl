@@ -96,53 +96,23 @@
   <xsl:template match="dict" mode="doc-xcont">
     <div class="document {xcontent/*/class[1]}">
 <!--      <h4>Document View</h4> -->
-      <div id="document">
+      <div id="xc-document" class="xc-document {view}">
         <xsl:apply-templates select="/*" mode="showxcontent"/>
       </div>
     </div>
   </xsl:template>
 
   <xsl:template match="dict[view = 'home']" mode="doc-xcont">
-    <div class="view"
-	 data-view-url="/main/view?path=measurement.xml"
-	 data-view-target="measurement-view"
-	 data-view-filter="measurement-view-html.xsl"
+    <div class="xc-sl-view"
+	 data-view-url="/main/view?path=config.xml"
+	 data-view-target="um-main-view"
+	 data-view-filter="um-config-view-html.xsl"
 	 data-view-done="0"
 	 >
-      <div id="measurement-view">
+      <div id="um-main-view">
+	UM Main view
       </div>
     </div>
-    <table>
-      <tr>
-	<td style="vertical-align: top;">
-	  <form action="/main/action" method="post">
-	    <input type="hidden" name="path" value="bin/start-measurement.sh"/>
-	    <input type="submit" value="Start Measurement"/>
-	    <input type="hidden" name="next_" value="/main/ajax_home"/>
-	    <xsl:copy-of select="/*/csrf/*"/>
-	  </form>
-	  <form action="/main/action" method="post">
-	    <input type="hidden" name="path" value="bin/stop-measurement.sh"/>
-	    <input type="submit" value="Stop Measurement"/>
-	    <input type="hidden" name="next_" value="/main/ajax_home"/>
-	    <xsl:copy-of select="/*/csrf/*"/>
-	  </form>
-	</td>
-	<td>
-	</td>
-	<td style="height: 20em; overflow: scroll;">
-	  <div class="view"
-	       data-view-url="/main/path?path=measurements&amp;sort=descend"
-	       data-view-target="measurements-view"
-	       data-view-filter="measurements-view-html.xsl"
-	       data-view-done="0"
-	       >
-	    <div id="measurements-view">
-	    </div>
-	  </div>
-	</td>
-      </tr>
-    </table>
   </xsl:template>
 
   <xsl:template match="text()" mode="post-xcont"/>
@@ -244,7 +214,9 @@
         </xsl:if>
       </fieldset>
     </form>
-    <xsl:apply-templates select="/*" mode="showxcontent"/>
+    <div class="xc-xcontent">
+      <xsl:apply-templates select="/*" mode="showxcontent"/>
+    </div>
   </xsl:template>
 
   <xsl:template match="text()" mode="showxcontent"/>
@@ -255,14 +227,14 @@
 
   <xsl:template match="xcontent" mode="showxcontent">
     <h4 class="oc-head">XML Content</h4>
-    <code class="oc-body oc-open">
+    <code class="oc-body">
       <xsl:apply-templates select="*" mode="xml-dump"/>
     </code>
   </xsl:template>
 
   <xsl:template match="xcontent-cdata[string-length(.)>0]" mode="showxcontent">
     <h4 class="oc-head">Markup Content</h4>
-    <code class="markup oc-body oc-open">
+    <code class="markup oc-body">
       <xsl:value-of select="."/>
     </code>
   </xsl:template>

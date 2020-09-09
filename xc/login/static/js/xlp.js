@@ -138,15 +138,13 @@ xlp.mkFormData = function(src) {
 }
 
 xlp.mkFormDataDict = function(src) {
-    var k, elem, res = {}, sep = ''
+    var k, elem, res = {}, sep = '', sres
     for (k = 0; k < src.elements.length; ++k) {
         elem = src.elements[k]
         if (elem.tagName == 'FIELDSET') {
-            if (false) {
-                sres = xlp.mkFormData(elem)
-                res = Object.assign({}, res, sres)
-            }
-        } else if ((elem.type != 'radio' && elem.type != 'checkbox') || elem.checked) {
+            sres = xlp.mkFormDataDict(elem)
+            res = Object.assign({}, res, sres)
+        } else if ((elem.type != 'radio' && elem.type != 'checkbox' && elem.name != '') || elem.checked) {
             res[elem.name] = elem.value.trim()
         }
     }
@@ -175,7 +173,7 @@ xlp.mkFormSearch = function(src) {
 
 xlp.reqXML = function(src, obj) {
     if (src.nodeType == src.ELEMENT_NODE && src.nodeName == "FORM") {
-        if (src.method == 'get') {
+        if (obj.method == 'get') {
             obj.URL = obj.URL + '?' + xlp.mkFormSearch(src)
         } else {
             obj.data = xlp.mkFormData(src)
@@ -205,6 +203,11 @@ xlp.reqXML = function(src, obj) {
     }
     xlp.sendRequest(obj)
 }
+
+xlp.submitForm = function(src, url, done) {
+    xlp.reqXML(src, { URL: url, callback: done, method: src.method })
+}
+
 
 xlp.loadXML = function(path, callback) {
     xlp.reqXML(document,  {'method': 'GET', 'URL': path, 'callback': callback})

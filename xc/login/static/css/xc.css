@@ -370,3 +370,10 @@ table, tr, th, td {
 .cboth {
     clear both;
 }
+
+.xc-section {
+    display: none;
+}
+.xc-section.xc-section-open {
+    display: block;
+}
