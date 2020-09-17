@@ -1221,12 +1221,14 @@ def getrange(request, path, mode, start, end, transpose=False):
         if mode == 'head':
             fdata = workdir.head(path, end)
             start = end - len(fdata)
+            fdata = '\n'.join(fdata)
         elif mode == 'tail':
+            print(start, end)
             (fdata, nmax) = workdir.tail(path, start)
             start = nmax - start
             end = nmax
-#            print(len(fdata))
-#            print(fdata)
+            print(len(fdata))
+            print(fdata)
             fdata = '\n'.join(fdata)
         elif mode == 'range':
             linesel = workdir.range(path, start, end)

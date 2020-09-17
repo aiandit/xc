@@ -92,7 +92,7 @@ xframes.mkXframes = function(frames, xsltbase) {
                 }
             })
         })
-        console.log('Xframes renderings lanched')
+        console.log('Xframes renderings launched')
     }
     var renderRespHandler = function(status, request, done) {
         var indoc = request.responseXML

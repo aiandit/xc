@@ -451,13 +451,29 @@ var psSingleField = function(data) {
     return '<span>' + data.split('\n')[1] + '</span>'
 }
 
+xc.getCSRFToken = function() {
+    var csrf = ''
+    Object.keys(document.forms).forEach(function(k) {
+	if (document.forms[k].csrfmiddlewaretoken != undefined && csrf == '') {
+	    csrf = document.forms[k].csrfmiddlewaretoken.value
+	}
+    })
+    return csrf
+}
+
 var ppPolls = function() {
     var tms = document.querySelectorAll('.xc-sl-poll')
     tms.forEach(function(el) {
 	var getf = function() {
 	    var ppFun = eval(el.dataset.postprocess)
 	    var handleData = function(text) {
-		el.innerHTML = ppFun(text)
+		var res = ppFun(text)
+		if (typeof res == typeof {}) {
+		    el.innerHTML = res.text
+		    res.done()
+		} else {
+		    el.innerHTML = res
+		}
 	    }
 	    var handleResult = function(st, res) {
 		if (st == 0) {
@@ -472,7 +488,7 @@ var ppPolls = function() {
 	    var method = el.dataset.pollMethod || 'get'
 	    if (method.toLowerCase() == 'post') {
 		var parts = url.split('?')
-		var rdata = parts[1] + '&csrfmiddlewaretoken=' + document.forms[0].csrfmiddlewaretoken.value
+		var rdata = parts[1] + '&csrfmiddlewaretoken=' + xc.getCSRFToken()
 		var headers = {'Content-type': 'application/x-www-form-urlencoded'}
 		xlp.sendPost(parts[0], rdata, headers, handleResult)
 	    } else {
@@ -507,7 +523,8 @@ var ppViews = function(ev) {
             mylframes.renderLink(ev.target, xframes.ajaxPathName(xlp.getbase() + url), function(request) {
 		console.log('VIEW: sub view ' + url + ' is handled completely')
 		xc.docs[viewName] = request.requestXML
-		renderPostProc(ev, request, true)
+		//renderPostProc(ev, request, true)
+		updateTreeFinal(ev)
             })
 	    el.dataset.viewDone = '1'
 	}
@@ -752,7 +769,11 @@ xc.csv2xml = function(text) {
 
 xc.readCSV = function(text) {
     var lines = text.split('\n')
-    var allitems = Array(lines[0].split(';').length)
+    var nitems = lines[0].split(';').length
+    if (lines.length>1) {
+	nitems = Math.max(nitems, lines[1].split(';').length)
+    }
+    var allitems = Array(nitems)
     for (var i = 0; i < allitems.length; ++i) {
 	allitems[i] = []
     }
