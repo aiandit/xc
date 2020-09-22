@@ -33,7 +33,8 @@ pipeline {
     stage('checkout') {
         steps {
 	    sshagent (credentials: ['wj-pc']) {
-		sh "ssh ${params.user}@${params.host} \"mkdir -p $params.depldir\""
+		sh "ssh ${params.user}@${params.host} \"sudo mkdir -p $params.depldir\""
+		sh "ssh ${params.user}@${params.host} \"sudo chown -R $params.user $params.depldir\""
 		sh "ssh ${params.user}@${params.host} \"$params.depldir && git clone $params.repo\""
 	    }
 	}
