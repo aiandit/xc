@@ -35,7 +35,7 @@ pipeline {
 	    sshagent (credentials: ['wj-pc']) {
 		sh "ssh ${params.user}@${params.host} \"sudo mkdir -p $params.depldir\""
 		sh "ssh ${params.user}@${params.host} \"sudo chown -R $params.user $params.depldir\""
-		sh "ssh ${params.user}@${params.host} \"$params.depldir && git clone $params.repo\""
+		sh "ssh ${params.user}@${params.host} \"cd $params.depldir && git clone $params.repo\""
 	    }
 	}
     }
@@ -43,7 +43,7 @@ pipeline {
     stage('deploy') {
         steps {
 	    sshagent (credentials: ['wj-pc']) {
-		sh "ssh ${params.user}@${params.host} \"$params.depldir/xc && ./ci/prepare-system.sh\""
+		sh "ssh ${params.user}@${params.host} \"cd $params.depldir/xc && ./ci/prepare-system.sh\""
             }
 	}
     }
