@@ -1,60 +1,50 @@
 pipeline {
   parameters {
-    string(name: 'host',         defaultValue: "famserv", description: '')
-    string(name: 'depldir',      defaultValue: "/opt/ai-and-it", description: '')
+    string(name: 'host',         defaultValue: "raspberrypi", description: 'Hostname')
+    string(name: 'user',         defaultValue: "pi",          description: 'Username')
+    string(name: 'depldir',      defaultValue: "/opt/ai-and-it", description: 'Install directory')
+    string(name: 'repo',         defaultValue: "https://github.com/aiandit/xc.git", description: 'XC Repo')
   }
-  agent {
-    label "${params.host}"
-  }
+
+  agent any
+
   stages {
     stage('get-version') {
       steps {
         sh 'ls -l'
+	sshagent (credentials: ['wj-pc']) {
+           sh 'ssh-add -l -E md5'
+	}
       }
     }
 
     stage('info') {
         steps {
-            sh 'whoami'
-            sh 'groups'
-            sh 'ls -l /usr/local'
-            sh 'env | sort'
-            sh 'pwd'
-        }
+	    sshagent (credentials: ['wj-pc']) {
+		sh "ssh ${params.user}@${params.host} \"whoami\""
+		sh "ssh ${params.user}@${params.host} \"groups\""
+		sh "ssh ${params.user}@${params.host} \"env\""
+		sh "ssh ${params.user}@${params.host} \"ls -l\""
+		sh "ssh ${params.user}@${params.host} \"hostname\""
+            }
+	}
     }
 
     stage('checkout') {
         steps {
-            sh "mkdir -p $params.depldir"
-            dir("$params.depldir") {
-                checkout([$class: 'GitSCM',
-                          branches: [[name: '*/master']],
-                          doGenerateSubmoduleConfigurations: false,
-                          extensions: [
-                              [$class: 'CleanBeforeCheckout'],
-                              [$class: 'RelativeTargetDirectory', relativeTargetDir: 'xc']
-                          ],
-                          submoduleCfg: [],
-                          userRemoteConfigs: [[credentialsId: 'joy-fs', url: 'famserv:git/xc']]])
-                sh 'ls -l'
-            }
-            dir("$params.depldir/xc/xc") {
-                script {
-                    env.VERSION = readFile 'ci/VERSION'
-                    env.BUILD = sh label: 'Test', returnStdout: true, script: './ci/get-build-number.sh'
-                }
-                sh 'echo VERSION=$VERSION BUILD=$BUILD'
-            }
-        }
+	    sshagent (credentials: ['wj-pc']) {
+		sh "ssh ${params.user}@${params.host} \"mkdir -p $params.depldir\""
+		sh "ssh ${params.user}@${params.host} \"$params.depldir && git clone $params.repo\""
+	    }
+	}
     }
 
     stage('deploy') {
         steps {
-            dir("$params.depldir/xc/xc") {
-                sh './ci/prepare-system.sh'
-                sh './ci/config-system.sh'
+	    sshagent (credentials: ['wj-pc']) {
+		sh "ssh ${params.user}@${params.host} \"$params.depldir/xc && ./ci/prepare-system.sh\""
             }
-        }
+	}
     }
 
   }
