@@ -35,6 +35,7 @@ pipeline {
 	    sshagent (credentials: ['wj-pc']) {
 		sh "ssh ${params.user}@${params.host} \"sudo mkdir -p $params.depldir\""
 		sh "ssh ${params.user}@${params.host} \"sudo chown -R $params.user $params.depldir\""
+		sh "ssh ${params.user}@${params.host} \"cd $params.depldir && rm -rf xc\""
 		sh "ssh ${params.user}@${params.host} \"cd $params.depldir && git clone $params.repo\""
 	    }
 	}
