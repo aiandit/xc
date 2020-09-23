@@ -6,15 +6,15 @@ set -x
 
 mydir=$(readlink -f $(dirname $BASH_SOURCE)/..)
 
-XCERP_HOME=$mydir
+XC_HOME=$mydir
 
-sed -e "s§/path/to/your/project§$XCERP_HOME§" $mydir/ci/xc_uwsgi.ini > xc_uwsgi.ini
+sed -e "s§/path/to/your/project§$XC_HOME§" $mydir/ci/xc_uwsgi.ini > xc_uwsgi.ini
 
 sudo mkdir -p /etc/uwsgi/vassals
 ln -sfT $mydir/xc_uwsgi.ini /etc/uwsgi/vassals/xc_uwsgi.ini
 
 
-sed -e "s§/path/to/your/project§$XCERP_HOME§" $mydir/ci/xc_nginx.conf > xc_nginx.conf
+sed -e "s§/path/to/your/project§$XC_HOME§" $mydir/ci/xc_nginx.conf > xc_nginx.conf
 
 ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
 
@@ -26,9 +26,9 @@ mkdir -p /etc/xc
 echo "$mydir" > /etc/xc/allowed_path.txt
 echo "/usr/share/fonts" >> /etc/xc/allowed_path.txt
 
-adduser www-data root
+#adduser www-data root
 chmod g+w $mydir
 
-cd $mydir/ && $mydir/manage.py migrate
+cd $mydir/xc && ./manage.py migrate
 
 sed -i -e 's/DEBUG = True/#DEBUG = True/' xc/settings.py

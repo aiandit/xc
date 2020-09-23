@@ -6,5 +6,5 @@ apt-get update
 
 apt-get install aptitude
 
-aptitude install -y python3 python3-decorator nginx uwsgi-plugin-python3 uwsgi-emperor
-pip3 install Django==3.1.1
+aptitude install -y python3 python3-decorator python3-brotli nginx uwsgi-plugin-python3 uwsgi-emperor
+python3 -m pip install Django==3.1.1
