@@ -454,7 +454,9 @@ var psSingleField = function(data) {
 xc.getCSRFToken = function() {
     var csrf = ''
     Object.keys(document.forms).forEach(function(k) {
-	if (document.forms[k].csrfmiddlewaretoken != undefined && csrf == '') {
+	if (document.forms[k].csrfmiddlewaretoken != undefined
+	    && document.forms[k].csrfmiddlewaretoken.value != ''
+	    && csrf == '') {
 	    csrf = document.forms[k].csrfmiddlewaretoken.value
 	}
     })
@@ -467,7 +469,7 @@ var ppPolls = function() {
 	var getf = function() {
 	    var ppFun = eval(el.dataset.postprocess)
 	    var handleData = function(text) {
-		var res = ppFun(text)
+		var res = ppFun(text, el)
 		if (typeof res == typeof {}) {
 		    el.innerHTML = res.text
 		    res.done()
@@ -522,7 +524,7 @@ var ppViews = function(ev) {
 	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
             mylframes.renderLink(ev.target, xframes.ajaxPathName(xlp.getbase() + url), function(request) {
 		console.log('VIEW: sub view ' + url + ' is handled completely')
-		xc.docs[viewName] = request.requestXML
+		xc.docs[viewName] = request.responseXML
 		//renderPostProc(ev, request, true)
 		updateTreeFinal(ev)
             })
@@ -532,6 +534,21 @@ var ppViews = function(ev) {
 	    getf()
 	}
         return false
+    })
+}
+
+var ppActions = function(ev) {
+    var tms = document.querySelectorAll('.xc-action')
+    tms.forEach(function(el) {
+	var getf = function() {
+	    var actionCode = el.dataset.action
+	    var res = eval(actionCode)
+	    el.dataset.actionResult = res
+	}
+	if (el.dataset.actionDone != '1') {
+	    el.dataset.actionDone = 1
+	    getf()
+	}
     })
 }
 
@@ -744,6 +761,7 @@ var updateTree = function(ev) {
 
 var updateTreeFinal = function(ev) {
     updateTree(ev)
+    ppActions(ev)
     ppPolls()
     ppViews(ev)
 }
@@ -816,4 +834,9 @@ xc.showSection = function(which, x) {
     })
     var sec = cont.parentElement.querySelector('#' + which)
     sec.style.display = 'block'
+}
+
+xc.getMarkup = function(doc) {
+    if (typeof doc == 'string') return doc
+    else return doc.documentElement.outerHTML
 }
