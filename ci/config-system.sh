@@ -14,9 +14,13 @@ sudo mkdir -p /etc/uwsgi/vassals
 ln -sfT $mydir/xc_uwsgi.ini /etc/uwsgi/vassals/xc_uwsgi.ini
 
 
-sed -e "s§/path/to/your/project§$XC_HOME§" $mydir/ci/xc_nginx.conf > xc_nginx.conf
+HOSTNAME=$(hostname -f)
+
+sed -e "s§/path/to/your/project§$XC_HOME§" -e s/example.local/$HOSTNAME/    $mydir/ci/xc_nginx.conf > xc_nginx.conf
 
 ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
+
+cp $mydir/ci/uwsgi_params $mydir/
 
 cd /etc/nginx/sites-enabled && ln -sf ../sites-available/xc_nginx.conf
 
@@ -31,4 +35,8 @@ chmod g+w $mydir
 
 cd $mydir/xc && ./manage.py migrate
 
-sed -i -e 's/DEBUG = True/#DEBUG = True/' xc/settings.py
+sed -i -e 's/DEBUG = True/#DEBUG = True/' -e s/example.local/$HOSTNAME/ xc/settings.py
+
+systemctl enable xc
+systemctl start xc
+systemctl restart nginx

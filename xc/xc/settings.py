@@ -27,8 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'raspberrypi',
-    'localhost',
-    'famserv'
+    'example.local'
 ]
 
 LOGIN_URL = 'login/'
@@ -142,6 +141,6 @@ EMAIL_USE_TLS = True
 #EMAIL_USE_SSL = True
 
 
-XC_WORKDIR = '/var/lib/xc/umweltmodul'
+XC_WORKDIR = '/var/lib/xc/xc-application'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200
