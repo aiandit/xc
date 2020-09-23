@@ -45,6 +45,7 @@ pipeline {
         steps {
 	    sshagent (credentials: ['wj-pc']) {
 		sh "ssh ${params.user}@${params.host} \"cd $params.depldir/xc && sudo ./ci/prepare-system.sh\""
+		sh "ssh ${params.user}@${params.host} \"cd $params.depldir/xc && sudo ./ci/config-system.sh\""
             }
 	}
     }
