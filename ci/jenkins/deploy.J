@@ -9,13 +9,14 @@ pipeline {
   agent any
 
   stages {
+
     stage('get-version') {
-      steps {
-        sh 'ls -l'
-	sshagent (credentials: ['wj-pc']) {
-           sh 'ssh-add -l -E md5'
+	steps {
+            sh 'ls -l'
+	    sshagent (credentials: ['wj-pc']) {
+		sh 'ssh-add -l -E md5'
+	    }
 	}
-      }
     }
 
     stage('info') {

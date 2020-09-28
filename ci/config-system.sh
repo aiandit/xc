@@ -32,6 +32,12 @@ echo "/usr/share/fonts" >> /etc/xc/allowed_path.txt
 
 #adduser www-data root
 chmod g+w $mydir
+chgrp root $mydir
+
+nginx_mt=/etc/nginx/mime.types
+if ! grep 'application/xml+xslt' $nginx_mt; then
+    sed -i.bak -e '/text/xml/ a \ \ \ \ application/xml+xslt                  xsl;' /etc/nginx/mime.types
+fi
 
 cd $mydir/xc && ./manage.py migrate
 
