@@ -41,7 +41,7 @@ def isexec(stat):
 st_keys = [ 'st_mtime', 'st_size' ]
 
 def getfinfo(path, relpath, follow=True):
-    print('getfinfo', path, relpath)
+#    print('getfinfo', path, relpath)
     try:
         if follow:
             stat = os.stat(path)
@@ -50,7 +50,7 @@ def getfinfo(path, relpath, follow=True):
     except:
         return ({}, {})
     ftype = filetypeLetter(stat)
-    print('os.stat', stat)
+#    print('os.stat', stat)
     statdict = { v: getattr(stat, v) for v in st_keys }
     data = {'name': os.path.basename(relpath),
             'dir': os.path.dirname(relpath),
@@ -83,7 +83,7 @@ def getlsl(path, relpath = '.', dironly=False):
             res['finfo'] = subinfos
     else:
         res
-    print(res)
+#    print(res)
     return res
 
 def getlines(fname):
@@ -143,7 +143,7 @@ class DirManager:
             res = self.normalize_allowed_path(relbase)
         else:
             res = None
-        print('cutpath: "%s","%s","%s" -> %s' %( path, base, relbase, res))
+#        print('cutpath: "%s","%s","%s" -> %s' %( path, base, relbase, res))
         return res
 
     def cutpath(self, path, relbase):
@@ -410,7 +410,7 @@ def runproc(cmdlist, wdir, timelimit=60, **kw):
         if l is None:
             return
     t0 = time.time()
-    print('exec:', cmdlist)
+#    print('exec:', cmdlist)
     p = subprocess.run(cmdlist, cwd = wdir, **kw)
     stat = p.returncode
 #    print(p)
