@@ -10,9 +10,9 @@ XC_HOME=$mydir
 
 sed -e "s§/path/to/your/project§$XC_HOME§" $mydir/ci/xc_uwsgi.ini > xc_uwsgi.ini
 
-sudo mkdir -p /etc/uwsgi/vassals
-rm /etc/uwsgi/vassals/xc_uwsgi.ini
-ln -sfT $mydir/xc_uwsgi.ini /etc/uwsgi/vassals/xc_uwsgi.ini
+sudo mkdir -p /etc/uwsgi-emperor/vassals
+rm /etc/uwsgi-emperor/vassals/xc_uwsgi.ini
+ln -sfT $mydir/xc_uwsgi.ini /etc/uwsgi-emperor/vassals/xc_uwsgi.ini
 
 
 HOSTNAME=$(hostname -f)
