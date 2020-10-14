@@ -25,19 +25,19 @@ cp $mydir/ci/uwsgi_params $mydir/
 
 cd /etc/nginx/sites-enabled && ln -sf ../sites-available/xc_nginx.conf
 
-ln -sfT $mydir/ci/xc.service /etc/systemd/system/xc.service
+# ln -sfT $mydir/ci/xc.service /etc/systemd/system/xc.service
 
 mkdir -p /etc/xc
 echo "$mydir" > /etc/xc/allowed_path.txt
 echo "/usr/share/fonts" >> /etc/xc/allowed_path.txt
 
 #adduser www-data root
-#chmod g+w $mydir
-#chgrp root $mydir
+chmod g+w $mydir
+chgrp root $mydir
 
 nginx_mt_file=/etc/nginx/mime.types
 nginx_mt=text/xml
-if ! grep "$nginx_mt" $nginx_mt_file; then
+if ! grep -E "$nginx_mt +xsl" $nginx_mt_file; then
     sed -i.bak -e '/text\/xml/ a \ \ \ \ $nginx_mt                            xsl;' $nginx_mt_file
 fi
 
