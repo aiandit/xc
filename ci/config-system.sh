@@ -31,9 +31,9 @@ mkdir -p /etc/xc
 echo "$mydir" > /etc/xc/allowed_path.txt
 echo "/usr/share/fonts" >> /etc/xc/allowed_path.txt
 
-adduser www-data root
-chmod g+w $mydir
-chgrp root $mydir
+#adduser www-data root
+#chmod g+w $mydir
+#chgrp root $mydir
 
 nginx_mt_file=/etc/nginx/mime.types
 nginx_mt=text/xml
