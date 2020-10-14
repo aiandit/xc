@@ -45,5 +45,15 @@ cd $mydir/xc && ./manage.py migrate
 
 sed -i -e 's/DEBUG = True/#DEBUG = True/' -e s/example.local/$HOSTNAME/ xc/settings.py
 
+if ! grep do_start_prepare /etc/init.d/uwsgi-emperor; then
+    cat >> /etc/init.d/uwsgi-emperor <<EOF
+#(ai-and-it) needed to set permissions properly
+do_start_prepare() {
+        # Create with correct permissions in advance as uwsgi with --daemonize creates it world write otherwise
+        touch "$PIDFILE"
+}
+EOF
+    fi
+
 systemctl restart nginx
 systemctl restart uwsgi-emperor
