@@ -377,3 +377,6 @@ table, tr, th, td {
 .xc-section.xc-section-open {
     display: block;
 }
+.xc-checks {
+    display: grid;
+}
