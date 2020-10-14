@@ -31,7 +31,7 @@ mkdir -p /etc/xc
 echo "$mydir" > /etc/xc/allowed_path.txt
 echo "/usr/share/fonts" >> /etc/xc/allowed_path.txt
 
-#adduser www-data root
+adduser www-data root
 chmod g+w $mydir
 chgrp root $mydir
 
