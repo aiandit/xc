@@ -38,13 +38,12 @@ chgrp root $mydir
 nginx_mt_file=/etc/nginx/mime.types
 nginx_mt=text/xml
 if ! grep -E "$nginx_mt +xsl" $nginx_mt_file; then
-    sed -i.bak -e '/text\/xml/ a \ \ \ \ $nginx_mt                            xsl;' $nginx_mt_file
+    sed -i.bak -e "/text\/xml/ a \ \ \ \ $nginx_mt                            xsl;" $nginx_mt_file
 fi
 
 cd $mydir/xc && ./manage.py migrate
 
 sed -i -e 's/DEBUG = True/#DEBUG = True/' -e s/example.local/$HOSTNAME/ xc/settings.py
 
-systemctl enable xc
-systemctl start xc
 systemctl restart nginx
+systemctl restart uwsgi-emperor
