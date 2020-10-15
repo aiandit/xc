@@ -10,6 +10,8 @@ from xc.dirman import dirman
 
 import json
 
+import os
+
 def xmlesc(str):
     str = str.replace('<', '&lt;')
     str = str.replace('>', '&gt;')
@@ -179,6 +181,8 @@ def userdict(user):
                                                            'is_authenticated', 'is_superuser'] )
 workdir = dirman.GitDirManager()
 workdir.base = xc.settings.XC_WORKDIR
+
+os.environ['XC_WORKDIR'] = xc.settings.XC_WORKDIR
 
 diractions = [
     {'action': 'newdoc', 'name': 'New Document'},
