@@ -22,11 +22,11 @@ pipeline {
     stage('info') {
         steps {
 	    sshagent (credentials: ['wj-pc']) {
-		sh "ssh ${params.user}@${params.host} \"whoami\""
-		sh "ssh ${params.user}@${params.host} \"groups\""
-		sh "ssh ${params.user}@${params.host} \"env\""
-		sh "ssh ${params.user}@${params.host} \"ls -l\""
-		sh "ssh ${params.user}@${params.host} \"hostname\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"whoami\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"groups\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"env\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"ls -l\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"hostname\""
             }
 	}
     }
@@ -34,10 +34,10 @@ pipeline {
     stage('checkout') {
         steps {
 	    sshagent (credentials: ['wj-pc']) {
-		sh "ssh ${params.user}@${params.host} \"sudo mkdir -p $params.depldir\""
-		sh "ssh ${params.user}@${params.host} \"sudo chown -R $params.user $params.depldir\""
-		sh "ssh ${params.user}@${params.host} \"cd $params.depldir && rm -rf xc\""
-		sh "ssh ${params.user}@${params.host} \"cd $params.depldir && git clone $params.repo\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"sudo mkdir -p $params.depldir\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"sudo chown -R $params.user $params.depldir\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir && rm -rf xc\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir && git clone $params.repo\""
 	    }
 	}
     }
@@ -45,8 +45,8 @@ pipeline {
     stage('deploy') {
         steps {
 	    sshagent (credentials: ['wj-pc']) {
-		sh "ssh ${params.user}@${params.host} \"cd $params.depldir/xc && sudo ./ci/prepare-system.sh\""
-		sh "ssh ${params.user}@${params.host} \"cd $params.depldir/xc && sudo ./ci/config-system.sh\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir/xc && sudo ./ci/prepare-system.sh\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir/xc && sudo ./ci/config-system.sh\""
             }
 	}
     }
