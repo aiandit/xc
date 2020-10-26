@@ -29,9 +29,12 @@ sed -e "s§/path/to/your/project§$XC_HOME§" \
     -e "s/example.local/$UMW_HOSTNAME.$UMW_DOMAIN/" \
     -e "s/generic.local/$UMW_HOSTNAME_GENERIC.$UMW_DOMAIN/" \
     -e "s/server_name example/server_name $UMW_HOSTNAME/" \
+    -e "s;http://example;http://$UMW_HOSTNAME;" \
     $mydir/ci/xc_nginx.conf > xc_nginx.conf
 
 ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
+
+rm /etc/nginx/sites-available/default
 
 cp $mydir/ci/uwsgi_params $mydir/
 
@@ -63,7 +66,7 @@ if ! grep do_start_prepare /etc/init.d/uwsgi-emperor; then
 #(ai-and-it) needed to set permissions properly
 do_start_prepare() {
         # Create with correct permissions in advance as uwsgi with --daemonize creates it world write otherwise
-        touch "$PIDFILE"
+        touch "\$PIDFILE"
 }
 EOF
     fi
