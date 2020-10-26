@@ -25,7 +25,11 @@ ln -sfT $mydir/xc_uwsgi.ini /etc/uwsgi-emperor/vassals/xc_uwsgi.ini
 
 HOSTNAME=$(hostname -f)
 
-sed -e "s§/path/to/your/project§$XC_HOME§" -e s/example.local/$HOSTNAME/    $mydir/ci/xc_nginx.conf > xc_nginx.conf
+sed -e "s§/path/to/your/project§$XC_HOME§" \
+    -e "s/example.local/$UMW_HOSTNAME.$UMW_DOMAIN/" \
+    -e "s/generic.local/$UMW_HOSTNAME_GENERIC.$UMW_DOMAIN/" \
+    -e "s/server_name example/server_name $UMW_HOSTNAME/" \
+    $mydir/ci/xc_nginx.conf > xc_nginx.conf
 
 ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
 
