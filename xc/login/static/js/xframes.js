@@ -115,6 +115,7 @@ xframes.mkXframes = function(frames, xsltbase) {
         xlp.reqXML(src, {URL: url, method: method, callback: (a,b)=>renderRespHandler(a,b,done)})
     }
     var Xframes = {
+	renderRespHandler: renderRespHandler,
         frames: frames,
         xsltbase: xsltbase,
         xlps: xlps,

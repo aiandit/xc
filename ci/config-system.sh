@@ -4,6 +4,14 @@
 
 set -x
 
+HOST=${HOST:-umw0001}
+
+UMW_HOSTNAME=${UMW_HOSTNAME:-$HOST}
+UMW_HOSTNAME_GENERIC=${UMW_HOSTNAME_GENERIC:-umweltmodul}
+UMW_DOMAIN=${UMW_DOMAIN:-umw}
+
+export UMW_DOMAIN UMW_HOSTNAME UMW_HOSTNAME_GENERIC
+
 mydir=$(readlink -f $(dirname $BASH_SOURCE)/..)
 
 XC_HOME=$mydir
@@ -43,7 +51,8 @@ fi
 
 cd $mydir/xc && ./manage.py migrate
 
-sed -i -e 's/DEBUG = True/#DEBUG = True/' -e s/example.local/$HOSTNAME/ xc/settings.py
+sed -i -e 's/DEBUG = True/#DEBUG = True/' xc/settings.py
+sed -i -e "s/'example.local'/'$UMW_HOSTNAME', '$UMW_HOSTNAME.$UMW_DOMAIN', '$UMW_HOSTNAME_GENERIC', '$UMW_HOSTNAME_GENERIC.$UMW_DOMAIN'/" xc/settings.py
 
 if ! grep do_start_prepare /etc/init.d/uwsgi-emperor; then
     cat >> /etc/init.d/uwsgi-emperor <<EOF

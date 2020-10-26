@@ -300,7 +300,8 @@
   </xsl:template>
 
 
-  <xsl:template match="dict[xapp = 'main' and view = 'home']" mode="xc-title">XC Home</xsl:template>
+  <xsl:template match="dict[xapp = 'main' and view = 'home']"
+		mode="xc-title">XC Home</xsl:template>
   <xsl:template match="dict[xapp = 'main' and view = 'home']">
     <div class="xc-home">
     </div>
@@ -730,7 +731,7 @@
 
 
   <xsl:template match="dict[xapp = 'main' and view = 'view']" mode="xc-title">
-    <xsl:text>View </xsl:text>
+<!--    <xsl:text>View </xsl:text> -->
     <xsl:value-of select="/*/dict/cgi/path"/>
   </xsl:template>
   <xsl:template match="dict[xapp = 'main' and view = 'view']">

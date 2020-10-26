@@ -117,6 +117,8 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
 
         getActionLSL(dclass, function(s, alistresp) {
             var frames = [
+                {target: 'title',
+                 xlp: xlp.mkXLP(['xc-app-title.xsl'], '/main/getf/xsl/')},
                 {target: 'xc-document',
                  xlp: viewTransform,
                  filters: []},

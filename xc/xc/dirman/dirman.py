@@ -247,6 +247,7 @@ class DirManager:
             stat = 'path is a directory'
         except BaseException as ex:
             stat = str(ex)
+            print('Failed to open file %s for writing: %s' % (name, ex))
         if stat == 0:
             file.write(doc)
             file.close()
@@ -283,7 +284,15 @@ class DirManager:
 
     def getlines(self, name):
         file = open(self.getpath(name), 'r', encoding='utf8')
-        content = file.read()
+        t0 = time.time()
+        print('Start reading file: %s' % name)
+        content = ''
+        try:
+            content = file.read()
+        except BaseException as ME:
+            print('File read failed: %s, %s' % (name, ME))
+        t1 = time.time()
+        print('File read: %s, %g s' % (name, t1 - t0))
         return content.split('\n')
 
     def nlines(self, name):
