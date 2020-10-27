@@ -4,7 +4,7 @@
 
 set -x
 
-HOST=${HOST:-umw0001}
+HOST=${HOST:-$(hostname)}
 
 UMW_HOSTNAME=${UMW_HOSTNAME:-$HOST}
 UMW_HOSTNAME_GENERIC=${UMW_HOSTNAME_GENERIC:-umweltmodul}
@@ -34,7 +34,7 @@ sed -e "s§/path/to/your/project§$XC_HOME§" \
 
 ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
 
-rm /etc/nginx/sites-available/default
+rm /etc/nginx/sites-enabled/default
 
 cp $mydir/ci/uwsgi_params $mydir/
 
@@ -73,5 +73,6 @@ do_start_prepare() {
 EOF
     fi
 
+systemctl daemon-reload
 systemctl restart nginx
 systemctl restart uwsgi-emperor
