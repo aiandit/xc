@@ -452,13 +452,18 @@ var psSingleField = function(data) {
     if (data.length == 0) return ''
     return '<span>' + data.split('\n')[1] + '</span>'
 }
+var psText = function(data) {
+    return '<span>' + data + '</span>'
+}
 
 xc.getCSRFToken = function() {
     var csrf = ''
     Object.keys(document.forms).forEach(function(k) {
-	if (document.forms[k].csrfmiddlewaretoken != undefined
-	    && document.forms[k].csrfmiddlewaretoken.value != ''
-	    && csrf == '') {
+	var csrfv = ''
+	if (document.forms[k].csrfmiddlewaretoken != undefined) {
+	    csrfv = document.forms[k].csrfmiddlewaretoken.value
+	}
+	if (csrfv != '' && csrf == '') {
 	    csrf = document.forms[k].csrfmiddlewaretoken.value
 	}
     })

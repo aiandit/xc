@@ -17,6 +17,11 @@
 
   <xsl:template match="/">
     <div class="xc">
+      <div style="display: none">
+	<form>
+          <xsl:copy-of select="/*/csrf/*"/>
+	</form>
+      </div>
       <xsl:apply-templates/>
     </div>
   </xsl:template>
