@@ -404,6 +404,7 @@ class EditData(XCForm):
     path = forms.CharField(max_length=1024, label='Path')
     data = forms.CharField(required=False, max_length=1024000, label='Content', widget=forms.Textarea)
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
+    retto = forms.CharField(required=False, max_length=100, label='Return to')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -432,6 +433,8 @@ def ajax_edit(request):
 
     rdata = EditData(reqDict)
 
+    resultview = 'dirmanform'
+
     res = rdata.is_valid()
     if not res:
         errmsg = 'The form data is invalid'
@@ -448,6 +451,8 @@ def ajax_edit(request):
                 lsl = workdir.stat(path)
                 #                fdata = workdir.getdoc(path).decode('utf8')
                 fdata = data
+                resultview = cdata['retto']
+
             else:
                 errmsg = 'file write failed: "%s"' % (stat)
                 fdata = ''
@@ -480,7 +485,7 @@ def ajax_edit(request):
     }
     data = { **data, **get_lsl(path) }
 
-    xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': dict, 'data': data, 'user': userdict(request.user)}
+    xcontext = {'xapp': 'main', 'view': resultview, 'cgi': dict, 'data': data, 'user': userdict(request.user)}
     dx = dictxml(xcontext)
     context = { 'context_xml': dx, 'forms': [ rdata, ControlForm()], 'xcontent_cdata': xmlesc(xcontent), 'mimetype': mtype}
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")

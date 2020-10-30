@@ -110,7 +110,6 @@
 	 data-view-done="0"
 	 >
       <div id="um-main-view">
-	UM Main view
       </div>
     </div>
   </xsl:template>
