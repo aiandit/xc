@@ -230,10 +230,10 @@
   </xsl:template>
 
   <xsl:template match="xcontent" mode="showxcontent">
-    <h4 class="oc-head">XML Content</h4>
+<!--    <h4 class="oc-head">XML Content</h4>
     <code class="oc-body">
       <xsl:apply-templates select="*" mode="xml-dump"/>
-    </code>
+    </code>-->
   </xsl:template>
 
   <xsl:template match="xcontent-cdata[string-length(.)>0]" mode="showxcontent">
