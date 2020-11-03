@@ -112,7 +112,7 @@ xc.mkViewTransform = function(transformName, done) {
 
 xc.classViewFunctions = {}
 xc.mkClassViewFunction = function(dclass, mode, done) {
-    var transformName = dclass + '-view' + '-' + mode
+    var transformName = dclass + '-' + mode
     xc.mkViewTransform(transformName, function(viewTransform) {
 
         getActionLSL(dclass, function(s, alistresp) {
@@ -154,6 +154,12 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
 }
 
 xc.getClassViewFunction = function(dclass, mode, done) {
+    var verb = 'view'
+    var vparam = xc.curresp.querySelector('cgi > v')
+    if (vparam != null) {
+	verb = vparam.textContent
+    }
+    dclass += '-' + verb
     var key = dclass + '-' + mode
     var incache = xc.classViewFunctions[key]
     if (typeof incache == 'undefined') {
