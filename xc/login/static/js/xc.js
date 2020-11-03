@@ -295,20 +295,21 @@ var processXData = function(ev, request, done) {
     })
 }
 
-var handleLinkClick = function(ev) {
-    // console.log('A: ' + ev.target.href + ' has been clicked')
-    // console.log(ev.target)
-    if (ev.target.href.startsWith('javascript:')) {
+xc.handleLinkClickA = function(ev, elem) {
+    if (elem.href.startsWith('javascript:')) {
         return true;
     } else {
 	xc.clearIntervals();
         // console.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
-        myframes.renderLink(ev.target, xframes.ajaxPathName(ev.target.href), function(request) {
-            // console.log('A: link click is handled completely')
+        myframes.renderLink(elem, xframes.ajaxPathName(elem.href), function(request) {
             renderPostProc(ev, request)
         })
         return false
     }
+}
+
+var handleLinkClick = function(ev) {
+    xc.handleLinkClickA(ev, ev.target)
 }
 
 var dohandleFormSubmit = function(form, ev) {
