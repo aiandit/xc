@@ -384,3 +384,7 @@ table, tr, th, td {
 .xc-checks {
     display: grid;
 }
+.xc-blink a {
+    color: inherit;
+    text-decoration: none;
+}
