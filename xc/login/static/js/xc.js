@@ -626,6 +626,22 @@ var ppSliders = function() {
     })
 }
 
+xc.setButtonLinkHandlers = function() {
+    var tms = document.querySelectorAll('.xc-blink')
+    tms.forEach(function(el) {
+	var bonclick = function(ev) {
+	    var a = ev.target.querySelector('a')
+	    if (a != null) {
+		xc.handleLinkClickA(ev, a)
+	    }
+	}
+	if (el.dataset.linkHandlerSet == undefined) {
+	    el.onclick = bonclick
+	    el.dataset.linkHandlerSet = true
+	}
+    })
+}
+
 xc.getCGIXML = function(form, exclude) {
     if (exclude == undefined) {
         exclude = {data:1}
@@ -764,6 +780,7 @@ var updateTree = function(ev) {
     ppTimestamps()
     ppUnits()
     ppSliders()
+    xc.setButtonLinkHandlers()
 //    document.forms[0].scrollIntoView()
 }
 
