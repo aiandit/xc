@@ -309,7 +309,7 @@ xc.handleLinkClickA = function(ev, elem) {
 }
 
 var handleLinkClick = function(ev) {
-    xc.handleLinkClickA(ev, ev.target)
+    return xc.handleLinkClickA(ev, ev.target)
 }
 
 var dohandleFormSubmit = function(form, ev) {
@@ -636,8 +636,9 @@ xc.setButtonLinkHandlers = function() {
 	var bonclick = function(ev) {
 	    var a = ev.target.querySelector('a')
 	    if (a != null) {
-		xc.handleLinkClickA(ev, a)
+		return xc.handleLinkClickA(ev, a)
 	    }
+	    return true
 	}
 	if (el.dataset.linkHandlerSet == undefined) {
 	    el.onclick = bonclick
