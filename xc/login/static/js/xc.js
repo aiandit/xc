@@ -360,9 +360,13 @@ var runxc = function(x, ev) {
         renderPostProc(ev, res)
     })
 
-    window.addEventListener( "popstate", function ( event ) {
-//        console.log('popstate')
-//        window.location = event.state
+    window.addEventListener("popstate", function (event) {
+        console.log('popstate: ' + event.state)
+	if (event.state != null) {
+	    myframes.renderLink(document, xframes.ajaxPathName(event.state), function(res) {
+		renderPostProc(event, res)
+	    })
+	}
     })
     window.addEventListener( "pageshow", function ( event ) {
 //        console.log('pageshow')
