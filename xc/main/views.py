@@ -38,6 +38,15 @@ def ajax_home(request):
     elif request.method == "POST":
         reqDict = request.POST
 
+    homeview = 'view'
+    homepath = 'config.xml'
+    if 'XC_HOME_VIEW' in dir(settings):
+        homeview = settings.XC_HOME_VIEW
+    if 'XC_HOME_PATH' in dir(settings):
+        homepath = settings.XC_HOME_PATH
+
+    return redirect(reverse('main:ajax_%s' % (homeview,)) + '?path=%s' % homepath)
+
     data = {
         'lsl': lsl,
         'errs': errors,

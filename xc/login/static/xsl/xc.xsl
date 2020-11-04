@@ -110,11 +110,11 @@
   <xsl:template match="dict[view = 'home']" mode="doc-xcont">
     <div class="xc-sl-view"
 	 data-view-url="/main/view?path=config.xml"
-	 data-view-target="um-main-view"
-	 data-view-filter="um-config-view-html.xsl"
+	 data-view-target="xc-home-view"
+	 data-view-filter="config-view-html.xsl"
 	 data-view-done="0"
 	 >
-      <div id="um-main-view">
+      <div id="xc-home-view">
       </div>
     </div>
   </xsl:template>
