@@ -68,7 +68,7 @@ def getfinfo(path, relpath, follow=True):
 def getlsl(path, relpath = '.', dironly=False):
     if relpath == '':
         relpath = '/'
-    print('getlsl', path, relpath)
+#    print('getlsl', path, relpath)
     (si, stat) = getfinfo(path, relpath)
     res = { 'info': si }
     if len(si.keys()) > 0:
@@ -285,14 +285,14 @@ class DirManager:
     def getlines(self, name):
         file = open(self.getpath(name), 'r', encoding='utf8')
         t0 = time.time()
-        print('Start reading file: %s' % name)
+#        print('Start reading file: %s' % name)
         content = ''
         try:
             content = file.read()
         except BaseException as ME:
             print('File read failed: %s, %s' % (name, ME))
         t1 = time.time()
-        print('File read: %s, %g s' % (name, t1 - t0))
+#        print('File read: %s, %g s' % (name, t1 - t0))
         return content.split('\n')
 
     def nlines(self, name):

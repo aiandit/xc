@@ -944,7 +944,7 @@ class RunwhichData(XCForm):
     path = forms.CharField(required=False, max_length=1024, label='Path')
     which = forms.CharField(max_length=1024, label='Pattern')
     choices=[ (f.lower(), f) for f in ['View', 'Edit', 'Clone', 'Transform', 'Get'] ]
-    print('choices', choices)
+#    print('choices', choices)
     action = forms.ChoiceField(label='Action',
                                choices=choices,
                                widget=forms.Select(choices=choices))
@@ -1227,7 +1227,7 @@ def getrange(request, path, mode, start, end, transpose=False):
     errors = []
 
     lsl = get_lsl(path)['lsl']
-    print(lsl)
+#    print('lsl', lsl)
 
     if len(lsl) > 0 and len(lsl['info']) > 0 and lsl['info']['type'] == '-':
         mtype = mimetypes.guess_type(lsl['info']['name'])
@@ -1554,7 +1554,7 @@ def ajax_find(request):
         errmsg = 'The form data is invalid'
     else:
         cdata = rdata.cleaned_data
-        print('find', cdata)
+#        print('find', cdata)
         path = cdata['path']
         find = cdata['find']
         findpath = cdata['findpath']
@@ -1793,7 +1793,7 @@ def ajax_action(request):
                 next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
 
             lsl = workdir.stat(path)
-            print(lsl)
+            print('lsl', lsl)
             if len(lsl['info']) == 0:
                 errmsg = 'File not found'
 
