@@ -1793,7 +1793,7 @@ def ajax_action(request):
                 next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
 
             lsl = workdir.stat(path)
-            print('lsl', lsl)
+#            print('lsl', lsl)
             if len(lsl['info']) == 0:
                 errmsg = 'File not found'
 

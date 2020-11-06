@@ -184,6 +184,8 @@ workdir.base = xc.settings.XC_WORKDIR
 
 os.environ['XC_WORKDIR'] = xc.settings.XC_WORKDIR
 
+os.environ['HOME'] = xc.settings.XC_HOME if 'XC_HOME' in dir(xc.settings) else '/var/www'
+
 diractions = [
     {'action': 'newdoc', 'name': 'New Document'},
     {'action': 'newdir', 'name': 'New Collection'},
