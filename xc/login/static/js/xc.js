@@ -447,9 +447,27 @@ xc.clearInterval = function(key) {
 	delete xc.intervals[key]
     }
 }
+xc.cintervals = {}
+xc.setChainedInterval = function(key, inter) {
+    xc.cintervals[key] = true
+}
+xc.clearChainedInterval = function(key) {
+    if (key in xc.cintervals) {
+	delete xc.cintervals[key]
+    }
+}
+xc.isChainedInterval = function(key) {
+    if (key in xc.cintervals) {
+	return true
+    }
+    return false
+}
 xc.clearIntervals = function() {
     Object.keys(xc.intervals).forEach(function(k) {
 	xc.clearInterval(k)
+    })
+    Object.keys(xc.cintervals).forEach(function(k) {
+	xc.clearChainedInterval(k)
     })
 }
 
@@ -481,10 +499,18 @@ xc.getCSRFToken = function() {
     return csrf
 }
 
+//var globtO =  (new Date()).getTime()
 var ppPolls = function() {
     var tms = document.querySelectorAll('.xc-sl-poll')
     tms.forEach(function(el) {
-	var getf = function() {
+	var getf = function(ciid, count, tlast) {
+	    if (!xc.isChainedInterval(ciid)) {
+//		console.log('Chained interval ' + ciid + ' was cancelled')
+		return
+	    }
+	    var url = el.dataset.pollUrl
+	    var t0 = (new Date()).getTime()
+//	    console.log('getf: ' + (t0 - globtO) + ': '  + url)
 	    var ppFun = eval(el.dataset.postprocess)
 	    var handleData = function(text) {
 		var res = ppFun(text, el)
@@ -494,6 +520,8 @@ var ppPolls = function() {
 		} else {
 		    el.innerHTML = res
 		}
+		var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
+		setTimeout(getf, nexttime, ciid, count+1, t0)
 	    }
 	    var handleResult = function(st, res) {
 		if (st == 0) {
@@ -504,7 +532,6 @@ var ppPolls = function() {
 		    }
 		}
 	    }
-	    var url = el.dataset.pollUrl
 	    var method = el.dataset.pollMethod || 'get'
 	    if (method.toLowerCase() == 'post') {
 		var parts = url.split('?')
@@ -515,14 +542,16 @@ var ppPolls = function() {
 		xlp.sendGet(url, handleResult)
 	    }
 	}
-	getf()
 	if (el.attributes.id == undefined) {
 	    el.setAttribute('id', 'id' + String(Math.random() * 1e16).substr(0, 8))
 	}
 	var pollid = el.attributes.id.value
 	if (el.dataset.pollRunning == undefined) {
-	    xc.setInterval('poll-'+ pollid, setInterval(getf, el.dataset.pollInterval))
+	    var ciid = 'poll-'+ pollid
+//	    xc.setInterval('poll-'+ pollid, setInterval(getf, el.dataset.pollInterval))
 	    el.dataset.pollRunning = true
+	    xc.setChainedInterval(ciid)
+	    getf(ciid, 0, (new Date()).getTime())
 	}
     })
 }
@@ -875,4 +904,11 @@ xc.showSection = function(which, x) {
 xc.getMarkup = function(doc) {
     if (typeof doc == 'string') return doc
     else return doc.documentElement.outerHTML
+}
+
+xc.inject = function(id, html) {
+    var el = document.querySelector('#' + id)
+    if (el != null) {
+	el.innerHTML = html
+    }
 }
