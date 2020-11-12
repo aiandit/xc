@@ -513,12 +513,25 @@ var ppPolls = function() {
 //	    console.log('getf: ' + (t0 - globtO) + ': '  + url)
 	    var ppFun = eval(el.dataset.postprocess)
 	    var handleData = function(text) {
-		var res = ppFun(text, el)
+		var res
+		try {
+		    res = ppFun(text, el)
+		} catch (error) {
+		    console.error('ppPolls catched error in user function ' + el.dataset.postprocess);
+		    console.error(error);
+		    res = {noupdate: true}
+		}
 		if (typeof res == typeof {}) {
-		    el.innerHTML = res.text
-		    res.done()
+		    if (!res.noupdate) {
+			el.innerHTML = res.text
+		    }
+		    tl.update()
+		    if (typeof res.done == 'function') {
+			res.done()
+		    }
 		} else {
 		    el.innerHTML = res
+		    tl.update()
 		}
 		var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
 		setTimeout(getf, nexttime, ciid, count+1, t0)
@@ -829,6 +842,7 @@ var updateTreeFinal = function(ev) {
     ppActions(ev)
     ppPolls()
     ppViews(ev)
+    tl.update()
 }
 
 var isNonXMLResponse = function(request) {
