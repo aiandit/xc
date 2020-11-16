@@ -142,5 +142,6 @@ EMAIL_USE_TLS = True
 
 
 XC_WORKDIR = '/var/lib/xc/xc-application'
+XC_USE_GIT=False
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200

@@ -179,7 +179,11 @@ def userdict(user):
         return dict( (key, getattr(user, key)) for key in ['username', 'email', 'first_name',
                                                            'last_name', 'last_login', 'date_joined',
                                                            'is_authenticated', 'is_superuser'] )
-workdir = dirman.GitDirManager()
+if xc.settings.XC_USE_GIT:
+    workdir = dirman.GitDirManager()
+else:
+    workdir = dirman.DirManager()
+
 workdir.base = xc.settings.XC_WORKDIR
 
 os.environ['XC_WORKDIR'] = xc.settings.XC_WORKDIR
