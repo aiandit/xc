@@ -168,6 +168,24 @@
 
   <xsl:template match="dict" mode="xc-form">
     <xsl:variable name="f1" select="/*/forms/form[1]"/>
+    <h4>Form</h4>
+    <xsl:if test="data/errs/item">
+      <div class="aleft">
+	<xsl:if test="cgi/next_">
+	  <p>Form failure: <a href="{cgi/next_}">Return to form page</a></p>
+	</xsl:if>
+	<p>Errors:</p>
+	<ul>
+	  <xsl:for-each select="data/errs/item">
+	    <li>
+	      <xsl:value-of select="type"/>
+	      <xsl:text>: </xsl:text>
+	      <xsl:value-of select="errmsg"/>
+	    </li>
+	  </xsl:for-each>
+	</ul>
+      </div>
+    </xsl:if>
     <form class="xc-form" id="{$f1/@id}" action="/{xapp}/{$f1/@action}" method="{$f1/@method}">
       <fieldset>
         <legend><xsl:value-of select="/*/forms/form[1]/@title"/></legend>
