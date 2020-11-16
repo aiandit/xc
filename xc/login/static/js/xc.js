@@ -331,6 +331,7 @@ var dohandleFormSubmit = function(form, ev) {
         var res = evres(ev)
         return false
     } else {
+	xc.clearIntervals();
         myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
             // console.log('A form POST submit is handled completely')
             renderPostProc(ev, request)
