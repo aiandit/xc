@@ -94,7 +94,7 @@ xframes.mkXframes = function(frames, xsltbase) {
         })
         console.log('Xframes renderings launched')
     }
-    var renderRespHandler = function(status, request, done) {
+    var renderRespHandler = function(status, request, done, src,url) {
         var indoc = request.responseXML
         if ((typeof indoc == "undefined") || (indoc === null)) {
             console.error('Xframes: no XML response from ' + src + '(' + url + ')')
@@ -105,14 +105,14 @@ xframes.mkXframes = function(frames, xsltbase) {
         }
     }
     var renderLink = function(src, url, done) {
-        xlp.reqXML(src, {URL: url, method: 'GET', callback: (a,b)=>renderRespHandler(a,b,done)})
+        xlp.reqXML(src, {URL: url, method: 'GET', callback: (a,b)=>renderRespHandler(a,b,done, src,url)})
     }
     var renderFormSubmit = function(src, url, done) {
         var method = 'GET'
         if (typeof src.method != "undefined") {
             method = src.method
         }
-        xlp.reqXML(src, {URL: url, method: method, callback: (a,b)=>renderRespHandler(a,b,done)})
+        xlp.reqXML(src, {URL: url, method: method, callback: (a,b)=>renderRespHandler(a,b,done, src,url)})
     }
     var Xframes = {
 	renderRespHandler: renderRespHandler,
