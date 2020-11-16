@@ -6,7 +6,9 @@ xframes.ajaxPathName = function(path) {
     var pieces = aurl.pathname.split(/[\/]+/)
     var lastpiece = pieces[pieces.length-1]
 
-    pieces[pieces.length-1] = 'ajax_' + lastpiece
+    if (!lastpiece.startsWith('ajax_')) {
+	pieces[pieces.length-1] = 'ajax_' + lastpiece
+    }
 
     var res = new URL(aurl.origin + pieces.join('/') + aurl.search) + ''
     return res
