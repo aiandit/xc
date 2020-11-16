@@ -372,7 +372,7 @@ class DirManager:
             ftrans = [ftrans[len(ftrans)-1]]
         return ftrans
 
-    def execute(self, args):
+    def execute(self, args, *moreArgs):
         p = runproc(args, self.getpath('/'))
         return p
 
