@@ -235,7 +235,7 @@ class DirManager:
             res = False
         return res
 
-    def replacedoc(self, name, doc):
+    def replacedoc(self, name, doc, *moreArgs):
         stat = 0
         try:
             fpath = self.realpath(name)
