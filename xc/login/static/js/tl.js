@@ -4,6 +4,7 @@ var tl = tl || {}
 tl.stringtable = {}
 tl.curlang = 'en'
 tl.invtable = {}
+tl.alltable = {}
 
 tl.getCurrentLanguage = function() {
     var res = tl.curlang
@@ -25,6 +26,13 @@ tl.updateDict = function() {
     tl.invtable = {}
     Object.keys(tl.stringtable).forEach((k) => {
 	tl.invtable[tl.stringtable[k]['en']] = k
+    })
+    tl.alltable = {}
+    Object.keys(tl.stringtable).forEach((k) => {
+	var ent = tl.stringtable[k]
+	Object.keys(ent).forEach((j) => {
+	    tl.alltable[ent[j]] = k
+	})
     })
 }
 
@@ -68,13 +76,22 @@ tl.transl = function(str) {
     return str
 }
 
+tl.itransl = function(str) {
+    if (str in tl.alltable) {
+	var key = tl.alltable[str]
+	return tl.stringtable[key]['en']
+    }
+    console.error('tl: cannot find inverse translation for "' + str + '"')
+    return str
+}
+
 tl.deftable = {
     lang: {en: 'Language', de: 'Sprache'}
 }
 
 tl.apptable(tl.deftable)
 
-console.log(tl.get('lang'))
+//console.log(tl.get('lang'))
 
 tl.update = function() {
     var elems = document.querySelectorAll('.tlt')
@@ -96,6 +113,13 @@ tl.update = function() {
 	if (k.dataset.tdone != '1') {
 	    k.dataset.tdone = '1'
 	    k.value = tl.transl(k.value)
+	}
+    })
+    elems = document.querySelectorAll('.tlto')
+    elems.forEach((k) => {
+	if (k.dataset.tdone != '1') {
+	    k.dataset.tdone = '1'
+	    k.innerText = tl.transl(k.innerText)
 	}
     })
 }
