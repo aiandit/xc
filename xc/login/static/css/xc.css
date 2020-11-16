@@ -32,10 +32,6 @@ body, fieldset, div.messages, div#content {
     padding: 0.5em;
 }
 
-div.main {
-    color: wheat;
-}
-
 fieldset table {
     display: inline;
 }
