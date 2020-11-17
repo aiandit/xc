@@ -19,6 +19,7 @@ tl.setCurrentLanguage = function(lang) {
     if (document.forms.xc_langselect != undefined) {
 	document.forms.xc_langselect.lang.value = lang
     }
+    document.documentElement.setAttribute('lang', lang)
     tl.update()
 }
 
