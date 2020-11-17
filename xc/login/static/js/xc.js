@@ -133,7 +133,7 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
             infoxml += '<viewmode>' + mode + '</viewmode>'
             infoxml += '<action-findlist>' + alistresp + '</action-findlist>'
 
-            res = {
+            var res = {
                 render: function(xcontdoc, done) {
 
                     var indoc = xc.getCurDoc(xcontdoc, xc.cgiParams() + infoxml)
