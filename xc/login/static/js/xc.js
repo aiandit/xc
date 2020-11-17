@@ -844,6 +844,7 @@ var updateTreeFinal = function(ev) {
     ppPolls()
     ppViews(ev)
     tl.update()
+    ppSorts(ev)
 }
 
 var isNonXMLResponse = function(request) {
@@ -926,4 +927,60 @@ xc.inject = function(id, html) {
     if (el != null) {
 	el.innerHTML = html
     }
+}
+
+xc.transformAndSaveAs = function(doc, filters, ofname, form, done) {
+    var updateconfxlp = xlp.mkXLP(filters, '/main/getf/')
+    updateconfxlp.transform(doc, function(resconf) {
+	form.path.value = ofname
+	form.data.value = resconf.textContent
+	xlp.submitForm(form, '/main/ajax_edit', function(status) {
+	    console.log('Doc ' + doc.URL + ' transformed with ' + filters + ' and saved as ' + ofname)
+	    done()
+	})
+    })
+}
+
+// https://stackoverflow.com/questions/3730510/javascript-sort-array-and-return-an-array-of-indicies-that-indicates-the-positi
+xc.sortWithIndices = function(toSort) {
+  for (var i = 0; i < toSort.length; i++) {
+    toSort[i] = [toSort[i], i];
+  }
+  toSort.sort(function(left, right) {
+    return left[0] < right[0] ? -1 : 1;
+  });
+  toSort.sortIndices = [];
+  for (var j = 0; j < toSort.length; j++) {
+    toSort.sortIndices.push(toSort[j][1]);
+    toSort[j] = toSort[j][0];
+  }
+  return toSort;
+}
+
+var ppSorts = function(ev) {
+    var tms = document.querySelectorAll('.xc-sl-sort')
+    tms.forEach(function(el) {
+	if (el.dataset.sorted == '1') {
+	    return
+	}
+	el.dataset.sorted = '1'
+	var use = el.dataset.select
+	var order = el.dataset.order || 'ascending'
+	var datatype = el.dataset.datatype || 'text'
+
+	var elems = Array.from(el.children)
+
+	var vals = elems.map((k) => {
+	    var sel = k.querySelector(use)
+	    return sel.innerText
+	})
+
+	var sres = xc.sortWithIndices(vals)
+	var res = []
+	for (var i = 0; i < elems.length; ++i) {
+	    res.push(elems[sres.sortIndices[i]])
+	}
+
+	el.innerHTML = res.map((k)=>k.outerHTML).join('')
+    })
 }
