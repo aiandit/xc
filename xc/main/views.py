@@ -413,7 +413,7 @@ class EditData(XCForm):
     path = forms.CharField(max_length=1024, label='Path')
     data = forms.CharField(required=False, max_length=1024000, label='Content', widget=forms.Textarea)
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
-    retto = forms.CharField(required=False, max_length=100, label='Return to')
+    next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -443,6 +443,7 @@ def ajax_edit(request):
     rdata = EditData(reqDict)
 
     resultview = 'dirmanform'
+    next_ = None
 
     res = rdata.is_valid()
     if not res:
@@ -460,7 +461,10 @@ def ajax_edit(request):
                 lsl = workdir.stat(path)
                 #                fdata = workdir.getdoc(path).decode('utf8')
                 fdata = data
-                resultview = cdata['retto']
+                next_ = cdata['next_']
+                if len(next_) == 0:
+                    next_ = reverse('main:ajax_edit') + '?path=%s' % (path,)
+                return redirect(next_)
 
             else:
                 errmsg = 'file write failed: "%s"' % (stat)
