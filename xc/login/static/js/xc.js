@@ -877,6 +877,7 @@ xc.readCSV = function(text) {
 	allitems[i] = []
     }
     lines.forEach(function(l) {
+	if (l.length == 0) return
 	var items = l.split(';')
 	for (var i = 0; i < items.length; ++i) {
 	    allitems[i].push(Number(items[i]))
