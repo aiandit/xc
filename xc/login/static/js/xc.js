@@ -942,13 +942,14 @@ xc.transformAndSaveAs = function(doc, filters, ofname, form, done) {
 }
 
 // https://stackoverflow.com/questions/3730510/javascript-sort-array-and-return-an-array-of-indicies-that-indicates-the-positi
-xc.sortWithIndices = function(toSort) {
+xc.sortWithIndices = function(toSort, datatype) {
   for (var i = 0; i < toSort.length; i++) {
     toSort[i] = [toSort[i], i];
   }
-  toSort.sort(function(left, right) {
-    return left[0] < right[0] ? -1 : 1;
-  });
+  var cmpNum = function(left, right) { return left[0] < right[0] ? -1 : 1; }
+  var cmpText = function(left, right) { return left[0].localeCompare(right[0]) }
+  var cmp = datatype == 'text' ? cmpText : cmpNum
+  toSort.sort(cmp)
   toSort.sortIndices = [];
   for (var j = 0; j < toSort.length; j++) {
     toSort.sortIndices.push(toSort[j][1]);
@@ -975,7 +976,10 @@ var ppSorts = function(ev) {
 	    return sel.innerText
 	})
 
-	var sres = xc.sortWithIndices(vals)
+	var sres = xc.sortWithIndices(vals, datatype)
+	if (order != 'ascending') {
+	    sres.sortIndices.reverse()
+	}
 	var res = []
 	for (var i = 0; i < elems.length; ++i) {
 	    res.push(elems[sres.sortIndices[i]])
