@@ -178,24 +178,35 @@ xlp.reqXML = function(src, obj) {
         } else {
             obj.data = xlp.mkFormData(src)
         }
-//        console.log('reqXML: data')
-//        console.log(obj.data)
     }
     var cur_callback = obj.callback
     obj.callback = function(status, request) {
         if (status == 0) {
-            var rdoc = request.responseXML
-            if (xlp.isIE) {
-                rdoc = parseXML(request.responseText)
-            } else {
-                rdoc = request.responseXML
-            }
-            if (rdoc) {
-                cur_callback(rdoc, request)
-            } else {
-                xlp.error('No valid response from server: ' + obj.URL)
-                cur_callback(0, request, 'no XML')
-            }
+	    if (obj.returnJSON) {
+		var json
+		try {
+		    json = JSON.parse(request.responseText)
+                    cur_callback(json, request)
+		} catch (error) {
+                    xlp.error('No valid JSON response from server: ' + obj.URL)
+                    cur_callback(0, request, 'no JSON')
+		}
+	    } else if (obj.returnData) {
+                cur_callback(request.responseText, request)
+	    } else {
+		var rdoc
+		if (xlp.isIE) {
+                    rdoc = parseXML(request.responseText)
+		} else {
+                    rdoc = request.responseXML
+		}
+		if (rdoc) {
+                    cur_callback(rdoc, request)
+		} else {
+                    xlp.error('No valid XML response from server: ' + obj.URL)
+                    cur_callback(0, request, 'no XML')
+		}
+	    }
         } else {
             xlp.error('Error response: ' + request.status + ' ' + request.statusText)
             cur_callback(0, request, 'request failed')
@@ -204,13 +215,30 @@ xlp.reqXML = function(src, obj) {
     xlp.sendRequest(obj)
 }
 
+xlp.reqJSON = function(src, obj) {
+    obj.returnJSON = true
+    xlp.reqXML(src, obj)
+}
+
+xlp.reqData = function(src, obj) {
+    obj.returnData = true
+    xlp.reqXML(src, obj)
+}
+
 xlp.submitForm = function(src, url, done) {
     xlp.reqXML(src, { URL: url, callback: done, method: src.method })
 }
 
-
 xlp.loadXML = function(path, callback) {
     xlp.reqXML(document,  {'method': 'GET', 'URL': path, 'callback': callback})
+}
+
+xlp.loadJSON = function(path, callback) {
+    xlp.reqJSON(document,  {'method': 'GET', 'URL': path, 'callback': callback})
+}
+
+xlp.loadData = function(path, callback) {
+    xlp.reqData(document,  {'method': 'GET', 'URL': path, 'callback': callback})
 }
 
 xlp.mkLoadCached = function() {
