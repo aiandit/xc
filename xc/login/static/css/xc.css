@@ -50,6 +50,13 @@ code {
 
 code.pre {
     white-space: pre;
+    font-family: 'mono';
+    border: 1px solid black;
+    color: grey;
+    border-radius: 0.5em;
+    display: inline-block;
+    padding: 0.5em;
+    min-width: 25em;
 }
 
 td.unit-value {
