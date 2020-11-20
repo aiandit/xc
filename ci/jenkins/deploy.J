@@ -6,7 +6,9 @@ pipeline {
     string(name: 'repo',         defaultValue: "https://github.com/aiandit/xc.git", description: 'XC Repo')
   }
 
-  agent any
+  agent {
+    label "linux"
+  }
 
   stages {
 
