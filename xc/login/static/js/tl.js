@@ -123,4 +123,25 @@ tl.update = function() {
 	    k.innerText = tl.transl(k.innerText)
 	}
     })
+    elems = document.querySelectorAll('.tln')
+    elems.forEach((k) => {
+	if (k.dataset.tdone != '1') {
+	    k.dataset.tdone = '1'
+	    var n = Number(k.innerText)
+	    if (n + '' != 'NaN') {
+		k.innerText = n.toLocaleString(undefined, {useGrouping: false})
+	    }
+	}
+    })
+    elems = document.querySelectorAll('.tlnv')
+    elems.forEach((k) => {
+	if (k.dataset.tndone != '1') {
+	    k.dataset.tndone = '1'
+	    var n = Number(k.value)
+	    if (n + '' != 'NaN') {
+		var s = n.toLocaleString(undefined, {useGrouping: false})
+		k.setAttribute('value', s)
+	    }
+	}
+    })
 }
