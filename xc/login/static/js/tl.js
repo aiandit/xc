@@ -135,12 +135,13 @@ tl.update = function() {
     })
     elems = document.querySelectorAll('.tlnv')
     elems.forEach((k) => {
-	if (k.dataset.tndone != '1') {
-	    k.dataset.tndone = '1'
-	    var n = Number(k.value)
+	if (k.dataset.tdone != '1') {
+	    k.dataset.tdone = '1'
+	    var n = xc.number(k.value)
 	    if (n + '' != 'NaN') {
 		var s = n.toLocaleString(undefined, {useGrouping: false})
 		k.setAttribute('value', s)
+		k.value = s
 	    }
 	}
     })
