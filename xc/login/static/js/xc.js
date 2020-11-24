@@ -989,3 +989,8 @@ var ppSorts = function(ev) {
 	el.innerHTML = res.map((k)=>k.outerHTML).join('')
     })
 }
+
+xc.number = function(val) {
+    if (val == '') val = 'NaN'
+    return Number(val)
+}
