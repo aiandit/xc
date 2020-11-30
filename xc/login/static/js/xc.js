@@ -8,13 +8,9 @@ if (typeof xframe == "undefined") {
 
 var frames = [
     {target: 'content',
-     filters: [
-         'xc.xsl'
-     ]},
+     xlp: xlp.mkXLP(['xc.xsl'], '/static/xsl/')},
     {target: 'title',
-     filters: [
-         'xc-title.xsl'
-     ]}
+     xlp: xlp.mkXLP(['xc-title.xsl'], '/static/xsl/', {output: 'text'})}
 ]
 
 var myframes = xframes.mkXframes(frames, '/static/xsl/')
@@ -118,7 +114,7 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
 //        getActionLSL(dclass, function(s, alistresp) {
             var frames = [
                 {target: 'title',
-                 xlp: xlp.mkXLP(['xc-app-title.xsl'], '/main/getf/xsl/')},
+                 xlp: xlp.mkXLP(['xc-app-title.xsl'], '/main/getf/xsl/', {output: 'text'})},
                 {target: 'xc-document',
                  xlp: viewTransform,
                  filters: []},

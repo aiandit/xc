@@ -56,7 +56,7 @@ xframes.mkXframes = function(frames, xsltbase) {
         [...Array(frames.length).keys()].forEach(function(framen) {
             var frame = frames[framen]
             var x = xlps[framen]
-            x.transform(indoc, true, function(result) {
+            x.transform(indoc, function(result) {
                 // console.log('Get result: ' + frame.target)
                 var resn = document.getElementById(frame.target)
                 if (resn === null) {
