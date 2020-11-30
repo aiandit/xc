@@ -15,7 +15,7 @@ tl.getCurrentLanguage = function() {
 }
 
 tl.setCurrentLanguage = function(lang) {
-    tl.curlang = lang
+    tl.curlang = lang.substr(0, 2)
     if (document.forms.xc_langselect != undefined) {
 	document.forms.xc_langselect.lang.value = lang
     }
