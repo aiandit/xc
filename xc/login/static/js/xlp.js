@@ -440,7 +440,7 @@ xlp.mkXSL = function(xslt, xsltbase) {
 }
 
 xlp.XLP =
-xlp.mkXLP = function(xslts, xsltbase) {
+xlp.mkXLP = function(xslts, xsltbase, options) {
     function step(xml, toDoc, done, j) {
         if (j == undefined) j = 0
         var xslt = xslts[j]
@@ -491,7 +491,7 @@ xlp.mkXLP = function(xslts, xsltbase) {
     var transform = function(indoc, toDoc, done) {
         if (typeof done == "undefined") {
             done = toDoc
-            toDoc = true
+            toDoc = (options != undefined && options.output == 'text') ? false : true
         }
         step(indoc, toDoc,
              function(outfrag) {
@@ -519,6 +519,7 @@ xlp.mkXLP = function(xslts, xsltbase) {
         transformTxt: transformTxt,
         attach: xlp.attach,
         mkpre: xlp.mkpre,
+	options: options
     }
     return XLP
 }
