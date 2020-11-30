@@ -302,6 +302,10 @@ var processXData = function(ev, request, done) {
 }
 
 xc.handleLinkClickA = function(ev, elem) {
+    document.querySelectorAll('.xc-active-link').forEach((e) => {
+	e.classList.remove('xc-active-link')
+    })
+    elem.classList.add('xc-active-link')
     if (elem.href.startsWith('javascript:')) {
         return true;
     } else {
