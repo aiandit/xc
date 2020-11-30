@@ -842,7 +842,7 @@ var updateTree = function(ev) {
 //    document.forms[0].scrollIntoView()
 }
 
-var updateTreeFinal = function(ev) {
+var updateTreeFinal = function(ev, done) {
     updateTree(ev)
     ppActions(ev)
     ppPolls()
@@ -850,6 +850,9 @@ var updateTreeFinal = function(ev) {
     tl.update()
     ppSorts(ev)
     xc.ppActiveLink(ev)
+    if (done != undefined) {
+	done()
+    }
 }
 
 var isNonXMLResponse = function(request) {
