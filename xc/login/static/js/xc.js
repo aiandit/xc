@@ -115,7 +115,7 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
     var transformName = dclass + '-' + mode
     xc.mkViewTransform(transformName, function(viewTransform) {
 
-        getActionLSL(dclass, function(s, alistresp) {
+//        getActionLSL(dclass, function(s, alistresp) {
             var frames = [
                 {target: 'title',
                  xlp: xlp.mkXLP(['xc-app-title.xsl'], '/main/getf/xsl/')},
@@ -131,7 +131,7 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
 
             var infoxml = '<viewclass>' + dclass + '</viewclass>'
             infoxml += '<viewmode>' + mode + '</viewmode>'
-            infoxml += '<action-findlist>' + alistresp + '</action-findlist>'
+//            infoxml += '<action-findlist>' + alistresp + '</action-findlist>'
 
             var res = {
                 render: function(xcontdoc, done) {
@@ -149,7 +149,7 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
 
             done(res)
 
-        })
+//        })
     })
 }
 
