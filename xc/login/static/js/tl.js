@@ -94,36 +94,39 @@ tl.apptable(tl.deftable)
 
 //console.log(tl.get('lang'))
 
-tl.update = function() {
-    var elems = document.querySelectorAll('.tlt')
+tl.update = function(doc) {
+    if (doc == undefined) {
+	doc = document
+    }
+    var elems = doc.querySelectorAll('.tlt')
     elems.forEach((k) => {
 	if (k.dataset.tdone != '1') {
 	    k.dataset.tdone = '1'
 	    k.innerHTML = tl.transl(k.innerHTML)
 	}
     })
-    elems = document.querySelectorAll('.tlg')
+    elems = doc.querySelectorAll('.tlg')
     elems.forEach((k) => {
 	if (k.dataset.tdone != '1') {
 	    k.dataset.tdone = '1'
 	    k.innerHTML = tl.get(k.dataset.tid)
 	}
     })
-    elems = document.querySelectorAll('.tltv')
+    elems = doc.querySelectorAll('.tltv')
     elems.forEach((k) => {
 	if (k.dataset.tdone != '1') {
 	    k.dataset.tdone = '1'
 	    k.value = tl.transl(k.value)
 	}
     })
-    elems = document.querySelectorAll('.tlto')
+    elems = doc.querySelectorAll('.tlto')
     elems.forEach((k) => {
 	if (k.dataset.tdone != '1') {
 	    k.dataset.tdone = '1'
 	    k.innerText = tl.transl(k.innerText)
 	}
     })
-    elems = document.querySelectorAll('.tln')
+    elems = doc.querySelectorAll('.tln')
     elems.forEach((k) => {
 	if (k.dataset.tdone != '1') {
 	    k.dataset.tdone = '1'
@@ -133,7 +136,7 @@ tl.update = function() {
 	    }
 	}
     })
-    elems = document.querySelectorAll('.tlnv')
+    elems = doc.querySelectorAll('.tlnv')
     elems.forEach((k) => {
 	if (k.dataset.tdone != '1') {
 	    k.dataset.tdone = '1'
