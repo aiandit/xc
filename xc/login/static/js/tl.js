@@ -26,7 +26,9 @@ tl.setCurrentLanguage = function(lang) {
 tl.updateDict = function() {
     tl.invtable = {}
     Object.keys(tl.stringtable).forEach((k) => {
-	tl.invtable[tl.stringtable[k]['en']] = k
+	var ent = tl.stringtable[k]
+	var key = ent['C'] || ent['en']
+	tl.invtable[key] = k
     })
     tl.alltable = {}
     Object.keys(tl.stringtable).forEach((k) => {
