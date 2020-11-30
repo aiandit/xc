@@ -845,6 +845,7 @@ var updateTreeFinal = function(ev) {
     ppViews(ev)
     tl.update()
     ppSorts(ev)
+    xc.ppActiveLink(ev)
 }
 
 var isNonXMLResponse = function(request) {
@@ -957,6 +958,17 @@ xc.sortWithIndices = function(toSort, datatype) {
     toSort[j] = toSort[j][0];
   }
   return toSort;
+}
+
+xc.ppActiveLink = function(ev) {
+    var links = document.querySelectorAll('a')
+    links.forEach((a) => {
+	if (a.href == document.location.href) {
+	    a.classList.add('xc-active-link')
+	} else {
+	    a.classList.remove('xc-active-link')
+	}
+    })
 }
 
 var ppSorts = function(ev) {
