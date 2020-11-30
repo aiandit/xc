@@ -478,6 +478,10 @@ var psMultiField = function(data) {
     items = items.filter( (k) => k.length > 0 )
     return '<td>' + items.join('</td><td>') + '</td>'
 }
+xc.psHTML = function(data) {
+    if (data.length == 0) return ''
+    return data
+}
 var psSingleField = function(data) {
     if (data.length == 0) return ''
     return '<span>' + data.split('\n')[1] + '</span>'
@@ -540,7 +544,13 @@ var ppPolls = function() {
 	    var handleResult = function(st, res) {
 		if (st == 0) {
 		    if (res.responseXML != undefined) {
-			extractXPath(res.responseXML, '/*/xcontent-cdata', false, '', function(x) {handleData(x.textContent)})
+			extractXPath(res.responseXML, '/*/xcontent-cdata', false, '', function(x) {
+			    if (x.textContent.length > 0) {
+				handleData(x.textContent)
+			    } else {
+				handleData(res.responseText)
+			    }
+			})
 		    } else {
 			handleData(res.responseText)
 		    }
