@@ -1826,6 +1826,66 @@ def ajax_action(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+def plain_status(request):
+
+    lsl = ''
+
+    errmsg = ''
+    errors = []
+    xcontent = ''
+    content = ''
+    path = ''
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+    rdata = ActionData(reqDict)
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+
+        lsl = workdir.stat(path)
+        if len(lsl['info']) == 0:
+            errmsg = 'File not found'
+
+        elif lsl['info']['exec'] == 0:
+            errmsg = 'File is not executable'
+
+        else:
+            result = workdir.pipe([workdir.realpath(path)])
+            print('pipe result: %d: output %s' % (result.returncode, result.stdout))
+            if result.returncode == 0:
+                aenc = request.headers['Accept-Encoding']
+                mtype = 'text/plain'
+                fdata = result.stdout
+                if 'br' in aenc:
+                    fdata = brotli.compress(fdata.encode('utf8'), quality=1)
+                resp = HttpResponse(fdata, content_type=mtype)
+                if 'br' in aenc:
+                    resp['Content-Encoding'] = 'br'
+                return resp
+            else:
+                errmsg = 'Run command failed'
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = {
+        'errs': errors
+    }
+    data = { **data }
+    xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [rdata], 'xcontent': xcontent, 'xcontent_cdata': xmlesc(content) }
+    print(context)
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
 psfields = dirman.getlines('psfields.txt')
 psfields_def = ['user','pid','ppid','c','sz','rss','psr','stime','tty','time','cmd','lstart']
 psfields_ws = ['args','cmd','comm','command','fname','ucmd','ucomm','lstart','bsdstart','start']

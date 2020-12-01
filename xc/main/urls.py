@@ -26,6 +26,10 @@ urlpatterns = [
     path('action', views.action, name='action'),
     path('ajax_action', views.ajax_action, name='ajax_action'),
 
+#    path('status', views.status, name='status'),
+#    path('ajax_status', views.ajax_status, name='ajax_status'),
+    path('plain_status', views.plain_status, name='plain_status'),
+
     path('ps', views.ps, name='ps'),
     path('ajax_ps', views.ajax_ps, name='ajax_ps'),
     path('plain_ps', views.plain_ps, name='plain_ps'),
