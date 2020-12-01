@@ -482,6 +482,12 @@ xc.psHTML = function(data) {
     if (data.length == 0) return ''
     return data
 }
+xc.psHead = function(n) {
+    return function(data) {
+	var lines = data.split('\n')
+	return lines.slice(0, n).join('\n')
+    }
+}
 var psSingleField = function(data) {
     if (data.length == 0) return ''
     return '<span>' + data.split('\n')[1] + '</span>'
