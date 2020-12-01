@@ -1858,7 +1858,6 @@ def plain_status(request):
 
         else:
             result = workdir.pipe([workdir.realpath(path)])
-            print('pipe result: %d: output %s' % (result.returncode, result.stdout))
             if result.returncode == 0:
                 aenc = request.headers['Accept-Encoding']
                 mtype = 'text/plain'
@@ -1882,7 +1881,6 @@ def plain_status(request):
     xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
     dx = dictxml(xcontext)
     context = { 'context_xml': dx, 'forms': [rdata], 'xcontent': xcontent, 'xcontent_cdata': xmlesc(content) }
-    print(context)
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
