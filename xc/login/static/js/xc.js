@@ -176,10 +176,10 @@ var updateXView = function(ev) {
 }
 
 var updateXDataView = function(ev, done) {
-    updateTree(ev)
+    updateTree(document, ev)
 
     var lastStep = function(r) {
-        updateTreeFinal(ev)
+        updateTreeFinal(document, ev)
         done(r)
     }
 
@@ -397,8 +397,8 @@ var renderPostProc = function(ev, request, subreq) {
     }
 }
 
-var setFormCallback = function(handle) {
-    var forms = document.querySelectorAll('form')
+var setFormCallback = function(subtree, handle) {
+    var forms = subtree.querySelectorAll('form')
     var ffunc = function(ev) {
         console.log(name + ': form submit  event for: ' + ev);
 	xc.clearIntervals();
@@ -413,8 +413,8 @@ var setFormCallback = function(handle) {
     }
 }
 
-var setLinkCallback = function(handle) {
-    var forms = document.querySelectorAll('a')
+var setLinkCallback = function(subtree, handle) {
+    var forms = subtree.querySelectorAll('a')
     var ffunc = function(ev) {
         console.log('link click event for: ' + ev);
         if (ev.target.classList.contains('xc-nocatch')) return true
@@ -511,8 +511,8 @@ xc.getCSRFToken = function() {
 }
 
 //var globtO =  (new Date()).getTime()
-var ppPolls = function() {
-    var tms = document.querySelectorAll('.xc-sl-poll')
+var ppPolls = function(subtree) {
+    var tms = subtree.querySelectorAll('.xc-sl-poll')
     tms.forEach(function(el) {
 	var getf = function(ciid, count, tlast) {
 	    if (!xc.isChainedInterval(ciid)) {
@@ -542,7 +542,7 @@ var ppPolls = function() {
 		    }
 		} else {
 		    el.innerHTML = res
-		    tl.update()
+		    updateTreeFinal(el)
 		}
 		var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
 		setTimeout(getf, nexttime, ciid, count+1, t0)
@@ -586,8 +586,8 @@ var ppPolls = function() {
     })
 }
 
-var ppViews = function(ev) {
-    var tms = document.querySelectorAll('.xc-sl-view')
+var ppViews = function(subtree, ev) {
+    var tms = subtree.querySelectorAll('.xc-sl-view')
     tms.forEach(function(el) {
 	var getf = function() {
 	    var viewName = el.dataset.viewName || 'unknown-view'
@@ -603,7 +603,7 @@ var ppViews = function(ev) {
 		console.log('VIEW: sub view ' + url + ' is handled completely')
 		xc.docs[viewName] = request.responseXML
 		//renderPostProc(ev, request, true)
-		updateTreeFinal(ev)
+		updateTreeFinal(document.querySelector('#' + el.dataset.viewTarget), ev)
             })
 	    el.dataset.viewDone = '1'
 	}
@@ -614,8 +614,8 @@ var ppViews = function(ev) {
     })
 }
 
-var ppActions = function(ev) {
-    var tms = document.querySelectorAll('.xc-action')
+var ppActions = function(subtree, ev) {
+    var tms = subtree.querySelectorAll('.xc-action')
     tms.forEach(function(el) {
 	var getf = function() {
 	    var actionCode = el.dataset.action
@@ -629,8 +629,8 @@ var ppActions = function(ev) {
     })
 }
 
-var ppTimestamps = function() {
-    var tms = document.querySelectorAll('span.unixtm')
+var ppTimestamps = function(subtree) {
+    var tms = subtree.querySelectorAll('span.unixtm')
     tms.forEach(function(el) {
         if (el.dataset.unixtm != 1) {
             var flval = Number(el.innerHTML)
@@ -644,8 +644,8 @@ var ppTimestamps = function() {
     })
 }
 
-var ppMarkup = function() {
-    var tms = document.querySelectorAll('.markup')
+var ppMarkup = function(subtree) {
+    var tms = subtree.querySelectorAll('.markup')
     tms.forEach(function(el) {
         if (el.dataset.markupDone != 1) {
             el.dataset.markupDone = 1
@@ -658,8 +658,8 @@ var displayNumber = function(str) {
     return String(str).replace('.', ',')
 }
 
-var ppUnits = function() {
-    var tms = document.querySelectorAll('span.unit')
+var ppUnits = function(subtree) {
+    var tms = subtree.querySelectorAll('span.unit')
     tms.forEach(function(el) {
         if (el.dataset.unit != el.dataset.targetunit) {
 //            console.log('GG: ' + el.innerHTML)
@@ -674,15 +674,15 @@ var ppUnits = function() {
             el.dataset.unit = el.dataset.targetunit
         }
     })
-    var tms = document.querySelectorAll('span.number')
+    var tms = subtree.querySelectorAll('span.number')
     tms.forEach(function(el) {
         var flval = el.innerHTML
         el.innerHTML = '<span title="' + flval + '">' + displayNumber(flval) + '</span>'
     })
 }
 
-var ppSliders = function() {
-    var tms = document.querySelectorAll('.xc-slider')
+var ppSliders = function(subtree) {
+    var tms = subtree.querySelectorAll('.xc-slider')
     tms.forEach(function(el) {
 	var rin = el.querySelector('[type="range"]')
 	var tin = el.querySelector('[type="text"]')
@@ -695,8 +695,8 @@ var ppSliders = function() {
     })
 }
 
-xc.setButtonLinkHandlers = function() {
-    var tms = document.querySelectorAll('.xc-blink')
+xc.setButtonLinkHandlers = function(subtree) {
+    var tms = subtree.querySelectorAll('.xc-blink')
     tms.forEach(function(el) {
 	var bonclick = function(ev) {
 	    var a = ev.target.querySelector('a')
@@ -754,7 +754,7 @@ xc.createElement = function(ev, name) {
     var indoc = xlp.parseXML(inxml)
     sframes.render(indoc, function(res) {
         console.log('Done with xc.createElement ' + name)
-        updateTree(ev)
+        updateTree(document, ev)
     })
 }
 
@@ -826,11 +826,11 @@ var xcRender = function(done) {
     })
 }
 
-var updateTree = function(ev) {
-    setFormCallback(handleFormSubmit)
-    setLinkCallback(handleLinkClick)
+var updateTree = function(subtree, ev) {
+    setFormCallback(subtree, handleFormSubmit)
+    setLinkCallback(subtree, handleLinkClick)
 
-    var forms = document.querySelectorAll('.oc-head')
+    var forms = subtree.querySelectorAll('.oc-head')
     Object.keys(forms).forEach(function(k) {
         var f = forms[k]
         var t = f.nextElementSibling
@@ -846,22 +846,22 @@ var updateTree = function(ev) {
         }
     })
 
-    ppMarkup()
-    ppTimestamps()
-    ppUnits()
-    ppSliders()
-    xc.setButtonLinkHandlers()
+    ppMarkup(subtree)
+    ppTimestamps(subtree)
+    ppUnits(subtree)
+    ppSliders(subtree)
+    xc.setButtonLinkHandlers(subtree)
 //    document.forms[0].scrollIntoView()
 }
 
-var updateTreeFinal = function(ev, done) {
-    updateTree(ev)
-    ppActions(ev)
-    ppPolls()
-    ppViews(ev)
-    tl.update()
-    ppSorts(ev)
-    xc.ppActiveLink(ev)
+var updateTreeFinal = function(subtree, ev, done) {
+    updateTree(subtree, ev)
+    ppActions(subtree, ev)
+    ppPolls(subtree)
+    ppViews(subtree, ev)
+    tl.update(subtree)
+    ppSorts(subtree, ev)
+    xc.ppActiveLink(subtree, ev)
     if (done != undefined) {
 	done()
     }
