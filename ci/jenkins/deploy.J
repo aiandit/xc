@@ -1,9 +1,9 @@
 pipeline {
   parameters {
-    string(name: 'host',         defaultValue: "raspberrypi", description: 'Hostname')
-    string(name: 'user',         defaultValue: "pi",          description: 'Username')
+    string(name: 'host',         defaultValue: "pc1", description: 'Hostname')
+    string(name: 'user',         defaultValue: "developer",   description: 'Username')
     string(name: 'depldir',      defaultValue: "/opt/ai-and-it", description: 'Install directory')
-    string(name: 'repo',         defaultValue: "https://github.com/aiandit/xc.git", description: 'XC Repo')
+    string(name: 'repo',         defaultValue: "dev-host:git/xc.git", description: 'XC Repo')
   }
 
   agent {
