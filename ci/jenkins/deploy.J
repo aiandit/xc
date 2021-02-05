@@ -3,7 +3,7 @@ pipeline {
     string(name: 'host',         defaultValue: "pc1", description: 'Hostname')
     string(name: 'user',         defaultValue: "developer",   description: 'Username')
     string(name: 'depldir',      defaultValue: "/opt/ai-and-it", description: 'Install directory')
-    string(name: 'repo',         defaultValue: "dev-host:git/xc.git", description: 'XC Repo')
+    string(name: 'repo',         defaultValue: "dev-host:git/xc", description: 'XC Repo')
   }
 
   agent {
