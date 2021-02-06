@@ -47,7 +47,8 @@ def getfinfo(path, relpath, follow=True):
             stat = os.stat(path)
         else:
             stat = os.lstat(path)
-    except:
+    except BaseException as ex:
+        print('getfinfo exception: ', ex)
         return ({}, {})
     ftype = filetypeLetter(stat)
 #    print('os.stat', stat)
@@ -143,6 +144,7 @@ class DirManager:
             res = self.normalize_allowed_path(relbase)
         else:
             res = None
+            print('cutpath: "%s" (%s) is not under base "%s", nor in allowed paths' %( path, relbase, base))
 #        print('cutpath: "%s","%s","%s" -> %s' %( path, base, relbase, res))
         return res
 
