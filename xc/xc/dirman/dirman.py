@@ -108,6 +108,11 @@ class DirManager:
 
     dir = '.'
 
+    def __init__(self, base='.'):
+        if not fileexists(base):
+            print('Error: DirManager init failed: base path %s does not exist' % (base,))
+        self.base = base
+
     def chroot(self, path):
         self.base = self.realpath(path)
         self.dir = '.'
@@ -479,6 +484,9 @@ def gitlog(func, wdir=settings.XC_WORKDIR, *args, **kw):
     return result
 
 class GitDirManager(DirManager):
+
+    def __init__(self, base='.'):
+        super.__init__(base=base)
 
     @gitlog()
     def chroot(self, path, comment):
