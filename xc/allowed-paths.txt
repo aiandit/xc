@@ -1,0 +1,1 @@
+/opt/ai-and-it/xc/xc/login/static

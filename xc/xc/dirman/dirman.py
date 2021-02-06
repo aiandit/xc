@@ -103,6 +103,7 @@ class DirManager:
 
     uhome = os.environ['HOME'] if 'HOME' in os.environ else '/root'
     allowedPaths = getlines('%s/.config/xc/allowed-paths.txt' % (uhome,)) + \
+        getlines('%s/allowed-paths.txt' % (settings.BASE_DIR,)) + \
         getlines('/etc/xc/allowed-paths.txt')
 
     dir = '.'
