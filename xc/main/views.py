@@ -1104,7 +1104,8 @@ def getfp(request, pattern):
     which = '*/' + pattern
     findlist = mkfindlist(workdir.which('/', which))
     if len(findlist) == 0:
-        errmsg = 'File not found'
+        errmsg = 'getfp: File ''%s'' not found' % (pattern,)
+        print(errmsg)
     else:
         path = '%s/%s' % (findlist[0]['path'], findlist[0]['name'])
         return getp(request, path)
