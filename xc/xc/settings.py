@@ -130,7 +130,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-MAIN_FRAME = 'xframe-main.html'
+MAIN_FRAME = 'xframe.html'
 
 DEFAULT_FROM_EMAIL = 'info@example.com'
 
@@ -140,8 +140,13 @@ EMAIL_HOST_PASSWORD = 'secret'
 EMAIL_USE_TLS = True
 #EMAIL_USE_SSL = True
 
+xc_appdir = '/var/lib/xc/xc-application'
+try:
+    os.lstat(xc_appdir)
+    XC_WORKDIR = '/var/lib/xc/xc-application'
+except:
+    XC_WORKDIR = os.path.join(os.path.abspath(os.path.join(BASE_DIR, '..')), 'data')
 
-XC_WORKDIR = '/var/lib/xc/xc-application'
 XC_USE_GIT=False
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200
