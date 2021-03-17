@@ -640,6 +640,7 @@ var ppTimestamps = function(subtree) {
 
             el.innerHTML = '<span title="' + d + '">' + sd.substr(0, 10) + ' ' + ts + '</span>'
             el.dataset.unixtm = 1
+            el.dataset.flval = flval
         }
     })
 }
