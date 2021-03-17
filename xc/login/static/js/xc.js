@@ -1028,6 +1028,7 @@ xc.number = function(val) {
 
 
 xc.xq = function(exp, node) {
+    // https://stackoverflow.com/questions/19146056/document-evaluate-allways-returns-null-in-singlenodevalue-on-some-pages-sites
     var nsResolver = function(prefix) {
 	var uri = prefix === "xhtml" ? 'http://www.w3.org/1999/xhtml' :
 	    prefix === "x" ? 'http://www.w3.org/1999/xhtml' :
