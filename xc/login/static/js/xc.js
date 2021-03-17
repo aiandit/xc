@@ -660,19 +660,21 @@ var displayNumber = function(str) {
 }
 
 var ppUnits = function(subtree) {
-    var tms = subtree.querySelectorAll('span.unit')
+    var tms = subtree.querySelectorAll('span.value-with-unit')
     tms.forEach(function(el) {
         if (el.dataset.unit != el.dataset.targetunit) {
 //            console.log('GG: ' + el.innerHTML)
-            var flval = Number(el.innerHTML.substr(0, el.innerHTML.search(/&| /)))
+            var flval = Number(el.firstElementChild.innerText)
             if (el.dataset.unit == 'B' && el.dataset.targetunit == 'KB') {
                 el.innerHTML = '<span title="' + flval + el.dataset.unit + '">'
-                    + displayNumber((Math.ceil(100*flval/1024)/100).toFixed(2)) + '&#xa0;' + el.dataset.targetunit + '</span>'
+                    + displayNumber((Math.ceil(100*flval/1024)/100).toFixed(2)) + '</span>'
             } else if (el.dataset.unit == 'B' && el.dataset.targetunit == 'MB') {
                 el.innerHTML = '<span title="' + flval + el.dataset.unit + '">'
-                    + displayNumber((Math.ceil(100*flval/(1024*1024))/100).toFixed(2)) + '&#xa0;' + el.dataset.targetunit + '</span>'
+                    + displayNumber((Math.ceil(100*flval/(1024*1024))/100).toFixed(2)) + '</span>'
             }
+	    el.innerHTML +=  '<span>' + '&#xa0;' + el.dataset.targetunit + '</span>'
             el.dataset.unit = el.dataset.targetunit
+            el.dataset.flval = flval
         }
     })
     var tms = subtree.querySelectorAll('span.number')
