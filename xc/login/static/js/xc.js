@@ -1025,3 +1025,30 @@ xc.number = function(val) {
     if (val == '') val = 'NaN'
     return Number(val)
 }
+
+
+xc.xq = function(exp, node) {
+    var nsResolver = function(prefix) {
+	var uri = prefix === "xhtml" ? 'http://www.w3.org/1999/xhtml' :
+	    prefix === "x" ? 'http://www.w3.org/1999/xhtml' :
+	    null
+	return uri
+    }
+    var xqres = document.evaluate(exp, node, nsResolver, XPathResult.ANY_TYPE, null);
+    var res
+    if (xqres.resultType == XPathResult.UNORDERED_NODE_ITERATOR_TYPE) {
+	xqres = document.evaluate(exp, node, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	res = []
+	for (var i = 0; i < xqres.snapshotLength; ++i) {
+	    var node = xqres.snapshotItem(i)
+	    res.push(node)
+	}
+    } else if (xqres.resultType == XPathResult.NUMBER_TYPE) {
+	res = xqres.numberValue
+    } else if (xqres.resultType == XPathResult.STRING_TYPE) {
+	res = xqres.stringValue
+    } else if (xqres.resultType == XPathResult.BOOLEAN_TYPE) {
+	res = xqres.booleanValue
+    }
+    return res
+}
