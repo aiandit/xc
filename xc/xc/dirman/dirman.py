@@ -369,7 +369,7 @@ class DirManager:
             path = '/' in pattern
         ftrans = self.find(name, pattern, path=path, sys=sys)
         if len(ftrans) > 0:
-            ftrans = [ftrans[len(ftrans)-1]]
+            ftrans = [ftrans[0]]
         return ftrans
 
     def execute(self, args, *moreArgs):
