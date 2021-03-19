@@ -234,16 +234,18 @@ var getXDataXML = function(inxml) {
     if (indoc != undefined) {
         doc = indoc
     } else {
-        var rootnode = inxml.match(/<[a-zA-Z0-9-_]+/)
-        if (rootnode == null || rootnode.length == 0) {
-            rootnode = 'x'
+        var firstTag = inxml.match(/<[a-zA-Z0-9-_]+/)
+        var rootnode = null
+        if (firstTag == null || firstTag.length == 0) {
         } else {
-            rootnode = rootnode[0].substr(1) + 's'
+            rootnode = firstTag[0].substr(1) + 's'
         }
-        indoc = xlp.parseXMLC(xc.getXDoc(inxml, rootnode))
-        if (indoc != undefined) {
-            doc = indoc
-        }
+	if (rootnode != null) {
+            indoc = xlp.parseXMLC(xc.getXDoc(inxml, rootnode))
+            if (indoc != undefined) {
+		doc = indoc
+            }
+	}
     }
     return doc
 }
@@ -271,7 +273,7 @@ var getXData = function(ev, request, done) {
 			if (indoc != null) {
                             done(indoc)
 			} else {
-                            done(xcontdoc)
+                            done(request.responseXML)
 			}
 		    }
                 }
