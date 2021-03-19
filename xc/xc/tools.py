@@ -77,9 +77,17 @@ class XCForm(forms.Form):
         if ftype == 'select':
             elemname = 'select'
         fval = f.value() if f.value() is not None else ''
-        required = ' required="required"' if f.field.required else ''
-        disabled = ' disabled="disabled"' if f.field.disabled else ''
         value = ''
+        moreAttrs = ""
+        moreClasses = ""
+        fattrs = f.build_widget_attrs(f.field.widget.attrs)
+        def mapValue(v):
+            if type(v) == type(True):
+                return int(v)
+            else:
+                return v
+        moreAttrs = " " + " ".join([ '%s="%s"' % (k, mapValue(fattrs[k])) for k in fattrs if k != 'class' ])
+        moreClasses = (" " + fattrs['class']) if 'class' in fattrs else ''
         if elemname == 'input':
             if ftype == 'checkbox':
                 value = ' checked="1"' if fval else ''
@@ -87,24 +95,20 @@ class XCForm(forms.Form):
                 pass
             else:
                 value = ' value="%s"' % (xmlesc(str(fval)),)
-            s += '<input id="%s" class="%s" name="%s"%s%s type="%s"%s/></field>' % (
-                auto_id, f.css_classes(), f.name, disabled, required, ftype, value)
+            s += '<input id="%s" class="%s" name="%s"%s type="%s"%s/></field>' % (
+                auto_id, f.css_classes() + moreClasses, f.name, moreAttrs, ftype, value)
         elif elemname == 'select':
             if type(f.field.widget) == type(forms.SelectMultiple()):
-                s += '<select id="%s" class="%s" name="%s"%s%s multiple="multiple">\n' % (
-                    auto_id, f.css_classes(), f.name, disabled, required)
-                olist = [ '<option %svalue="%s">%s</option>' % ('selected="selected" ' if c in fval else '',
-                                                                c, d) for (c, d) in f.form.fields[field].choices ]
-            else:
-                s += '<select id="%s" class="%s" name="%s"%s%s>\n' % (
-                    auto_id, f.css_classes(), f.name, disabled, required)
-                olist = [ '<option %svalue="%s">%s</option>' % ('selected="selected" ' if c == fval else '',
-                                                                c, d) for (c, d) in f.form.fields[field].choices ]
+                moreAttrs += ' multiple="multiple"'
+            s += '<select id="%s" class="%s" name="%s"%s>\n' % (
+                auto_id, f.css_classes() + moreClasses, f.name, moreAttrs)
+            olist = [ '<option %svalue="%s">%s</option>' % ('selected="selected" ' if c in fval else '',
+                                                            c, d) for (c, d) in f.form.fields[field].choices ]
             s += '\n'.join( olist )
             s += '</select></field>'
         else:
-            s += '<textarea id="%s" class="%s" %sname="%s" %s><![CDATA[%s]]></textarea></field>' % (
-                auto_id, f.css_classes(), disabled, f.name, required, fval)
+            s += '<textarea id="%s" class="%s" name="%s"%s><![CDATA[%s]]></textarea></field>' % (
+                auto_id, f.css_classes() + moreClasses, f.name, moreAttrs, fval)
         return s
 
     def asxml(self):
