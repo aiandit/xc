@@ -759,6 +759,12 @@
   <xsl:template match="dict[xapp = 'main' and view = 'view']">
   </xsl:template>
 
+  <!-- no output from dirmanform -->
+  <xsl:template match="dict[view = 'dirmanform']">
+  </xsl:template>
+  <xsl:template match="dict[view = 'dirmanform']" mode="xc-title">
+  </xsl:template>
+
 
   <xsl:template match="dict[view = 'sendmsg']" mode="xc-title">
     <xsl:value-of select="/*/forms/form[1]/@title"/>
