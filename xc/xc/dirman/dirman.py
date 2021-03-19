@@ -419,7 +419,7 @@ def runproc(cmdlist, wdir, timelimit=60, **kw):
         if l is None:
             return
     t0 = time.time()
-#    print('exec:', cmdlist)
+#    print('exec:', ' '.join(cmdlist))
     p = subprocess.run(cmdlist, cwd = wdir, **kw)
     stat = p.returncode
 #    print(p)
