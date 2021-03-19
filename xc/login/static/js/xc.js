@@ -1056,3 +1056,61 @@ xc.xq = function(exp, node) {
     }
     return res
 }
+
+xc.sortCol = function(ev) {
+    var t = event.target
+    var ind = xc.xq('count(preceding-sibling::x:td)', t)
+    var table = xc.xq('ancestor::x:table', t)[0]
+    var rows = xc.xq('x:tbody/x:tr', table)
+    var vals = rows.map(function(row) {
+	var td = xc.xq('x:td', row)[ind]
+	var fe = td.firstElementChild
+	var val
+	if (fe.dataset.flval != undefined) {
+	    val = fe.dataset.flval
+	} else {
+	    val = td.innerText
+	}
+	return val
+    })
+
+    var order = t.dataset.order || 'ascending'
+    var datatype = t.dataset.datatype || 'number'
+
+    if (datatype == 'number') {
+	var nvals = vals.map((k) => Number(k))
+	if (nvals.length == nvals.filter((k) => String(k) != 'NaN').length) {
+	    vals = nvals
+	} else {
+	    datatype = 'text'
+	}
+    }
+
+    var sres = xc.sortWithIndices(vals, datatype)
+    if (order != 'ascending') {
+	sres.sortIndices.reverse()
+    }
+    var res = []
+    for (var i = 0; i < rows.length; ++i) {
+	res.push(rows[sres.sortIndices[i]])
+    }
+
+    table.querySelector('tbody').innerHTML = res.map((k)=>k.outerHTML).join('')
+
+    xc.xq('../x:td', t).forEach((k) => {
+	k.classList.remove('sort-descending')
+	k.classList.remove('sort-ascending')
+    })
+
+    if (order == 'ascending') {
+	t.dataset.order = 'descending'
+	t.classList.add('sort-ascending')
+	t.classList.remove('sort-descending')
+    } else {
+	t.dataset.order = 'ascending'
+	t.classList.add('sort-descending')
+	t.classList.remove('sort-ascending')
+    }
+
+    return false
+}
