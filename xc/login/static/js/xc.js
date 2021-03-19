@@ -315,7 +315,11 @@ xc.handleLinkClickA = function(ev, elem) {
 }
 
 var handleLinkClick = function(ev) {
-    return xc.handleLinkClickA(ev, ev.target)
+    var target = ev.target
+    while(target.nodeName != 'A' && !target.nodeName.startsWith('#')) {
+	target = target.parentElement
+    }
+    return xc.handleLinkClickA(ev, target)
 }
 
 var dohandleFormSubmit = function(form, ev) {
