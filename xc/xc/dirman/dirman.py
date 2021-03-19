@@ -320,7 +320,7 @@ class DirManager:
             print('renamedoc:', ex)
         return stat
 
-    def deletedoc(self, name):
+    def deletedoc(self, name, *moreArgs):
         if self.normalizepath(name) is None:
             return -2
         try:
