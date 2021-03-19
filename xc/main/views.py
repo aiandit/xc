@@ -209,6 +209,8 @@ class DeleteData(XCForm):
                            widget=forms.TextInput(attrs={'size': 120}))
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
 
+    next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action', widget=forms.HiddenInput)
+
     def clean(self):
         cleaned_data = super().clean()
         return cleaned_data
@@ -242,7 +244,10 @@ def ajax_delete(request):
         if lsl != 0:
             errmsg = 'doc deletion failed'
         else:
-            return redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
+            next_ = cdata['next_']
+            if len(next_) == 0:
+                next_ = redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
+            return redirect(next_)
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
