@@ -6,6 +6,10 @@ xframes.ajaxPathName = function(path) {
     var pieces = aurl.pathname.split(/[\/]+/)
     var lastpiece = pieces[pieces.length-1]
 
+    if (lastpiece == '') {
+	pieces = ['', 'main', '']
+	lastpiece = 'home'
+    }
     if (!lastpiece.startsWith('ajax_')) {
 	pieces[pieces.length-1] = 'ajax_' + lastpiece
     }
