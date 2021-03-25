@@ -959,9 +959,9 @@ xc.inject = function(id, html) {
     }
 }
 
-xc.transformAndSaveAs = function(doc, filters, ofname, form, done) {
+xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done) {
     var updateconfxlp = xlp.mkXLP(filters, '/main/getf/')
-    updateconfxlp.transform(doc, function(resconf) {
+    updateconfxlp.transform(doc, toDoc, function(resconf) {
 	form.path.value = ofname
 	form.data.value = resconf.textContent
 	xlp.submitForm(form, '/main/ajax_edit', function(status) {
