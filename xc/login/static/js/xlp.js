@@ -315,8 +315,20 @@ xlp.transformToFragment = function(xslt, xml) {
         result = parseXML(xml.transformNode(xslt))
     } else {
         xsltproc = new XSLTProcessor()
-        xsltproc.importStylesheet(xslt)
-        result = xsltproc.transformToFragment(xml, document)
+        try {
+            xsltproc.importStylesheet(xslt)
+        } catch(e) {
+            console.error('Failed to import stylesheet: ' + xslt.URL)
+            console.error(e)
+        }
+        if (xsltproc) {
+            try {
+                result = xsltproc.transformToFragment(xml, document)
+            } catch(e) {
+                console.error('Failed to transform: ' + xslt.URL)
+                console.error(e)
+            }
+        }
     }
 
     return result
@@ -448,7 +460,8 @@ xlp.mkXLP = function(xslts, xsltbase, options) {
             if (j < xslts.length - 1) {
                 step(res, toDoc, done, j+1)
             } else {
-                if (res.documentElement != undefined
+                if (res != undefined
+                    && res.documentElement != undefined
                     && res.documentElement.namespaceURI == "http://www.mozilla.org/TransforMiix") {
                     var tn = res.documentElement.firstChild
                     var newres = document.createDocumentFragment()

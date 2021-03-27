@@ -205,17 +205,22 @@ var updateXDataView = function(ev, done) {
     } else {
 	var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
 	xinfo.transform(xcontdoc, false, function(jinfo) {
-            var info = JSON.parse(jinfo.textContent)
             var dclass = 'default'
-            if (info.class.length>0) {
-		dclass = info.class
+            if (! jinfo) {
+                console.error('XC: failed to get doc class info in JSON format')
             } else {
-		console.log('No Xdata class found')
+                var info = JSON.parse(jinfo.textContent)
+                if (info.class.length>0) {
+		    dclass = info.class
+                } else {
+		    console.error('XC: No Xdata class found in the JSON structure')
+                }
             }
             var modeForm = document.forms['xc-control']
             if (modeForm) {
 		mode = modeForm.elements['mode'].value
             }
+	    console.log('XC: class is ' + dclass)
 	    xc.docs[dclass] = xcontdoc
             xc.getClassViewFunction(dclass, mode, function(res) {
 		res.render(xcontdoc, function(res) {
