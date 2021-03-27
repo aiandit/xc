@@ -6,7 +6,26 @@ from register.models import UserIP
 
 import xc.settings
 
-from xc.dirman import dirman
+import importlib
+import os
+import sys
+
+def load_from_file(modname):
+#    class_inst = None
+#    expected_class = 'MyClass'
+
+    my_mod = importlib.import_module(modname)
+
+#    if hasattr(py_mod, expected_class):
+#        class_inst = getattr(py_mod, expected_class)()
+
+    return my_mod
+ #   return class_inst
+
+dirman = load_from_file(os.getenv('XC_DIRMAN', 'xc.dirman.dirman'))
+
+print(dir(dirman))
+print(dirman.version)
 
 import json
 
