@@ -1079,7 +1079,9 @@ def ajax_getf(request):
                 errmsg = 'File not found'
                 rdata.add_error("which", 'File not found')
             else:
+                #print('getf: %s -> %d results ' %(which, len(findlist)))
                 path = '%s/%s' % (findlist[0]['path'], findlist[0]['name'])
+                #print('getf: %s -> %s ' %(which, path))
                 return getp(request, path)
 
     (filename, file_extension) = os.path.splitext(path)
@@ -1113,7 +1115,9 @@ def getfp(request, pattern):
         errmsg = 'getfp: File ''%s'' not found' % (pattern,)
         print(errmsg)
     else:
+        #print('getfp: %s -> %d results ' % (which, len(findlist)))
         path = '%s/%s' % (findlist[0]['path'], findlist[0]['name'])
+        #print('getfp: %s -> %s ' %(which, path))
         return getp(request, path)
 
     return HttpResponse(status=404)
