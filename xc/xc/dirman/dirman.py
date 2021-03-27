@@ -4,6 +4,8 @@ import os, sys, time, shutil, subprocess, csv, io
 
 from xc import settings
 
+version = 'Dirman 1.0'
+
 def fileexists(name):
     res = True
     try:
