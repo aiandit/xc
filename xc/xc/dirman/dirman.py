@@ -47,7 +47,8 @@ def getfinfo(path, relpath, follow=True):
             stat = os.stat(path)
         else:
             stat = os.lstat(path)
-    except:
+    except BaseException as ex:
+        print('getfinfo exception: ', ex)
         return ({}, {})
     ftype = filetypeLetter(stat)
 #    print('os.stat', stat)
@@ -102,9 +103,15 @@ class DirManager:
 
     uhome = os.environ['HOME'] if 'HOME' in os.environ else '/root'
     allowedPaths = getlines('%s/.config/xc/allowed-paths.txt' % (uhome,)) + \
+        getlines('%s/allowed-paths.txt' % (settings.BASE_DIR,)) + \
         getlines('/etc/xc/allowed-paths.txt')
 
     dir = '.'
+
+    def __init__(self, base='.'):
+        if not fileexists(base):
+            print('Error: DirManager init failed: base path %s does not exist' % (base,))
+        self.base = base
 
     def chroot(self, path):
         self.base = self.realpath(path)
@@ -143,6 +150,7 @@ class DirManager:
             res = self.normalize_allowed_path(relbase)
         else:
             res = None
+            print('cutpath: "%s" (%s) is not under base "%s", nor in allowed paths' %( path, relbase, base))
 #        print('cutpath: "%s","%s","%s" -> %s' %( path, base, relbase, res))
         return res
 
@@ -476,6 +484,9 @@ def gitlog(func, wdir=settings.XC_WORKDIR, *args, **kw):
     return result
 
 class GitDirManager(DirManager):
+
+    def __init__(self, base='.'):
+        super.__init__(base=base)
 
     @gitlog()
     def chroot(self, path, comment):
