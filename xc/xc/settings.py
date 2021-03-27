@@ -27,7 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'raspberrypi',
-    'example.local'
+    'example.local',
+    'localhost'
 ]
 
 LOGIN_URL = 'login/'
