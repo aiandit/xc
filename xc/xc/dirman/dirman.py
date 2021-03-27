@@ -290,7 +290,7 @@ class DirManager:
         file.close()
         return content
 
-    def getlines(self, name):
+    def getlines(self, name, offs=0, len=-1):
         file = open(self.getpath(name), 'r', encoding='utf8')
         t0 = time.time()
 #        print('Start reading file: %s' % name)
@@ -300,24 +300,26 @@ class DirManager:
         except BaseException as ME:
             print('File read failed: %s, %s' % (name, ME))
         t1 = time.time()
-#        print('File read: %s, %g s' % (name, t1 - t0))
-        return content.split('\n')
+        #        print('File read: %s, %g s' % (name, t1 - t0))
+        lines = content.split('\n')
+        if len > 0:
+            lines = lines[offs:(offs+len)]
+        return lines
 
     def nlines(self, name):
         return len(self.getlines(name))
 
     def head(self, name, n):
 #        print('retrieve first %d lines of %s' % (n, name))
-        return self.getlines(name)[0:n]
+        return self.getlines(name, 0, n)
 
     def tail(self, name, n):
 #        print('retrieve last %d lines of %s' % (n, name))
-        lines = self.getlines(name)
-        return (lines[-n:], len(lines))
+        lines = self.getlines(name, self.nlines(name) - n,  n)
+        return (lines, self.nlines(name))
 
     def range(self, name, m, n):
-#        print('retrieve range %d-%d of lines of %s' % (m, n, name))
-        return self.getlines(name)[m:n]
+        lines = self.getlines(name, m, n-m)
 
     def renamedoc(self, name1, name2):
         stat = 0
