@@ -1171,6 +1171,7 @@ def getp(request, path):
         else:
             print('The file is not a file:', path)
             errmsg = 'The file was not found'
+            return HttpResponse(status=404)
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
