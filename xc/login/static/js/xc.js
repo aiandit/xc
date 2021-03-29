@@ -963,7 +963,8 @@ xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done) {
     var updateconfxlp = xlp.mkXLP(filters, '/main/getf/')
     updateconfxlp.transform(doc, toDoc, function(resconf) {
 	form.path.value = ofname
-	form.data.value = resconf.textContent
+	form.data.value = toDoc ? resconf.documentElement.outerHTML : resconf.textContent
+	form.csrfmiddlewaretoken.value = xc.getCSRFToken()
 	xlp.submitForm(form, '/main/ajax_edit', function(status) {
 	    console.log('Doc ' + doc.URL + ' transformed with ' + filters + ' and saved as ' + ofname)
 	    done()
