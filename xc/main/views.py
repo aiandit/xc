@@ -1162,7 +1162,11 @@ def getp(request, path):
     (isXML, lsl, fdata, fstr) = getxmlifposs(path)
 
     if isXML:
-        return HttpResponse(fstr, content_type="application/xml")
+        ctype = "application/xml"
+        (filename, file_extension) = os.path.splitext(path)
+        if file_extension == ".xsl":
+            ctype = "text/xml"
+        return HttpResponse(fstr, content_type=ctype)
     else:
         if len(lsl) > 0 and len(lsl['info']) > 0 and lsl['info']['type'] == '-':
             mtype = mimetypes.guess_type(lsl['info']['name'])
