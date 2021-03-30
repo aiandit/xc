@@ -1,2 +1,6 @@
-<config>
+<config xmlns="http://ai-and-it.de/xmlns/2020/xc">
+<Test test="112" a="1" c="3" b="2">
+</Test>
+<clock/>
+<env/>
 </config>

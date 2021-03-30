@@ -89,10 +89,10 @@ xc.mkViewTransform = function(transformName, done) {
         if (isErrorResponse(t)) {
             xlp.loadXML(xc.xslpath + transformName + '.xsl', function(st, t) {
                 if (isErrorResponse(t)) {
-                    console.error('mkTransform: No transformation functions found for "' + transformName + '"')
+                    console.error('mkTransform: No XHLP transformations found for "'
+                                  + transformName + '", default')
                     var viewTransform = xlp.mkXLP(['default-view-html.xsl'], '/main/getf/xsl/')
                     done(viewTransform)
-                    //done(res)
                 } else {
                     var viewTransform = xlp.mkXLP([t.responseXML], '/main/getf')
                     done(viewTransform)
@@ -159,6 +159,7 @@ xc.getClassViewFunction = function(dclass, mode, done) {
     var key = dclass + '-' + mode
     var incache = xc.classViewFunctions[key]
     if (typeof incache == 'undefined') {
+        console.log('Create viewclass function for ' + key)
         xc.mkClassViewFunction(dclass, mode, function(res) {
             incache = res
             xc.classViewFunctions[key] = res
@@ -1126,3 +1127,5 @@ xc.sortCol = function(ev) {
 
     return false
 }
+
+xc.id = (r) => r
