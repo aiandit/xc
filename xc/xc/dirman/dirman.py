@@ -306,7 +306,7 @@ class DirManager:
         lines = content.split('\n')
         if len > 0:
             lines = lines[offs:(offs+len)]
-        return lines
+        return '\n'.join(lines)
 
     def nlines(self, name):
         return len(self.getlines(name))
