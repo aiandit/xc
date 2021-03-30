@@ -322,6 +322,7 @@ class DirManager:
 
     def range(self, name, m, n):
         lines = self.getlines(name, m, n-m)
+        return lines
 
     def renamedoc(self, name1, name2):
         stat = 0
