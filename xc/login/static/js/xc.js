@@ -615,6 +615,8 @@ var ppViews = function(subtree, ev) {
 		xc.docs[viewName] = request.responseXML
 		//renderPostProc(ev, request, true)
 		updateTreeFinal(document.querySelector('#' + el.dataset.viewTarget), ev)
+		var onloadCode = el.dataset.viewOnload
+		eval(onloadCode)
             })
 	    el.dataset.viewDone = '1'
 	}
