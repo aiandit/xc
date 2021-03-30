@@ -22,8 +22,11 @@ def load_from_file(modname):
     return my_mod
  #   return class_inst
 
-dirman = load_from_file(os.getenv('XC_DIRMAN', 'xc.dirman.dirman'))
 
+dirmanModuleName = os.getenv('XC_DIRMAN', xc.settings.XC_DIRMAN if hasattr(xc.settings, 'XC_DIRMAN') else 'xc.dirman.dirman')
+dirman = load_from_file(dirmanModuleName)
+
+print(dirmanModuleName)
 print(dir(dirman))
 print(dirman.version)
 
