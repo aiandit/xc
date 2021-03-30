@@ -52,7 +52,7 @@ code {
     padding: 0.5em;
     min-width: 25em;
 }
-code.pre {
+.pre {
     white-space: pre;
 }
 code.mono {
@@ -288,10 +288,10 @@ table, tr, th, td {
     font-size: inherit;
 }
 #document {
-    color: wheat;
+    color: darkgrey;
 }
 #content {
-    color: wheat;
+    color: darkgrey;
 }
 #document-actions {
     max-width: 30rem;
