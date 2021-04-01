@@ -316,8 +316,9 @@ class DirManager:
         return self.getlines(name, 0, n)
 
     def tail(self, name, n):
-#        print('retrieve last %d lines of %s' % (n, name))
-        lines = self.getlines(name, self.nlines(name) - n,  n)
+        # print('retrieve last %d lines of %s' % (n, name))
+        # don't try to read the last line...
+        lines = self.getlines(name, self.nlines(name) - n-1,  n)
         return (lines, self.nlines(name))
 
     def range(self, name, m, n):
