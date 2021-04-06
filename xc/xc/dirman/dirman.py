@@ -304,6 +304,8 @@ class DirManager:
         t1 = time.time()
         #        print('File read: %s, %g s' % (name, t1 - t0))
         lines = content.split('\n')
+        if offs < 0:
+            offs = 0
         if len > 0:
             lines = lines[offs:(offs+len)]
         return '\n'.join(lines)
