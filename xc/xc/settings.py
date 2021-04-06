@@ -144,9 +144,11 @@ EMAIL_USE_TLS = True
 xc_appdir = '/var/lib/xc/xc-application'
 try:
     os.lstat(xc_appdir)
-    XC_WORKDIR = '/var/lib/xc/xc-application'
 except:
-    XC_WORKDIR = os.path.join(os.path.abspath(os.path.join(BASE_DIR, '..')), 'data')
+    xc_appdir = os.path.join(os.path.abspath(os.path.join(BASE_DIR, '..')), 'data')
+XC_WORKDIR = xc_appdir
+
+XC_HOME_PATH = 'config.xml'
 
 XC_USE_GIT=False
 

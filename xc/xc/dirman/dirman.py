@@ -311,7 +311,7 @@ class DirManager:
         return '\n'.join(lines)
 
     def nlines(self, name):
-        return len(self.getlines(name))
+        return len(self.getlines(name).split('\n'))
 
     def head(self, name, n):
 #        print('retrieve first %d lines of %s' % (n, name))
