@@ -263,7 +263,7 @@ class DirManager:
             file.close()
         return stat
 
-    def appenddoc(self, name, doc):
+    def appenddoc(self, name, doc, *more):
         stat = 0
         try:
             fpath = self.realpath(name)
