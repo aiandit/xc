@@ -10,10 +10,6 @@ import importlib
 import os
 import sys
 
-userPyPath = xc.settings.XC_WORKDIR + '/files/py'
-if os.path.exists(userPyPath):
-    sys.path.append(xc.settings.XC_WORKDIR + '/files/py')
-
 def load_from_file(modname):
 #    class_inst = None
 #    expected_class = 'MyClass'
