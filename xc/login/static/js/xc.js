@@ -1137,3 +1137,12 @@ xc.sortCol = function(ev) {
 
     return false
 }
+
+xc.getID = function(path, done) {
+    var rdata = 'path=' + path + '&incr=1&next_=counter&csrfmiddlewaretoken=' + xc.getCSRFToken()
+    var headers = {'Content-type': 'application/x-www-form-urlencoded'}
+    xlp.sendPost('/main/plain_counter', rdata, headers, function(stat, res) {
+        var num = xc.xq('number(/*/xcontent/xc:*)', res.responseXML)
+        done(num)
+    })
+}
