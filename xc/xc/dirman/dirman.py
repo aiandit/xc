@@ -490,7 +490,7 @@ def gitlog(func, wdir=settings.XC_WORKDIR, *args, **kw):
 class GitDirManager(DirManager):
 
     def __init__(self, base='.'):
-        super.__init__(base=base)
+        super().__init__(base=base)
 
     @gitlog()
     def chroot(self, path, comment):
