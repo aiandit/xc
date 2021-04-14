@@ -421,6 +421,9 @@ var setFormCallback = function(subtree, handle) {
     for (var k=0; k < forms.length; ++k) {
 //        console.log(name + ': set form submit event for: ' + forms[k].id);
         forms[k].onsubmit = ffunc;
+        if (forms[k].elements.csrfmiddlewaretoken == undefined) {
+            forms[k].innerHTML += "<input type='hidden' name='csrfmiddlewaretoken' value=''/>"
+        }
     }
 }
 
@@ -962,6 +965,11 @@ xc.inject = function(id, html) {
     if (el != null) {
 	el.innerHTML = html
     }
+}
+
+xc.submitForm = function(form, url, done) {
+    form.csrfmiddlewaretoken.value = xc.getCSRFToken()
+    xlp.submitForm(form, url, done)
 }
 
 xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done) {
