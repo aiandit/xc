@@ -379,7 +379,7 @@ class DirManager:
     def which(self, name, pattern, path=None, sys=True):
         if path is None:
             path = '/' in pattern
-        ftrans = self.find(name, pattern, path=path, sys=sys)
+        ftrans = self.findsort(name, pattern, path=path, sys=sys)
         if len(ftrans) > 0:
             ftrans = [ftrans[0]]
         return ftrans
