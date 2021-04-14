@@ -1341,29 +1341,13 @@ def getrange(request, path, mode, start, end, transpose=False):
         t0 = time.time()
         if mode == 'head':
             fdata = workdir.head(path, end)
-            start = end - len(fdata)
-            fdata = '\n'.join(fdata)
+            start = -1
         elif mode == 'tail':
-#            print(start, end)
             (fdata, nmax) = workdir.tail(path, start)
             start = nmax - start
             end = nmax
-#            print(len(fdata))
-#            print(fdata)
-            fdata = '\n'.join(fdata)
         elif mode == 'range':
-            linesel = workdir.range(path, start, end)
-            # if transpose:
-            #     crr = csv.reader(linesel, delimiter=';')
-            #     t1 = time.time()
-            #     fdatat = zip(*crr)
-            #     output = io.StringIO()
-            #     csv.writer(output, delimiter=';').writerows(fdatat)
-            #     fdata = output.getvalue()
-            #     t2 = time.time()
-            #     print('Transpose: %g' % (t2-t1))
-            # else:
-            fdata = '\n'.join(linesel)
+            fdata = workdir.range(path, start, end)
             t1 = time.time()
             print('Load %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
         aenc = request.headers['Accept-Encoding']

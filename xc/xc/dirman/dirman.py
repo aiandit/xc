@@ -304,24 +304,28 @@ class DirManager:
         t1 = time.time()
         #        print('File read: %s, %g s' % (name, t1 - t0))
         lines = content.split('\n')
+        if offs < 0:
+            offs = 0
         if len > 0:
             lines = lines[offs:(offs+len)]
-        return lines
+        return '\n'.join(lines)
 
     def nlines(self, name):
-        return len(self.getlines(name))
+        return len(self.getlines(name).split('\n'))
 
     def head(self, name, n):
 #        print('retrieve first %d lines of %s' % (n, name))
         return self.getlines(name, 0, n)
 
     def tail(self, name, n):
-#        print('retrieve last %d lines of %s' % (n, name))
-        lines = self.getlines(name, self.nlines(name) - n,  n)
+        # print('retrieve last %d lines of %s' % (n, name))
+        # don't try to read the last line...
+        lines = self.getlines(name, self.nlines(name) - n-1,  n)
         return (lines, self.nlines(name))
 
     def range(self, name, m, n):
         lines = self.getlines(name, m, n-m)
+        return lines
 
     def renamedoc(self, name1, name2):
         stat = 0
