@@ -2176,7 +2176,7 @@ def ajax_counter(request, plain=False):
     xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
     dx = dictxml(xcontext)
     context = { 'context_xml': dx, 'forms': [ rdata], 'xcontent': xcontent, 'xcontent_cdata': xmlesc(content) }
-    return render(request, 'common/xcerp-msg.xml' if not plain else 'common/xcerp-atom.xml',
+    return render(request, 'common/xc-msg.xml' if not plain else 'common/xc-atom.xml',
                   context, content_type="application/xml")
 
 def plain_counter(request):
