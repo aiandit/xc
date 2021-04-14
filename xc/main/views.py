@@ -510,6 +510,93 @@ def ajax_edit(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+def append(request):
+    context = {'xapp': 'main', 'view': 'append', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
+
+def ajax_append(request):
+
+    lsl = ''
+
+    errmsg = ''
+    errors = []
+    xcontent = ''
+    path = ''
+    fdata = ''
+    mtype = ''
+
+    if request.method == "GET":
+        reqDict = request.GET
+
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = EditData(reqDict)
+
+    resultview = 'dirmanform'
+    next_ = None
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+        formpath = path
+
+        if request.method == "POST":
+            data = cdata['data']
+
+            data.replace('\n', '<br/>')
+
+            stat = workdir.appenddoc(path, data, {'user': request.user.username, 'comment': cdata['comment']})
+            if stat == 0:
+                lsl = workdir.stat(path)
+                #                fdata = workdir.getdoc(path).decode('utf8')
+                fdata = data
+                next_ = cdata['next_']
+                if len(next_) == 0:
+                    next_ = reverse('main:ajax_edit') + '?path=%s' % (path,)
+                return redirect(next_)
+
+            else:
+                errmsg = 'file write failed: "%s"' % (stat)
+                fdata = ''
+            xcontent = fdata
+
+        elif request.method == 'GET':
+            fdata = workdir.getdoc(path)
+            (filename, file_extension) = os.path.splitext(path)
+            mtype = mimetypes.guess_type(path)[0]
+            if is_binary_string(fdata):
+                errmsg = 'File is binary'
+                formpath = os.path.dirname(path)
+            else:
+                try:
+                    xcontent = fdata.decode('utf-8')
+                except:
+                    errmsg = 'File cannot be decoded as UTF8'
+                    pass
+
+        rdata = EditData(initial={'path': formpath})
+
+    dict = getAllCGI(reqDict)
+    dict['data'] = ''
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = {
+        'errs': errors
+    }
+    data = { **data, **get_lsl(path) }
+
+    xcontext = {'xapp': 'main', 'view': resultview, 'cgi': dict, 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata, ControlForm()], 'xcontent_cdata': xmlesc(xcontent), 'mimetype': mtype}
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
 class FileuploadData(XCForm):
     title = 'Upload'
     name = 'fileupload'
