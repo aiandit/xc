@@ -426,6 +426,9 @@ var setFormCallback = function(subtree, handle) {
     for (var k=0; k < forms.length; ++k) {
 //        console.log(name + ': set form submit event for: ' + forms[k].id);
         forms[k].onsubmit = ffunc;
+        if (forms[k].elements.csrfmiddlewaretoken == undefined) {
+            forms[k].innerHTML += "<input type='hidden' name='csrfmiddlewaretoken' value=''/>"
+        }
     }
 }
 
@@ -985,6 +988,11 @@ xc.inject = function(id, html) {
     }
 }
 
+xc.submitForm = function(form, url, done) {
+    form.csrfmiddlewaretoken.value = xc.getCSRFToken()
+    xlp.submitForm(form, url, done)
+}
+
 xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done) {
     var updateconfxlp = xlp.mkXLP(filters, '/main/getf/')
     updateconfxlp.transform(doc, toDoc, function(resconf) {
@@ -1063,18 +1071,21 @@ xc.number = function(val) {
 }
 
 
+xc.nsResolver = function(prefix) {
+    var uri = prefix === "xhtml" ? 'http://www.w3.org/1999/xhtml' :
+	prefix === "x" ? 'http://www.w3.org/1999/xhtml' :
+	prefix === "xc" ? 'http://ai-and-it.de/xmlns/2020/xc' :
+	null
+    return uri
+}
+
+
 xc.xq = function(exp, node) {
     // https://stackoverflow.com/questions/19146056/document-evaluate-allways-returns-null-in-singlenodevalue-on-some-pages-sites
-    var nsResolver = function(prefix) {
-	var uri = prefix === "xhtml" ? 'http://www.w3.org/1999/xhtml' :
-	    prefix === "x" ? 'http://www.w3.org/1999/xhtml' :
-	    null
-	return uri
-    }
-    var xqres = document.evaluate(exp, node, nsResolver, XPathResult.ANY_TYPE, null);
+    var xqres = node.evaluate(exp, node, xc.nsResolver, XPathResult.ANY_TYPE, null);
     var res
     if (xqres.resultType == XPathResult.UNORDERED_NODE_ITERATOR_TYPE) {
-	xqres = document.evaluate(exp, node, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	xqres = node.evaluate(exp, node, xc.nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 	res = []
 	for (var i = 0; i < xqres.snapshotLength; ++i) {
 	    var node = xqres.snapshotItem(i)
@@ -1146,4 +1157,13 @@ xc.sortCol = function(ev) {
     }
 
     return false
+}
+
+xc.getID = function(path, done) {
+    var rdata = 'path=' + path + '&incr=1&next_=counter&csrfmiddlewaretoken=' + xc.getCSRFToken()
+    var headers = {'Content-type': 'application/x-www-form-urlencoded'}
+    xlp.sendPost('/main/plain_counter', rdata, headers, function(stat, res) {
+        var num = xc.xq('number(/*/xcontent/xc:*)', res.responseXML)
+        done(num)
+    })
 }
