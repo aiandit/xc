@@ -130,14 +130,16 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
 //            infoxml += '<action-findlist>' + alistresp + '</action-findlist>'
 
             var res = {
-                render: function(xcontdoc, done) {
+                render: function(xcontdoc, done, preprocess) {
 
                     var indoc = xc.getCurDoc(xcontdoc, xc.cgiParams() + infoxml)
 
                     sframes.render(indoc, function(res) {
                         console.log('Class render complete')
-                        console.log(res)
-                        done(sframes)
+                        done(res, sframes)
+                    }, function(res, pdone) {
+                        console.log('Class generation complete')
+                        preprocess(res, pdone)
                     })
 
                 }
@@ -226,6 +228,9 @@ var updateXDataView = function(ev, done) {
 		res.render(xcontdoc, function(res) {
                     console.log('Done with class based render cycle')
                     lastStep(res)
+		}, function(res, pdone) {
+                    console.log('Done with class based content generation')
+		    updateTreeFinal(res, ev, pdone)
 		})
             })
 	})
@@ -522,10 +527,12 @@ xc.getCSRFToken = function() {
 }
 
 //var globtO =  (new Date()).getTime()
-var ppPolls = function(subtree) {
+var ppPolls = function(subtree, done) {
     var tms = subtree.querySelectorAll('.xc-sl-poll')
-    tms.forEach(function(el) {
+
+    var doPoll = function(el, eldone) {
 	var getf = function(ciid, count, tlast) {
+	    el = document.getElementById(ciid)
 	    if (!xc.isChainedInterval(ciid)) {
 //		console.log('Chained interval ' + ciid + ' was cancelled')
 		return
@@ -547,16 +554,19 @@ var ppPolls = function(subtree) {
 		    if (!res.noupdate) {
 			el.innerHTML = res.text
 		    }
-		    tl.update()
 		    if (typeof res.done == 'function') {
 			res.done()
 		    }
 		} else {
 		    el.innerHTML = res
-		    updateTreeFinal(el)
 		}
-		var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
-		setTimeout(getf, nexttime, ciid, count+1, t0)
+		updateTreeFinal(el, undefined, function(utres) {
+		    var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
+		    setTimeout(getf, nexttime, ciid, count+1, t0)
+		    if (count == 0) {
+			eldone(utres)
+		    }
+		})
 	    }
 	    var handleResult = function(st, res) {
 		if (st == 0) {
@@ -584,22 +594,25 @@ var ppPolls = function(subtree) {
 	    }
 	}
 	if (el.attributes.id == undefined) {
-	    el.setAttribute('id', 'id' + String(Math.random() * 1e16).substr(0, 8))
+	    el.setAttribute('id', 'pid' + String((new Date()).getTime()))
 	}
 	var pollid = el.attributes.id.value
 	if (el.dataset.pollRunning == undefined) {
-	    var ciid = 'poll-'+ pollid
-//	    xc.setInterval('poll-'+ pollid, setInterval(getf, el.dataset.pollInterval))
 	    el.dataset.pollRunning = true
-	    xc.setChainedInterval(ciid)
-	    getf(ciid, 0, (new Date()).getTime())
+	    xc.setChainedInterval(pollid)
+	    getf(pollid, 0, (new Date()).getTime())
 	}
+    }
+
+    xlp.amap(tms, doPoll, function(res) {
+	done(res)
     })
+
 }
 
-var ppViews = function(subtree, ev) {
+var ppViews = function(subtree, ev, done) {
     var tms = subtree.querySelectorAll('.xc-sl-view')
-    tms.forEach(function(el) {
+    var doView = function(el, eldone) {
 	var getf = function() {
 	    var viewName = el.dataset.viewName || 'unknown-view'
 	    var url = el.dataset.viewUrl
@@ -617,6 +630,7 @@ var ppViews = function(subtree, ev) {
 		updateTreeFinal(document.querySelector('#' + el.dataset.viewTarget), ev)
 		var onloadCode = el.dataset.viewOnload
 		eval(onloadCode)
+		eldone(request)
             })
 	    el.dataset.viewDone = '1'
 	}
@@ -624,6 +638,9 @@ var ppViews = function(subtree, ev) {
 	    getf()
 	}
         return false
+    }
+    xlp.amap(tms, doView, function(res) {
+	done(res)
     })
 }
 
@@ -873,14 +890,16 @@ var updateTree = function(subtree, ev) {
 var updateTreeFinal = function(subtree, ev, done) {
     updateTree(subtree, ev)
     ppActions(subtree, ev)
-    ppPolls(subtree)
-    ppViews(subtree, ev)
     tl.update(subtree)
     ppSorts(subtree, ev)
     xc.ppActiveLink(subtree, ev)
-    if (done != undefined) {
-	done()
-    }
+    ppPolls(subtree, function(result) {
+	ppViews(subtree, ev, function(result) {
+	    if (typeof done == 'function') {
+		done(result)
+	    }
+	})
+    })
 }
 
 var isNonXMLResponse = function(request) {
