@@ -398,3 +398,7 @@ table, tr, th, td {
 .sort-ascending:after {
     content: "\2193";
 }
+
+.display-none {
+    display: none;
+}

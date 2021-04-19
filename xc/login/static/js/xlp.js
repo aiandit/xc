@@ -574,6 +574,9 @@ xlp.amap = function(array, func, done) {
             }
         })
     })
+    if (n == 0) {
+	done(results)
+    }
 }
 
 xlp.mloadXML = function(URLs, done) {
