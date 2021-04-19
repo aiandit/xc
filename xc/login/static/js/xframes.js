@@ -72,7 +72,7 @@ xframes.mkXframes = function(frames, xsltbase) {
             xlps[framen] = frame.xlp
         }
     }
-    var render = function(indoc, done) {
+    var render = function(indoc, done, preprocess) {
         var stepsDone = Array(frames.length);
         var stepsRes = Array(frames.length);
         [...Array(frames.length).keys()].forEach(function(framen) {
@@ -95,11 +95,22 @@ xframes.mkXframes = function(frames, xsltbase) {
                                || result.nodeType == result.DOCUMENT_FRAGMENT_NODE) {
                         // xmlns:transformiix="http://www.mozilla.org/TransforMiix"
                         if (result.documentElement != null) {
-                            if (result.documentElement.nodeName == 'transformiix:result') {
-                                resn.innerHTML = result.documentElement.innerHTML
-                            } else {
-                                resn.innerHTML = result.documentElement.outerHTML
-                            }
+			    var resHTML = result.documentElement.outerHTML
+			    var invNode = document.getElementById('invisible')
+			    console.log('Invisible children ' + invNode.childElementCount)
+			    var newNode = document.createElement('div')
+			    var nid = '' + (new Date()).getTime()
+			    newNode.setAttribute('id', nid)
+			    console.log('New Inv node ' + newNode.attributes.id.value + ' ' + nid)
+			    invNode.appendChild(newNode)
+			    newNode.innerHTML = resHTML
+			    preprocess(newNode, function(done) {
+				resHTML = newNode.innerHTML
+				resn.innerHTML = resHTML
+				var oldNode = invNode.removeChild(newNode)
+				console.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)
+				console.log('Invisible children ' + invNode.childElementCount)
+			    })
                         } else {
                             resn.innerHTML = result.textContent
                         }
@@ -128,6 +139,9 @@ xframes.mkXframes = function(frames, xsltbase) {
         } else {
             render(indoc, function(res) {
                 done(request, res)
+            }, function(res, done) {
+		console.log('No preprocess')
+		done(res)
             })
         }
     }
