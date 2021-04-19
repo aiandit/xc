@@ -105,17 +105,16 @@ xc.mkViewTransform = function(transformName, done) {
 }
 
 xc.classViewFunctions = {}
-xc.mkClassViewFunction = function(dclass, mode, done) {
+xc.mkClassViewFunction = function(targetid, dclass, mode, done) {
     var transformName = dclass + '-' + mode
-    xc.mkViewTransform(transformName, function(viewTransform) {
+    // xc.mkViewTransform(transformName, function(viewTransform) {
 
 //        getActionLSL(dclass, function(s, alistresp) {
             var frames = [
                 {target: 'title',
                  xlp: xlp.mkXLP(['xc-app-title.xsl'], '/main/getf/xsl/', {output: 'text'})},
-                {target: 'xc-document',
-                 xlp: viewTransform,
-                 filters: []},
+                {target: targetid + '-document',
+                 xlp: xlp.mkXLP([transformName + '.xml'], '/main/getf/xsl/')},
                 {target: 'document-actions',
                  xlp: xlp.mkXLP(['docactions-html.xsl'], '/main/getf/xsl/')},
                 {target: 'document-info',
@@ -144,7 +143,7 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
             done(res)
 
 //        })
-    })
+//    })
 }
 
 xc.getClassViewFunction = function(targetid, dclass, mode, done) {
