@@ -21,4 +21,6 @@
 
   <xsl:template match="xhtml:*" mode="get-class">html</xsl:template>
 
+  <xsl:template match="xc" mode="get-class">xc</xsl:template>
+
 </xsl:stylesheet>

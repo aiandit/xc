@@ -1,17 +1,38 @@
 var xframes = xframes || {}
 
-xframes.ajaxPathName = function(path) {
-    var aurl = new URL(path)
+xframes.normalizePath = function(path) {
+    if (path[0] == '/') {
+        path = xlp.getbase() + path
+    }
+    var t = new URL(path)
+    var p = t.pathname
+    var pieces = p.split('/')
+    pieces = pieces.filter((k)=> k.length>0)
+    var np = pieces.join('/')
+    if (p[p.length-1] == '/') {
+        np += '/'
+    }
+    return t.origin + '/' + np + t.search
+}
 
-    var pieces = aurl.pathname.split(/[\/]+/)
-    var lastpiece = pieces[pieces.length-1]
+xframes.ajaxPathName = function(path) {
+    var aurl = new URL(xframes.normalizePath(path))
+
+    var pieces = aurl.pathname.split('/')
+    var lastpieceI = pieces.length-1
+    var lastpiece = pieces[lastpieceI]
 
     if (lastpiece == '') {
-	pieces = ['', 'main', '']
-	lastpiece = 'home'
+        if (pieces.length < 4) {
+	    pieces = ['', 'main', '']
+	    lastpiece = 'home'
+        } else {
+            lastpieceI -= 1
+            lastpiece = pieces[lastpieceI]
+        }
     }
     if (!lastpiece.startsWith('ajax_')) {
-	pieces[pieces.length-1] = 'ajax_' + lastpiece
+	pieces[lastpieceI] = 'ajax_' + lastpiece
     }
 
     var res = new URL(aurl.origin + pieces.join('/') + aurl.search) + ''
@@ -109,6 +130,9 @@ xframes.mkXframes = function(frames, xsltbase) {
                 done(request, res)
             })
         }
+    }
+    var renderData = function(src, doc, done) {
+        renderRespHandler(0, doc, done, src, src)
     }
     var renderLink = function(src, url, done) {
         xlp.reqXML(src, {URL: url, method: 'GET', callback: (a,b)=>renderRespHandler(a,b,done, src,url)})

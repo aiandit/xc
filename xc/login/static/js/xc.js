@@ -99,9 +99,7 @@ xc.mkViewTransform = function(transformName, done) {
                 }
             })
         } else {
-            xlp.readXLP(t.responseXML, '/main/getf/',  function(viewTransform) {
-                done(viewTransform)
-            })
+            xlp.readXLP(t.responseXML, '/main/getf/',  done)
         }
     })
 }
@@ -175,6 +173,42 @@ var updateXView = function(ev) {
     })
 }
 
+xc.autoRender = function(ev, xcontdoc, targetid, done) {
+
+    var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
+    xinfo.transform(xcontdoc, false, function(jinfo) {
+        var dclass = 'default'
+        if (! jinfo) {
+            console.error('XC: failed to get doc class info in JSON format')
+        } else {
+            var info = JSON.parse(jinfo.textContent)
+            if (info.class.length>0) {
+		dclass = info.class
+            } else {
+		console.error('XC: No Xdata class found in the JSON structure')
+            }
+        }
+        var mode = 'html'
+        var modeForm = document.forms['xc-control']
+        if (modeForm) {
+	    mode = modeForm.elements['mode'].value
+        }
+	console.log('XC: class is ' + dclass)
+	xc.docs[dclass] = xcontdoc
+        xc.getClassViewFunction(targetid, dclass, mode, function(viewFun) {
+	    viewFun.render(xcontdoc, function(res) {
+                console.log('Done with class based render cycle')
+                updateTreeFinal(document, ev)
+                done(res)
+	    }, function(res) {
+                console.log('Before insert')
+                updateTreeFinal(res, ev)
+	    })
+        })
+    })
+
+}
+
 var updateXDataView = function(ev, done) {
     updateTree(document, ev)
 
@@ -195,7 +229,7 @@ var updateXDataView = function(ev, done) {
         console.log('No XML data')
 
 	var dclass = xc.curtype.replace('/', '_')
-        xc.getClassViewFunction(dclass, mode, function(xcontdoc) {
+        xc.getClassViewFunction('xc', dclass, mode, function(xcontdoc) {
 	    res.render(xcontdoc, function(res) {
                 console.log('Done with class based render cycle')
                 lastStep(res)
@@ -203,32 +237,8 @@ var updateXDataView = function(ev, done) {
         })
 
     } else {
-	var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
-	xinfo.transform(xcontdoc, false, function(jinfo) {
-            var dclass = 'default'
-            if (! jinfo) {
-                console.error('XC: failed to get doc class info in JSON format')
-            } else {
-                var info = JSON.parse(jinfo.textContent)
-                if (info.class.length>0) {
-		    dclass = info.class
-                } else {
-		    console.error('XC: No Xdata class found in the JSON structure')
-                }
-            }
-            var modeForm = document.forms['xc-control']
-            if (modeForm) {
-		mode = modeForm.elements['mode'].value
-            }
-	    console.log('XC: class is ' + dclass)
-	    xc.docs[dclass] = xcontdoc
-            xc.getClassViewFunction(dclass, mode, function(res) {
-		res.render(xcontdoc, function(res) {
-                    console.log('Done with class based render cycle')
-                    lastStep(res)
-		})
-            })
-	})
+        // does updateTreeFinal
+        xc.autoRender(ev, xcontdoc, 'xc', done)
     }
 
 }
@@ -539,13 +549,19 @@ var ppPolls = function(subtree) {
 	    var ppFun = eval(el.dataset.postprocess)
 	    var handleData = function(text) {
 		var res
-		try {
-		    res = ppFun(text, el)
-		} catch (error) {
-		    console.error('ppPolls catched error in user function ' + el.dataset.postprocess);
-		    console.error(error);
-		    res = {noupdate: true}
-		}
+                if (ppFun != undefined) {
+		    try {
+		        res = ppFun(text, el)
+		    } catch (error) {
+		        console.error('ppPolls catched error in user function ' + el.dataset.postprocess);
+		        console.error(error);
+		        res = {noupdate: true}
+		    }
+                } else {
+                    xc.autoRender(undefined, text, el.dataset.pollTarget, function(request) {
+                        console.log('poll auto render done')
+                    })
+                }
 		if (typeof res == typeof {}) {
 		    if (!res.noupdate) {
 			el.innerHTML = res.text

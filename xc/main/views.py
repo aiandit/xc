@@ -1360,7 +1360,7 @@ def getrange(request, path, mode, start, end, transpose=False):
             fdata = brotli.compress(fdata.encode('utf8'), quality=1)
             t1 = time.time()
 #            print('Compress %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
-        resp = HttpResponse(fdata, content_type=mtype[0])
+        resp = HttpResponse(fdata, content_type=mtype[0] if mtype[0] is not None else 'text/plain')
         #        resp['Content-Encoding'] = 'gzip'
         if 'br' in aenc:
             resp['Content-Encoding'] = 'br'

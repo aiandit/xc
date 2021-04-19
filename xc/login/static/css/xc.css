@@ -398,3 +398,14 @@ table, tr, th, td {
 .sort-ascending:after {
     content: "\2193";
 }
+
+.flat-list {
+    display: block;
+}
+
+.flat-list > li {
+    list-style: circle;
+    display: inline list-item;
+    padding: 0.5em 1em;
+}
+
