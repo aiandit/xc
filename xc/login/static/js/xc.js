@@ -147,17 +147,17 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
     })
 }
 
-xc.getClassViewFunction = function(dclass, mode, done) {
+xc.getClassViewFunction = function(targetid, dclass, mode, done) {
     var verb = 'view'
     var vparam = xc.curresp.querySelector('cgi > v')
     if (vparam != null) {
 	verb = vparam.textContent
     }
     dclass += '-' + verb
-    var key = dclass + '-' + mode
+    var key = targetid + '-' + dclass + '-' + mode
     var incache = xc.classViewFunctions[key]
     if (typeof incache == 'undefined') {
-        xc.mkClassViewFunction(dclass, mode, function(res) {
+        xc.mkClassViewFunction(targetid, dclass, mode, function(res) {
             incache = res
             xc.classViewFunctions[key] = res
             done(res)
@@ -584,11 +584,15 @@ var ppPolls = function(subtree) {
 			    if (x.textContent.length > 0) {
 				handleData(x.textContent)
 			    } else {
-				handleData(res.responseText)
+				handleData(res.responseXML)
 			    }
 			})
 		    } else {
-			handleData(res.responseText)
+                        if (el.dataset.pollWrap != undefined) {
+                            handleData(xc.getXDoc(res.responseText, el.dataset.pollWrap))
+                        } else {
+			    handleData(res.responseText)
+                        }
 		    }
 		}
 	    }
@@ -695,6 +699,11 @@ var ppUnits = function(subtree) {
     var tms = subtree.querySelectorAll('span.value-with-unit')
     tms.forEach(function(el) {
         if (el.dataset.unit != el.dataset.targetunit) {
+            if (el.dataset.targetunit == undefined) {
+                if (el.dataset.unit == 'B') {
+                    el.dataset.targetunit = 'KB'
+                }
+            }
 //            console.log('GG: ' + el.innerHTML)
             var flval = Number(el.firstElementChild.innerText)
             if (el.dataset.unit == 'B' && el.dataset.targetunit == 'KB') {
