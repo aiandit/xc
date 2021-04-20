@@ -124,8 +124,9 @@ xframes.mkXframes = function(frames, xsltbase) {
             })
         }
     }
-    var renderLink = function(src, url, done) {
-        xlp.reqXML(src, {URL: url, method: 'GET', callback: (a,b)=>renderRespHandler(a,b,done, src,url)})
+    var renderLink = function(src, url, done, cached) {
+	var getfun = cached ? xlp.loadCached : xlp.loadXML
+        getfun(url, (a,b)=>renderRespHandler(a,b,done, src,url))
     }
     var renderFormSubmit = function(src, url, done) {
         var method = 'GET'
