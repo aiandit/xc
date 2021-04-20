@@ -181,8 +181,7 @@ var updateXDataView = function(ev, done) {
     updateTree(document, ev)
 
     var lastStep = function(r) {
-        updateTreeFinal(document, ev)
-        done(r)
+        updateTreeFinal(document, ev, done)
     }
 
     var xcontdoc = xc.getCurDocText(xc.curdoc)
@@ -226,10 +225,10 @@ var updateXDataView = function(ev, done) {
 	    xc.docs[dclass] = xcontdoc
             xc.getClassViewFunction(dclass, mode, function(res) {
 		res.render(xcontdoc, function(res) {
-                    console.log('Done with class based render cycle')
+                    console.log('Done with class based render cycle: ' + dclass + ', ' + mode)
                     lastStep(res)
 		}, function(res, pdone) {
-                    console.log('Done with class based content generation')
+                    console.log('Done with class based content generation: ' + dclass + ', ' + mode)
 		    updateTreeFinal(res, ev, pdone)
 		})
             })
@@ -444,15 +443,7 @@ var setLinkCallback = function(subtree, handle) {
     Object.keys(forms).forEach(function(k) {
         var oldHandler = forms[k].onclick
         forms[k].onclick = function(x, y) {
-            var res = ffunc(x, y)
-            // if (res) {
-            //     console.log('link click event handled OK: ' + res)
-            // }
-            // else {
-            //     var res = oldHandler(x, y)
-            //     console.log('call old handler: ' + res)
-            // }
-            return res
+            return ffunc(x, y)
         }
     })
 }
@@ -496,6 +487,9 @@ var psMultiField = function(data) {
     var items = data.split('\n')[1].split(' ')
     items = items.filter( (k) => k.length > 0 )
     return '<td>' + items.join('</td><td>') + '</td>'
+}
+xc.psHTMLC = function(data, done) {
+    done(xc.psHTML(data))
 }
 xc.psHTML = function(data) {
     if (data.length == 0) return ''
@@ -608,6 +602,9 @@ var ppPolls = function(subtree, done) {
     }
 
     xlp.amap(tms, doPoll, function(res) {
+	if (tms.length > 0) {
+	    console.log('All polls done')
+	}
 	done(res)
     })
 
@@ -617,24 +614,36 @@ var ppViews = function(subtree, ev, done) {
     var tms = subtree.querySelectorAll('.xc-sl-view')
     var doView = function(el, eldone) {
 	var getf = function() {
+	    var viewTarget = el.dataset.viewTarget
+	    if (viewTarget == undefined) {
+		if (el.attributes.id == undefined) {
+		    el.setAttribute('id', ''+(new Date()).getTime())
+		}
+		viewTarget = el.attributes.id.value
+	    }
 	    var viewName = el.dataset.viewName || 'unknown-view'
+	    var viewCache = el.dataset.viewCache || false
 	    var url = el.dataset.viewUrl
 	    var localframes = [
-		{target: el.dataset.viewTarget,
+		{target: viewTarget,
 		 filters: [
 		     el.dataset.viewFilter
 		 ]}
 	    ]
 	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
-            mylframes.renderLink(ev.target, xframes.ajaxPathName(xlp.getbase() + url), function(request) {
-		console.log('VIEW: sub view ' + url + ' is handled completely')
+            mylframes.renderLink(ev.target, url, function(request) {
+		console.log('VIEW: sub view ' + url + ' has been rendered')
 		xc.docs[viewName] = request.responseXML
 		//renderPostProc(ev, request, true)
-		updateTreeFinal(document.querySelector('#' + el.dataset.viewTarget), ev)
-		var onloadCode = el.dataset.viewOnload
-		eval(onloadCode)
-		eldone(request)
-            })
+		updateTreeFinal(document.getElementById(viewTarget), ev, function(result) {
+		    var onloadCode = el.dataset.viewOnload
+		    if (onloadCode != undefined) {
+			eval(onloadCode)
+		    }
+		    console.log('VIEW: sub view ' + url + ' is handled completely')
+		    eldone(request)
+		})
+            }, viewCache)
 	    el.dataset.viewDone = '1'
 	}
 	if (el.dataset.viewDone != '1') {
@@ -643,6 +652,9 @@ var ppViews = function(subtree, ev, done) {
         return false
     }
     xlp.amap(tms, doView, function(res) {
+	if (tms.length > 0) {
+	    console.log('All views done')
+	}
 	done(res)
     })
 }
