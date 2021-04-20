@@ -1,6 +1,7 @@
 var xc = xc || {}
 
 xc.docs = {}
+xc.curtype = 'xc'
 
 if (typeof xframe == "undefined") {
     xframe = 'index'
@@ -83,69 +84,43 @@ xc.isXC = function(dclass) {
     return !(dclass == 'svg' || dclass == 'html')
 }
 
-xc.mkViewTransform = function(transformName, done) {
-    var res = {}
-    xlp.loadXML('/main/getf/pipelines/' + transformName + '.xml', function(st, t) {
-        if (isErrorResponse(t)) {
-            xlp.loadXML(xc.xslpath + transformName + '.xsl', function(st, t) {
-                if (isErrorResponse(t)) {
-                    console.error('mkTransform: No transformation functions found for "' + transformName + '"')
-                    var viewTransform = xlp.mkXLP(['default-view-html.xsl'], '/main/getf/xsl/')
-                    done(viewTransform)
-                    //done(res)
-                } else {
-                    var viewTransform = xlp.mkXLP([t.responseXML], '/main/getf')
-                    done(viewTransform)
-                }
-            })
-        } else {
-            xlp.readXLP(t.responseXML, '/main/getf/',  done)
-        }
-    })
-}
-
 xc.classViewFunctions = {}
 xc.mkClassViewFunction = function(targetid, dclass, mode, done) {
     var transformName = dclass + '-' + mode
-    // xc.mkViewTransform(transformName, function(viewTransform) {
 
-//        getActionLSL(dclass, function(s, alistresp) {
-            var frames = [
-                {target: 'title',
-                 xlp: xlp.mkXLP(['xc-app-title.xsl'], '/main/getf/xsl/', {output: 'text'})},
-                {target: targetid + '-document',
-                 xlp: xlp.mkXLP([transformName + '.xml'], '/main/getf/xsl/')},
-                {target: 'document-actions',
-                 xlp: xlp.mkXLP(['docactions-html.xsl'], '/main/getf/xsl/')},
-                {target: 'document-info',
-                 xlp: xlp.mkXLP(['xc-document-info.xsl', 'docinfo-html.xsl'], '/main/getf/xsl/')}
-            ]
-            var sframes = xframes.mkXframes(frames, xc.xslpath)
+    var frames = [
+        {target: 'title',
+         xlp: xlp.mkXLP(['xc-app-title.xsl'], '/main/getf/xsl/', {output: 'text'})},
+        {target: targetid + '-document',
+         xlp: xlp.mkXLP(['pipelines/' + transformName + '.xml'], '/main/getf/')},
+        {target: 'document-actions',
+         xlp: xlp.mkXLP(['docactions-html.xsl'], '/main/getf/xsl/')},
+        {target: 'document-info',
+         xlp: xlp.mkXLP(['xc-document-info.xsl', 'docinfo-html.xsl'], '/main/getf/xsl/')}
+    ]
+    var sframes = xframes.mkXframes(frames, xc.xslpath)
 
-            var infoxml = '<viewclass>' + dclass + '</viewclass>'
-            infoxml += '<viewmode>' + mode + '</viewmode>'
-//            infoxml += '<action-findlist>' + alistresp + '</action-findlist>'
+    var infoxml = '<viewclass>' + dclass + '</viewclass>'
+    infoxml += '<viewmode>' + mode + '</viewmode>'
+    infoxml += '<targetid>' + targetid + '</targetid>'
 
-            var res = {
-                render: function(xcontdoc, done, preprocess) {
+    var res = {
+        render: function(xcontdoc, done, preprocess) {
 
-                    var indoc = xc.getCurDoc(xcontdoc, xc.cgiParams() + infoxml)
+            var indoc = xc.getCurDoc(xcontdoc, xc.cgiParams() + infoxml)
 
-                    sframes.render(indoc, function(res) {
-                        console.log('Class render complete')
-                        done(res, sframes)
-                    }, function(res, pdone) {
-                        console.log('Class generation complete')
-                        preprocess(res, pdone)
-                    })
+            sframes.render(indoc, function(res) {
+                console.log('Class render complete')
+                done(res, sframes)
+            }, function(res, pdone) {
+                console.log('Class generation complete')
+                preprocess(res, pdone)
+            })
 
-                }
-            }
+        }
+    }
 
-            done(res)
-
-//        })
-//    })
+    done(res)
 }
 
 xc.getClassViewFunction = function(targetid, dclass, mode, done) {
@@ -198,12 +173,11 @@ xc.autoRender = function(ev, xcontdoc, targetid, done) {
 	xc.docs[dclass] = xcontdoc
         xc.getClassViewFunction(targetid, dclass, mode, function(viewFun) {
 	    viewFun.render(xcontdoc, function(res) {
-                console.log('Done with class based render cycle')
-                updateTreeFinal(document, ev)
+                console.log('Done with autoRender cycle ' + targetid)
                 done(res)
-	    }, function(res) {
-                console.log('Before insert')
-                updateTreeFinal(res, ev)
+	    }, function(res, pdone) {
+                console.log('Before insert in autoRender cycle ' + targetid)
+                updateTreeFinal(res, ev, pdone)
 	    })
         })
     })
@@ -211,12 +185,6 @@ xc.autoRender = function(ev, xcontdoc, targetid, done) {
 }
 
 var updateXDataView = function(ev, done) {
-    updateTree(document, ev)
-
-    var lastStep = function(r) {
-        updateTreeFinal(document, ev)
-        done(r)
-    }
 
     var xcontdoc = xc.getCurDocText(xc.curdoc)
     var mode = 'html'
@@ -228,18 +196,10 @@ var updateXDataView = function(ev, done) {
 
     if (!xcontdoc.startsWith('<')) {
         console.log('No XML data')
-
-	var dclass = xc.curtype.replace('/', '_')
-        xc.getClassViewFunction('xc', dclass, mode, function(xcontdoc) {
-	    res.render(xcontdoc, function(res) {
-                console.log('Done with class based render cycle')
-                lastStep(res)
-	    })
-        })
-
-    } else {
-        xc.autoRender(ev, xcontdoc, 'xc', lastStep)
+        xcontdoc = xc.getXDoc('', 'xc')
     }
+
+    xc.autoRender(ev, xcontdoc, 'xc', done)
 
 }
 
@@ -632,24 +592,31 @@ var ppViews = function(subtree, ev, done) {
     var tms = subtree.querySelectorAll('.xc-sl-view')
     var doView = function(el, eldone) {
 	var getf = function() {
+            var viewFilter = el.dataset.viewFilter || 'auto'
+            var viewTarget = el.dataset.viewTarget
 	    var viewName = el.dataset.viewName || 'unknown-view'
 	    var url = el.dataset.viewUrl
-	    var localframes = [
-		{target: el.dataset.viewTarget,
-		 filters: [
-		     el.dataset.viewFilter
-		 ]}
-	    ]
-	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
-            mylframes.renderLink(ev.target, xframes.ajaxPathName(xlp.getbase() + url), function(request) {
-		console.log('VIEW: sub view ' + url + ' is handled completely')
+            var lastStep = function(request) {
 		xc.docs[viewName] = request.responseXML
-		//renderPostProc(ev, request, true)
-		updateTreeFinal(document.querySelector('#' + el.dataset.viewTarget), ev)
-		var onloadCode = el.dataset.viewOnload
-		eval(onloadCode)
-		eldone(request)
-            })
+	        var onloadCode = el.dataset.viewOnload
+	        eval(onloadCode)
+	        console.log('VIEW: sub view ' + url + ' is handled completely')
+	        eldone(request)
+            }
+            if (viewFilter == 'auto') {
+                xlp.loadXML(url, function(dt) {
+                    xc.autoRender(ev, dt.responseXML, viewTarget, lastStep)
+                })
+            } else {
+	        var localframes = [
+		    {target: viewTarget,
+		     filters: [ viewFilter ]}
+	        ]
+	        var mylframes = xframes.mkXframes(localframes, xc.xslpath)
+                mylframes.renderLink(ev.target, xframes.ajaxPathName(xlp.getbase() + url), function(request) {
+		    updateTreeFinal(document.querySelector('#' + el.dataset.viewTarget), ev, lastStep)
+                })
+            }
 	    el.dataset.viewDone = '1'
 	}
 	if (el.dataset.viewDone != '1') {
@@ -818,12 +785,19 @@ xc.getXDoc = function(xcontdoc, nodename) {
     return '<' + nodename + ' xmlns="http://ai-and-it.de/xmlns/2020/xc">' + xcontdoc + '</' + nodename + '>'
 }
 
-xc.getCurDocText = function(xcontdoc) {
+xc.getDocText = function(xcontdoc) {
     var xcont = ''
     if (xcontdoc.documentElement != undefined) {
         xcont = xcontdoc.documentElement.outerHTML
     } else if (xcontdoc.textContent != undefined) {
         xcont = xcontdoc.textContent
+    }
+    return xcont
+}
+xc.getCurDocText = function(xcontdoc) {
+    var xcont = ''
+    if (xcontdoc != undefined) {
+        xc.getDocText(xcontdoc)
     }
     return xcont
 }
