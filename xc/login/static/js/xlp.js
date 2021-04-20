@@ -566,7 +566,6 @@ xlp.amap = function(array, func, done) {
     }
     Object.keys(array).forEach(function(k) {
         func(array[k], function(res) {
-            console.log('amap: ' + k + ' of ' + n + ' ' + array[k])
             dones[k] = 1
             results[k] = res
             if (dones.every((x) => { return x>0 })) {

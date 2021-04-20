@@ -409,15 +409,7 @@ var setLinkCallback = function(subtree, handle) {
     Object.keys(forms).forEach(function(k) {
         var oldHandler = forms[k].onclick
         forms[k].onclick = function(x, y) {
-            var res = ffunc(x, y)
-            // if (res) {
-            //     console.log('link click event handled OK: ' + res)
-            // }
-            // else {
-            //     var res = oldHandler(x, y)
-            //     console.log('call old handler: ' + res)
-            // }
-            return res
+            return ffunc(x, y)
         }
     })
 }
@@ -461,6 +453,9 @@ var psMultiField = function(data) {
     var items = data.split('\n')[1].split(' ')
     items = items.filter( (k) => k.length > 0 )
     return '<td>' + items.join('</td><td>') + '</td>'
+}
+xc.psHTMLC = function(data, done) {
+    done(xc.psHTML(data))
 }
 xc.psHTML = function(data) {
     if (data.length == 0) return ''
@@ -583,6 +578,9 @@ var ppPolls = function(subtree, done) {
     }
 
     xlp.amap(tms, doPoll, function(res) {
+	if (tms.length > 0) {
+	    console.log('All polls done')
+	}
 	done(res)
     })
 
@@ -595,6 +593,7 @@ var ppViews = function(subtree, ev, done) {
             var viewFilter = el.dataset.viewFilter || 'auto'
             var viewTarget = el.dataset.viewTarget
 	    var viewName = el.dataset.viewName || 'unknown-view'
+	    var viewCache = el.dataset.viewCache || false
 	    var url = el.dataset.viewUrl
             var lastStep = function(request) {
 		xc.docs[viewName] = request.responseXML
@@ -615,7 +614,7 @@ var ppViews = function(subtree, ev, done) {
 	        var mylframes = xframes.mkXframes(localframes, xc.xslpath)
                 mylframes.renderLink(ev.target, xframes.ajaxPathName(xlp.getbase() + url), function(request) {
 		    updateTreeFinal(document.querySelector('#' + el.dataset.viewTarget), ev, lastStep)
-                })
+                }, viewCache)
             }
 	    el.dataset.viewDone = '1'
 	}
@@ -625,6 +624,9 @@ var ppViews = function(subtree, ev, done) {
         return false
     }
     xlp.amap(tms, doView, function(res) {
+	if (tms.length > 0) {
+	    console.log('All views done')
+	}
 	done(res)
     })
 }
