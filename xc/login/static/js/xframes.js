@@ -61,18 +61,27 @@ xframes.mkXframes = function(frames, xsltbase) {
             var frame = frames[framen]
             var x = xlps[framen]
             x.transform(indoc, function(result) {
-                // console.log('Get result: ' + frame.target)
+
+		var lastStep = function(res) {
+                    console.log('XLP chain ' + framen + ' done')
+                    stepsDone[framen] = 1
+                    stepsRes[framen] = result
+                    if (stepsDone.every(function(x) { return x > 0 })) {
+			console.log('Xframes Renderings done')
+			done(stepsRes[stepsRes.length-1], stepsDone)
+                    }
+		}
+
                 var resn = document.getElementById(frame.target)
                 if (resn === null) {
-                    console.error('Target not found')
+                    console.error('XFrame target ' +  frame.target + ' not found')
+		    lastStep()
                 } else {
-                    // console.log('Get result: ' + resn)
-                    // console.log('Get result: ' + result)
                     if (result.nodeType == result.ELEMENT_NODE) {
                         resn.innerHTML = result.outerHTML
+			lastStep(resn)
                     } else if (result.nodeType == result.DOCUMENT_NODE
                                || result.nodeType == result.DOCUMENT_FRAGMENT_NODE) {
-                        // xmlns:transformiix="http://www.mozilla.org/TransforMiix"
                         if (result.documentElement != null) {
 			    var resHTML = result.documentElement.outerHTML
 			    var invNode = document.getElementById('invisible')
@@ -83,29 +92,22 @@ xframes.mkXframes = function(frames, xsltbase) {
 			    console.log('New Inv node ' + newNode.attributes.id.value + ' ' + nid)
 			    invNode.appendChild(newNode)
 			    newNode.innerHTML = resHTML
-			    preprocess(newNode, function(done) {
+			    preprocess(newNode, function(res) {
 				resHTML = newNode.innerHTML
 				resn.innerHTML = resHTML
 				var oldNode = invNode.removeChild(newNode)
 				console.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)
 				console.log('Invisible children ' + invNode.childElementCount)
+				lastStep(resn)
 			    })
                         } else {
                             resn.innerHTML = result.textContent
+			    lastStep(resn)
                         }
                     } else {
                         resn.innerHTML = 'Transformation error: ' + result.nodeType + ': ' + result.URL 
+			lastStep(resn)
                     }
-                }
-                console.log('XLP chain ' + framen + ' done')
-                stepsDone[framen] = 1
-                stepsRes[framen] = result
-//                console.log('Xframes Rendering ' + framen + ' done')
-                // console.log(stepsDone)
-                // console.log(stepsDone.every(function(x) { x > 0 }))
-                if (stepsDone.every(function(x) { return x > 0 })) {
-                    console.log('Xframes Renderings done')
-                    done(stepsRes[stepsRes.length-1], stepsDone)
                 }
             })
         })
