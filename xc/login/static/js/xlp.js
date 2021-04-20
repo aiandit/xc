@@ -246,22 +246,22 @@ xlp.mkLoadCached = function() {
     var loadCached = function(url, done) {
         var lev
         if (docs[url]) {
-            done(docs[url])
+            done(docs[url].doc, docs[url].resp)
         } else {
             if (requested[url]) {
                 var levHandler = function(ev) {
-                    done(docs[url])
+                    done(docs[url].doc, docs[url].resp)
                     document.removeEventListener('doc-loaded'+url, levHandler)
                 }
                 document.addEventListener('doc-loaded'+url, levHandler)
             } else {
                 requested[url] = 1
-                xlp.loadXML(url, function(doc) {
-                    docs[url] = doc
+                xlp.loadXML(url, function(doc, resp) {
+                    docs[url] = {doc: doc, resp: resp}
                     lev = document.createEvent('Event')
                     lev.initEvent('doc-loaded'+url, true, true)
                     document.dispatchEvent(lev)
-                    done(doc)
+                    done(doc, resp)
                 })
             }
         }
