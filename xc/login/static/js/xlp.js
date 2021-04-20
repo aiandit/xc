@@ -549,7 +549,7 @@ xlp.readXLP = function(Xdoc, xslbase, done) {
     })
 }
 xlp.loadXLP = function(XURL, xslbase, done) {
-    xlp.loadXML(XURL, function(doc, req) {
+    xlp.loadCached(XURL, function(doc, req) {
         xlp.readXLP(doc, xslbase, done)
     })
 }
