@@ -320,7 +320,14 @@ class DirManager:
     def tail(self, name, n):
         # print('retrieve last %d lines of %s' % (n, name))
         # don't try to read the last line...
-        lines = self.getlines(name, self.nlines(name) - n-1,  n)
+        ltime = os.path.getctime(self.getpath(name))
+        ltd = time.time() - ltime
+        print('File %s is %g s old' %(self.getpath(name), ltd))
+        nlines = self.nlines(name)
+        offs = nlines - n
+        if ltd < 2:
+            offs -= 1
+        lines = self.getlines(name, offs, n)
         return (lines, self.nlines(name))
 
     def range(self, name, m, n):
