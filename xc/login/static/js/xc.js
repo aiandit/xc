@@ -439,7 +439,7 @@ xc.isChainedInterval = function(key) {
     }
     return false
 }
-xc.clearIntervals = function() {
+xc.stop = xc.clearIntervals = function() {
     Object.keys(xc.intervals).forEach(function(k) {
 	xc.clearInterval(k)
     })
@@ -584,6 +584,10 @@ var ppPolls = function(subtree, done) {
 	done(res)
     })
 
+}
+
+xc.id = function() {
+    return '' + (new Date()).getTime()
 }
 
 var ppViews = function(subtree, ev, done) {
@@ -799,7 +803,7 @@ xc.getDocText = function(xcontdoc) {
 xc.getCurDocText = function(xcontdoc) {
     var xcont = ''
     if (xcontdoc != undefined) {
-        xc.getDocText(xcontdoc)
+        xcont = xc.getDocText(xcontdoc)
     }
     return xcont
 }
@@ -824,6 +828,12 @@ xc.performAction = function(ev, name) {
         updateXDataView(ev, function(res) {
             console.log('Perform action complete')
         })
+    })
+}
+
+xc.loadXML = function(path, done) {
+    xlp.loadXML('/main/getf/' + path, function(st, resp) {
+        done(resp.responseXML)
     })
 }
 
@@ -886,13 +896,17 @@ var updateTree = function(subtree, ev) {
 //    document.forms[0].scrollIntoView()
 }
 
-var updateTreeFinal = function(subtree, ev, done) {
+var updateTree2 = function(subtree, ev) {
     updateTree(subtree, ev)
     ppActions(subtree, ev)
     tl.update(subtree)
     ppSorts(subtree, ev)
     xc.ppActiveLink(subtree, ev)
-    ppPolls(subtree, function(result) {
+}
+
+var updateTreeFinal = function(subtree, ev, done) {
+    updateTree2(subtree, ev)
+    ppPolls(subtree, ev, function(result) {
 	ppViews(subtree, ev, function(result) {
 	    if (typeof done == 'function') {
 		done(result)
@@ -972,7 +986,7 @@ xc.showSection = function(which, x) {
     sec.style.display = 'block'
 }
 
-xc.getMarkup = function(doc) {
+xc.getXML = xc.getMarkup = function(doc) {
     if (typeof doc == 'string') return doc
     else return doc.documentElement.outerHTML
 }
