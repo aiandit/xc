@@ -1,4 +1,4 @@
-var xframes = xframes || {}
+var xframes = {}
 
 xframes.normalizePath = function(path) {
     if (path[0] == '/') {
@@ -89,7 +89,7 @@ xframes.mkXframes = function(frames, xsltbase) {
                     stepsRes[framen] = result
                     if (stepsDone.every(function(x) { return x > 0 })) {
 			console.log('Xframes Renderings done')
-			done(stepsRes[stepsRes.length-1], stepsDone)
+			done(stepsRes, stepsDone)
                     }
 		}
 

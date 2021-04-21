@@ -288,10 +288,8 @@ table, tr, th, td {
     font-size: inherit;
 }
 #document {
-    color: wheat;
 }
 #content {
-    color: wheat;
 }
 #document-actions {
     max-width: 30rem;
@@ -399,8 +397,12 @@ table, tr, th, td {
     content: "\2193";
 }
 
-.flat-list {
-    display: block;
+form.inline, div.inline, img.inline  {
+    display: inline-block;
+}
+
+.flat-list ul {
+    display: inline-block;
 }
 
 .flat-list > li {
@@ -411,4 +413,11 @@ table, tr, th, td {
 
 .display-none {
     display: none;
+}
+.float-right {
+    float: right;
+    clear: right;
+}
+.small {
+    font-size: 80%;
 }

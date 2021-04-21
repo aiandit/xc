@@ -14,8 +14,7 @@
   <xsl:template match="dict" mode="xc-title">XC</xsl:template>
 
 
-
-    <xsl:template match="text()" mode="xml-dump">
+  <xsl:template match="text()" mode="xml-dump">
     <span>
       <xsl:value-of select="."/>
     </span>
@@ -65,7 +64,7 @@
 
       <div>
         <div class="xc-sl-view"
-             data-view-url="/main/view?path={x:data/x:lsl/x:info/x:path}"
+             data-view-url="/main/ajax_view?path={x:data/x:lsl/x:info/x:path}"
              data-view-filter="auto"
              data-view-target="dict-path-view">
         </div>

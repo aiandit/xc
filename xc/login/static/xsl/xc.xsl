@@ -81,15 +81,16 @@
         <h3 id="pad-XC" class="oc-head">XC</h3>
         <div id="pad-docinfo" class="oc-body">
           <xsl:apply-templates select="dict/data/lsl/info" mode="lsl-info"/>
-          <div id="document-info"></div>
-          <div id="document-actions"></div>
+          <div id="xc-document-info"></div>
+          <div id="xc-document-actions"></div>
           <xsl:apply-templates select="." mode="xc-pad"/>
         </div>
       </div>
     </div>
     <div class="main">
-      <h2 class="xc-title {dict/view}" title="XC view: {dict/xapp}/{dict/view}">
-        <xsl:apply-templates select="dict" mode="xc-title"/>
+      <h2 id="xc-title" class="xc-title {dict/view}" title="XC view: {dict/xapp}/{dict/view}">
+        &#160;
+<!--        <xsl:apply-templates select="dict" mode="xc-title"/> -->
       </h2>
       <xsl:apply-templates select="dict"/>
     </div>

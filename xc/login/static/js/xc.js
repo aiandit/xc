@@ -89,13 +89,13 @@ xc.mkClassViewFunction = function(targetid, dclass, mode, done) {
     var transformName = dclass + '-' + mode
 
     var frames = [
-        {target: 'title',
+        {target: targetid + '-title',
          xlp: xlp.mkXLP(['xc-app-title.xsl'], '/main/getf/xsl/', {output: 'text'})},
         {target: targetid + '-document',
          xlp: xlp.mkXLP(['pipelines/' + transformName + '.xml'], '/main/getf/')},
-        {target: 'document-actions',
+        {target: targetid + '-document-actions',
          xlp: xlp.mkXLP(['docactions-html.xsl'], '/main/getf/xsl/')},
-        {target: 'document-info',
+        {target: targetid + '-document-info',
          xlp: xlp.mkXLP(['xc-document-info.xsl', 'docinfo-html.xsl'], '/main/getf/xsl/')}
     ]
     var sframes = xframes.mkXframes(frames, xc.xslpath)
@@ -111,7 +111,17 @@ xc.mkClassViewFunction = function(targetid, dclass, mode, done) {
 
             sframes.render(indoc, function(res) {
                 console.log('Class render complete')
-                done(res, sframes)
+                xlp.amap(frames, (k, done) => {
+                    var n = document.getElementById(k.target)
+                    if (n) {
+                        updateTree2(n)
+                    }
+                    done(n)
+                }, function(res) {
+                    console.log('Class render fully complete')
+                    updateTree2(document)
+                    done(res)
+                })
             }, function(res, pdone) {
                 console.log('Class generation complete')
                 preprocess(res, pdone)
@@ -244,7 +254,11 @@ var getXData = function(ev, request, done) {
 		    if (mimetype.length > 0) {
                         done(xcontdoc, mimetype)
 		    } else {
-			var indoc = getXDataXML(xcontdoc.textContent)
+                        var xmldata = xcontdoc.textContent
+			var indoc = null
+                        if (xmldata.length > 0) {
+			    indoc = getXDataXML(xmldata)
+                        }
 			if (indoc != null) {
                             done(indoc)
 			} else {
@@ -490,7 +504,7 @@ xc.getCSRFToken = function() {
 }
 
 //var globtO =  (new Date()).getTime()
-var ppPolls = function(subtree, done) {
+var ppPolls = function(subtree, ev, done) {
     var tms = subtree.querySelectorAll('.xc-sl-poll')
 
     var doPoll = function(el, eldone) {
@@ -504,6 +518,13 @@ var ppPolls = function(subtree, done) {
 	    var t0 = (new Date()).getTime()
 //	    console.log('getf: ' + (t0 - globtO) + ': '  + url)
 	    var ppFun = eval(el.dataset.postprocess)
+            var finalStep = function(res) {
+		var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
+		setTimeout(getf, nexttime, ciid, count+1, t0)
+		if (count == 0) {
+		    eldone(res)
+		}
+            }
 	    var handleData = function(text) {
 		var res
                 if (ppFun != undefined) {
@@ -514,28 +535,25 @@ var ppPolls = function(subtree, done) {
 		        console.error(error);
 		        res = {noupdate: true}
 		    }
+		    if (typeof res == typeof {}) {
+		        if (!res.noupdate) {
+			    el.innerHTML = res.text
+		        }
+		        if (typeof res.done == 'function') {
+			    res.done()
+		        }
+		    } else {
+		        el.innerHTML = res
+		    }
+		    updateTreeFinal(el, undefined, function(utres) {
+                        finalStep(res)
+		    })
                 } else {
-                    xc.autoRender(undefined, text, el.dataset.pollTarget, function(request) {
+                    xc.autoRender(ev, text, el.dataset.pollTarget, function(res) {
                         console.log('poll auto render done')
+                        finalStep(res)
                     })
                 }
-		if (typeof res == typeof {}) {
-		    if (!res.noupdate) {
-			el.innerHTML = res.text
-		    }
-		    if (typeof res.done == 'function') {
-			res.done()
-		    }
-		} else {
-		    el.innerHTML = res
-		}
-		updateTreeFinal(el, undefined, function(utres) {
-		    var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
-		    setTimeout(getf, nexttime, ciid, count+1, t0)
-		    if (count == 0) {
-			eldone(utres)
-		    }
-		})
 	    }
 	    var handleResult = function(st, res) {
 		if (st == 0) {
@@ -608,7 +626,7 @@ var ppViews = function(subtree, ev, done) {
             }
             if (viewFilter == 'auto') {
                 xlp.loadXML(url, function(dt) {
-                    xc.autoRender(ev, dt.responseXML, viewTarget, lastStep)
+                    xc.autoRender(ev, dt, viewTarget, lastStep)
                 })
             } else {
 	        var localframes = [
@@ -623,6 +641,11 @@ var ppViews = function(subtree, ev, done) {
 	    el.dataset.viewDone = '1'
 	}
 	if (el.dataset.viewDone != '1') {
+            if (el.attributes.id == undefined) {
+                const nid = xc.id()
+                el.setAttribute('id', nid + '-document')
+                el.setAttribute('data-view-target', nid)
+            }
 	    getf()
 	}
         return false
