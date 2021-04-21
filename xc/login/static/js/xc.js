@@ -555,6 +555,13 @@ var ppPolls = function(subtree, ev, done) {
                     })
                 }
 	    }
+            var splitFirst = function(s, c) {
+                var i = s.indexOf(c)
+                if (i >= 0) {
+                    return [s.substr(0, i), s.substr(i+1)]
+                }
+                return [s]
+            }
 	    var handleResult = function(st, res) {
 		if (st == 0) {
 		    if (res.responseXML != undefined) {
@@ -567,7 +574,18 @@ var ppPolls = function(subtree, ev, done) {
 			})
 		    } else {
                         if (el.dataset.pollWrap != undefined) {
-                            handleData(xc.getXDoc(res.responseText, el.dataset.pollWrap))
+                            var headers = res.getAllResponseHeaders()
+                            headers = headers.split('\n')
+                            headers = headers.filter((k)=>k.length>0)
+                            headers = headers.map((k)=>splitFirst(k, ':'))
+                            var hdict = {}
+                            for (var i = 0; i < headers.length; ++i) {
+                                hdict[headers[i][0]] = headers[i][1].trim()
+                            }
+                            var lineinfo = xc.dictXML(hdict)
+                            handleData(xc.getXDoc(
+                                xc.getXDoc(res.responseText, 'lines')
+                                    + '<headers>' + lineinfo + '</headers>', el.dataset.pollWrap))
                         } else {
 			    handleData(res.responseText)
                         }
@@ -762,6 +780,16 @@ xc.setButtonLinkHandlers = function(subtree) {
 	    el.dataset.linkHandlerSet = true
 	}
     })
+}
+
+xc.dictXML = function(data, exclude) {
+    var rdict = {}
+    Object.keys(data).forEach(function(k) {
+//        if (exclude && k in exclude) return
+        var r = '<' + k + '>' + data[k] + '</' + k + '>'
+        rdict[k] = r
+    })
+    return Object.values(rdict).join('\n')
 }
 
 xc.getCGIXML = function(form, exclude) {
