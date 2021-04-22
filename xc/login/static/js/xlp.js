@@ -195,8 +195,8 @@ xlp.reqXML = function(src, obj) {
                 cur_callback(request.responseText, request)
 	    } else {
 		var rdoc
-		if (xlp.isIE) {
-                    rdoc = parseXML(request.responseText)
+		if (xlp.isIE || request.responseXML == null) {
+                    rdoc = xlp.parseXML(request.responseText)
 		} else {
                     rdoc = request.responseXML
 		}
