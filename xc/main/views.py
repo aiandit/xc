@@ -1364,6 +1364,8 @@ def getrange(request, path, mode, start, end, transpose=False):
         #        resp['Content-Encoding'] = 'gzip'
         if 'br' in aenc:
             resp['Content-Encoding'] = 'br'
+        resp['X-Range-Start'] = start
+        resp['X-Range-End'] = end
         dlfname = os.path.basename(path)
         filename, file_extension = os.path.splitext(dlfname)
         dlfname = '%s-range%d-%d%s' % (filename, start, end, file_extension)
