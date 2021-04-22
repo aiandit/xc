@@ -100,9 +100,11 @@ xc.mkClassViewFunction = function(targetid, dclass, mode, done) {
     ]
     var sframes = xframes.mkXframes(frames, xc.xslpath)
 
+    var parameters = xc.curresp.getElementsByTagName('cgi')[0].outerHTML
     var infoxml = '<viewclass>' + dclass + '</viewclass>'
     infoxml += '<viewmode>' + mode + '</viewmode>'
     infoxml += '<targetid>' + targetid + '</targetid>'
+    infoxml += '<parameters>' + parameters + '</parameters>'
 
     var res = {
         render: function(xcontdoc, done, preprocess) {
