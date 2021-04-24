@@ -1294,3 +1294,31 @@ xc.register = function(mode, handle) {
     }
     xc.registeredHandles[mode].push(handle)
 }
+
+xc.mkMessage = function(mode, msg) {
+    var res = ''
+    res += '<div class="' + mode + '">' + msg + '</div>'
+    return res
+}
+
+xc.showMessage = function(msg, timeout) {
+    var p = document.querySelector('.doc-float-messages')
+    p.innerHTML += msg
+    if (!timeout) {
+        timeout = 1800
+    }
+    if (timeout) {
+        setTimeout(function() {
+            try {
+                var p = document.querySelector('.doc-float-messages')
+                p.firstElementChild.remove()
+            } catch {
+            }
+        }, timeout)
+    }
+}
+
+xlp.addErrorHandler(function(msg, req) {
+    console.error('an XLP request failed')
+    xc.showMessage(xc.mkMessage('error', msg))
+})
