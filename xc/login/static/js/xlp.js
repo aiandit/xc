@@ -223,7 +223,7 @@ xlp.reqXML = function(src, obj) {
 		}
 	    }
         } else {
-            xlp.error('Error response: ' + request.status + ' ' + request.statusText)
+            xlp.error('Error response: ' + request.status + ' ' + request.statusText, request)
             cur_callback(0, request, 'request failed')
         }
     }
