@@ -361,6 +361,17 @@ xlp.mkpre = function(text) {
 
 xlp.log = function(txt) { console.log('XLP: ' + txt) }
 xlp.error = function(txt) { console.error('XLP: ' + txt) }
+xlp.mkdoc = function(docstr) {
+    var res = docstr
+    if (typeof docstr == "string" && docstr[0] == "<") {
+        try {
+            res = xlp.parseXML(docstr)
+        } catch (e) {
+            console.error('failed to parse XML', e)
+        }
+    }
+    return res
+}
 
 xlp.getdoc = function(docstr, opts, done) {
     var res = docstr
