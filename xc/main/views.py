@@ -448,7 +448,7 @@ def ajax_edit(request):
 
     rdata = EditData(reqDict)
 
-    resultview = 'dirmanform'
+    resultview = 'edit'
     next_ = None
 
     res = rdata.is_valid()

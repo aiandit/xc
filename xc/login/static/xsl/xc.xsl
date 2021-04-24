@@ -93,6 +93,10 @@
 <!--        <xsl:apply-templates select="dict" mode="xc-title"/> -->
       </h2>
       <xsl:apply-templates select="dict"/>
+      <div class="doc-messages">
+        <div class="doc-float-messages">
+        </div>
+      </div>
     </div>
     <xsl:apply-templates select="dict" mode="doc-xcont"/>
     <xsl:apply-templates select="dict" mode="post-xcont"/>
@@ -682,7 +686,7 @@
   </xsl:template>
 
   <xsl:template match="text()" mode="xc-pad"/>
-  <xsl:template match="dict[view = 'dirmanform' and /*/forms/form[1]/@action = 'edit' or view = 'view' or view = 'path']" mode="xc-pad">
+  <xsl:template match="dict[view = 'edit' or view = 'view' or view = 'path']" mode="xc-pad">
     <div class="docform" id="xc-form">
       <h4 class="oc-head">Forms</h4>
       <div class="oc-body">
@@ -704,15 +708,7 @@
 
   <xsl:template match="dict[view = 'dirmanform']">
     <div>
-      <xsl:if test="/*/forms/form[1]/@action != 'edit'">
-	<xsl:apply-templates select="." mode="xc-form"/>
-      </xsl:if>
-<!--      <xsl:if test="/*/forms/form[1]/@action = 'find'">
-        <xsl:apply-templates select="." mode="findcmd"/>
-      </xsl:if>
-      <xsl:if test="/*/forms/form[1]/@action = 'edit'">
-        <xsl:apply-templates select="." mode="xc-control-form"/>
-      </xsl:if> -->
+      <xsl:apply-templates select="." mode="xc-form"/>
       <xsl:if test="data/findlist">
         <div class="find">
           <xsl:choose>
@@ -754,10 +750,19 @@
 
 
   <xsl:template match="dict[xapp = 'main' and view = 'view']" mode="xc-title">
-<!--    <xsl:text>View </xsl:text> -->
+    <xsl:text>View </xsl:text>
     <xsl:value-of select="/*/dict/cgi/path"/>
   </xsl:template>
   <xsl:template match="dict[xapp = 'main' and view = 'view']">
+  </xsl:template>
+
+  <xsl:template match="dict[xapp = 'main' and view = 'edit']" mode="xc-title">
+    <xsl:text>Edit </xsl:text>
+    <xsl:value-of select="/*/dict/cgi/path"/>
+  </xsl:template>
+  <xsl:template match="dict[xapp = 'main' and view = 'edit']">
+    <div>
+    </div>
   </xsl:template>
 
   <!-- no output from dirmanform -->
