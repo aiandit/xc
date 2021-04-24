@@ -651,6 +651,8 @@ var ppViews = function(subtree, ev, done) {
             var viewFilter = el.dataset.viewFilter || 'auto'
             var viewTarget = el.dataset.viewTarget
 	    var viewName = el.dataset.viewName || 'unknown-view'
+	    var viewWrap = el.dataset.viewWrap
+	    var viewMode = el.dataset.viewMode || 'xml'
 	    var viewCache = el.dataset.viewCache || false
 	    var url = el.dataset.viewUrl
             var lastStep = function(request) {
@@ -661,7 +663,11 @@ var ppViews = function(subtree, ev, done) {
 	        eldone(request)
             }
             if (viewFilter == 'auto') {
-                xlp.loadXML(url, function(dt) {
+                var lfun = viewCache ? xlp.loadCached : (viewMode == 'xml' ? xlp.loadXML : xlp.loadText)
+                lfun(url, function(dt) {
+                    if (viewWrap) {
+                        dt = xc.getXDoc(dt, viewWrap)
+                    }
                     xc.cursubresp = xlp.mkdoc(dt)
                     xc.autoRender(ev, dt, viewTarget, lastStep)
                 })
