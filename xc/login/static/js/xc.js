@@ -148,9 +148,14 @@ xc.mkClassViewFunction = function(targetid, dclass, mode, done) {
 
 xc.getClassViewFunction = function(targetid, dclass, mode, done) {
     var verb = 'view'
-    var vparam = xc.curresp.querySelector('cgi > v')
+    var vparam = xc.cursubresp.querySelector('dict > view')
     if (vparam != null) {
 	verb = vparam.textContent
+    } else {
+        vparam = xc.curresp.querySelector('cgi > v')
+        if (vparam != null) {
+	    verb = vparam.textContent
+        }
     }
     dclass += '-' + verb
     var key = targetid + '-' + dclass + '-' + mode
@@ -285,7 +290,7 @@ var getXData = function(ev, request, done) {
 }
 
 var processXData = function(ev, request, done) {
-    xc.curresp = request.responseXML
+    xc.cursubresp = xc.curresp = request.responseXML
     getXData(ev, request, function(xcontdoc, mimetype) {
         if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE) {
             xc.curdoc = xcontdoc
@@ -657,6 +662,7 @@ var ppViews = function(subtree, ev, done) {
             }
             if (viewFilter == 'auto') {
                 xlp.loadXML(url, function(dt) {
+                    xc.cursubresp = xlp.mkdoc(dt)
                     xc.autoRender(ev, dt, viewTarget, lastStep)
                 })
             } else {
