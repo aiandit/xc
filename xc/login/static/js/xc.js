@@ -970,6 +970,12 @@ var updateTree = function(subtree, ev) {
     ppSliders(subtree)
     xc.setButtonLinkHandlers(subtree)
 //    document.forms[0].scrollIntoView()
+
+    if (xc.registeredHandles['tree1']) {
+        xc.registeredHandles['tree1'].forEach(function(handle) {
+            handle(subtree)
+        })
+    }
 }
 
 var updateTree2 = function(subtree, ev) {
@@ -978,15 +984,28 @@ var updateTree2 = function(subtree, ev) {
     tl.update(subtree)
     ppSorts(subtree, ev)
     xc.ppActiveLink(subtree, ev)
+    if (xc.registeredHandles['tree2']) {
+        xc.registeredHandles['tree2'].forEach(function(handle) {
+            handle(subtree)
+        })
+    }
 }
 
 var updateTreeFinal = function(subtree, ev, done) {
     updateTree2(subtree, ev)
     ppPolls(subtree, ev, function(result) {
 	ppViews(subtree, ev, function(result) {
-	    if (typeof done == 'function') {
-		done(result)
-	    }
+
+            if (xc.registeredHandles['tree3']) {
+                xlp.amap(xc.registeredHandles['tree3'],
+                         function(handle, eldone) {
+                             handle(subtree, eldone)
+                         },
+                         done)
+            } else {
+                done(result)
+            }
+
 	})
     })
 }
@@ -1252,4 +1271,11 @@ xc.getID = function(path, done) {
         var num = xc.xq('number(/*/xcontent/xc:*)', res.responseXML)
         done(num)
     })
+}
+xc.registeredHandles = {}
+xc.register = function(mode, handle) {
+    if (!xc.registeredHandles[mode]) {
+        xc.registeredHandles[mode] = []
+    }
+    xc.registeredHandles[mode].push(handle)
 }
