@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import os, sys, time, shutil, subprocess, csv, io
+import os, sys, time, shutil, subprocess, csv, io, pathlib
 
 from xc import settings
 
@@ -189,13 +189,10 @@ class DirManager:
         info = getlsl(self.getpath(path), self.normalizepath(path))
         return info
 
-    def mkdir(self, name):
-        try:
-            print('mkdir', name)
-            os.makedirs(self.getpath(name))
+    def mkdir(self, name, *more):
+        stat = pathlib.Path(self.getpath(name)).mkdir(parents=True, exist_ok=True)
+        if stat is None:
             stat = 0
-        except:
-            stat = -1
         return stat
 
     def rmdir(self, name, rec=False):
