@@ -64,19 +64,21 @@ xlp.parseXMLC = function(xmlStr) {
     }
 }
 
-xlp.sendRequest = function(URL, method, callback, headers, data) {
+xlp.sendRequest = function(URL, method, callback, headers, data, mode) {
     if (typeof URL == 'object') {
         return xlp.sendRequest(URL.URL || URL.src || URL.href,
                                URL.method || undefined,
                                URL.callback || undefined,
                                URL.headers || undefined,
-                               URL.data || undefined)
+                               URL.data || undefined,
+                               URL.mode)
     }
 
     if (!method) method = 'GET'
     if (!callback) callback = function(){}
     if (!headers) headers = {}
     if (!data) data = ''
+    if (!mode) mode = ''
 
     var request, k
 
@@ -84,6 +86,10 @@ xlp.sendRequest = function(URL, method, callback, headers, data) {
         request = new ActiveXObject("Msxml2.XMLHTTP")
     } else if (window.XMLHttpRequest) {
         request = new XMLHttpRequest()
+    }
+
+    if (mode) {
+        request.overrideMimeType(mode)
     }
 
     request.onreadystatechange = function () {
@@ -180,6 +186,13 @@ xlp.reqXML = function(src, obj) {
         }
     }
     var cur_callback = obj.callback
+    if (!obj.mode) {
+        if (obj.returnJSON) {
+            obj.mode = 'text/plain'
+        } else if (obj.returnData) {
+            obj.mode = 'application/octet-stream'
+        }
+    }
     obj.callback = function(status, request) {
         if (status == 0) {
 	    if (obj.returnJSON) {
@@ -202,6 +215,8 @@ xlp.reqXML = function(src, obj) {
 		}
 		if (rdoc) {
                     cur_callback(rdoc, request)
+		} else if (obj.mode) {
+                    cur_callback(request.responseText, request)
 		} else {
                     xlp.error('No valid XML response from server: ' + obj.URL)
                     cur_callback(0, request, 'no XML')
