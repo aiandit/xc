@@ -378,8 +378,19 @@ xlp.mkpre = function(text) {
     return pre
 }
 
+xlp.errorHandlers = []
+xlp.addErrorHandler = function(h) {
+    xlp.errorHandlers.push(h)
+}
+
 xlp.log = function(txt) { console.log('XLP: ' + txt) }
-xlp.error = function(txt) { console.error('XLP: ' + txt) }
+xlp.error = function(txt, req) {
+    console.error('XLP: ' + txt)
+    xlp.errorHandlers.forEach(function(h) {
+        h(txt, req)
+    })
+}
+
 xlp.mkdoc = function(docstr) {
     var res = docstr
     if (typeof docstr == "string" && docstr[0] == "<") {
