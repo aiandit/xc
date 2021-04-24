@@ -397,7 +397,7 @@ xlp.mkdoc = function(docstr) {
         try {
             res = xlp.parseXML(docstr)
         } catch (e) {
-            console.error('failed to parse XML', e)
+            xlp.error('failed to parse XML' + e)
         }
     }
     return res
@@ -407,7 +407,11 @@ xlp.getdoc = function(docstr, opts, done) {
     var res = docstr
     if (typeof docstr == "string") {
         if (docstr[0] == "<") {
-            res = xlp.parseXML(docstr)
+            try {
+                res = xlp.parseXML(docstr)
+            } catch (e) {
+                xlp.error('failed to parse XML' + e)
+            }
             done(res)
         } else if (docstr.length < 1024 && opts.xsltbase != undefined) {
             xlp.loadXML(opts.xsltbase + docstr, function(doc) {
