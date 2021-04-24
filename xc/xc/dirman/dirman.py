@@ -370,7 +370,6 @@ class DirManager:
         return sout
 
     def findsort(self, name, pattern, path=True, sys=True, case=True):
-        print('findsort')
         args = self.findcmd(name, pattern, path, sys, case)
         p2 = subprocess.Popen(('sort',), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT, encoding='utf8')
