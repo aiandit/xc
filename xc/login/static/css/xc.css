@@ -421,3 +421,8 @@ form.inline, div.inline, img.inline  {
 .small {
     font-size: 80%;
 }
+
+.error {
+    color: black;
+    background-color: #ff8060;
+}
