@@ -382,20 +382,30 @@ def ajax_view(request):
 
         lsl = workdir.stat(path)
 
-        if lsl['info']['type'] == '-':
-            (isXML, stat, fdata, fstr) = getxmlifposs(path)
-            if isXML:
-                xcontent = fstr
-            else:
-                content = fstr
+        try:
+            if lsl['info']['type'] == '-':
+                (isXML, stat, fdata, fstr) = getxmlifposs(path)
+                if isXML:
+                    xcontent = fstr
+                else:
+                    content = fstr
+        except BaseException as e:
+            errmsg = 'File "%s" does not exist' % (path)
+            print(e)
+            return HttpResponse(status=404)
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
 
-    if lsl['info']['type'] == 'd':
-        actions = diractions
-    else:
-        actions = fileactions
+    actions = []
+    try:
+        if lsl['info']['type'] == 'd':
+            actions = diractions
+        else:
+            actions = fileactions
+    except BaseException as e:
+        print(e)
+        pass
 
     data = {
         'lsl': lsl,
