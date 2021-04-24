@@ -7,8 +7,6 @@
 
   <xsl:output method="xml" encoding="utf-8"/>
 
-  <xsl:include href="view-utils.xsl"/>
-
   <xsl:template match="x:docinfo">
     <div class="docinfo">
       <h4 class="oc-head">Document Info</h4>
