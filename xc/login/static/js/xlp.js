@@ -248,6 +248,10 @@ xlp.loadXML = function(path, callback) {
     xlp.reqXML(document,  {'method': 'GET', 'URL': path, 'callback': callback})
 }
 
+xlp.loadText = function(path, callback) {
+    xlp.reqXML(document,  {'method': 'GET', 'URL': path, 'callback': callback, 'mode': 'text/plain'})
+}
+
 xlp.loadJSON = function(path, callback) {
     xlp.reqJSON(document,  {'method': 'GET', 'URL': path, 'callback': callback})
 }
