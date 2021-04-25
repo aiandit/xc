@@ -298,6 +298,13 @@ var processXData = function(ev, request, done) {
         if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE) {
             xc.curdoc = xcontdoc
         } else if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
+            if (mimetype == 'application/xml') {
+                try {
+                    var xdoc = xlp.parseXML(xcontdoc.textContent)
+                    xcontdoc = xdoc
+                } catch {
+                }
+            }
             xc.curdoc = xcontdoc
 	    xc.curtype = mimetype
         } else {
