@@ -611,9 +611,11 @@ var ppPolls = function(subtree, ev, done) {
                                 hdict[headers[i][0]] = headers[i][1].trim()
                             }
                             var lineinfo = xc.dictXML(hdict)
-                            handleData(xc.getXDoc(
+                            var xdoc = xlp.mkdoc(xc.getXDoc(
                                 xc.getXDoc(res.responseText, 'lines')
                                     + '<headers>' + lineinfo + '</headers>', el.dataset.pollWrap))
+                            xc.cursubresp = xdoc
+                            handleData(xdoc)
                         } else {
 			    handleData(res.responseText)
                         }
