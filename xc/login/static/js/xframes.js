@@ -167,6 +167,7 @@ xframes.mkXframes = function(frames, xsltbase) {
         xsltbase: xsltbase,
         xlps: xlps,
         render: render,
+        renderData: renderData,
         renderLink: renderLink,
         renderFormSubmit: renderFormSubmit
     }
