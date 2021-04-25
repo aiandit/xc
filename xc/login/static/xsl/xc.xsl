@@ -753,6 +753,7 @@
     <xsl:text>View </xsl:text>
     <xsl:value-of select="/*/dict/cgi/path"/>
   </xsl:template>
+  <!-- no output with 'view' -->
   <xsl:template match="dict[xapp = 'main' and view = 'view']">
   </xsl:template>
 
@@ -760,17 +761,9 @@
     <xsl:text>Edit </xsl:text>
     <xsl:value-of select="/*/dict/cgi/path"/>
   </xsl:template>
+  <!-- no output with 'edit' -->
   <xsl:template match="dict[xapp = 'main' and view = 'edit']">
-    <div>
-    </div>
   </xsl:template>
-
-  <!-- no output from dirmanform -->
-  <xsl:template match="dict[view = 'dirmanform']">
-  </xsl:template>
-  <xsl:template match="dict[view = 'dirmanform']" mode="xc-title">
-  </xsl:template>
-
 
   <xsl:template match="dict[view = 'sendmsg']" mode="xc-title">
     <xsl:value-of select="/*/forms/form[1]/@title"/>
