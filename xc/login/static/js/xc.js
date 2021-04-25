@@ -1315,6 +1315,9 @@ xc.mkMessage = function(mode, msg) {
 
 xc.showMessage = function(msg, timeout) {
     var p = document.querySelector('.doc-float-messages')
+    if (!p) {
+        p = document.querySelector('body')
+    }
     p.innerHTML += msg
     if (!timeout) {
         timeout = 1800
