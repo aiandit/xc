@@ -1,4 +1,4 @@
-var xc = xc || {}
+var xc = {}
 
 xc.docs = {}
 xc.curtype = 'xc'
