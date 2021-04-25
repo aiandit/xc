@@ -48,10 +48,10 @@ def msgsXML(request, touser):
     except:
         pass
 
-    xml = '<x xmlns="http://ai-and-it.de/xmlns/2020/xc">'
+    xml = '<xc xmlns="http://ai-and-it.de/xmlns/2020/xc">'
     xml += '<class>msgs</class>'
     xml += '<cont><msgs>' + fdata + '</msgs>'
-    xml += '<readdate>' + readdate + '</readdate></cont></x>'
+    xml += '<readdate>' + readdate + '</readdate></cont></xc>'
 
     workdir.replacedoc(rtm, ('<rtm>%.16g</rtm>' % time.time()).encode('ascii'),
                        {'user': request.user.username, 'comment': 'msg-read'})
