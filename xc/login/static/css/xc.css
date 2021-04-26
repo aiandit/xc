@@ -189,7 +189,6 @@ table.collection {
 }
 
 table.collection td {
-    border-bottom: 1px solid gray;
     padding: 0.25em;
 }
 
@@ -198,7 +197,11 @@ table.collection td {
     border-radius: 0.3em;
     padding: 0.2em;
     background: lightblue;
-    float: right;
+}
+
+.doc-lsl-info {
+    border: 0.1em outset grey;
+    border-radius: 0.3em;
 }
 
 .fright {
@@ -250,6 +253,15 @@ td.ntd {
     background: aliceblue;
 }
 
+.xc-alt-pad {
+    display: none;
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    border-radius: 0.3em;
+    padding: 0.2em;
+}
+
 .xc-pad.home.logged-in {
     visibility: hidden;
 }
@@ -299,13 +311,11 @@ table, tr, th, td {
 .docinfo {
     font-size: 0.9rem;
     font-stretch: condensed;
-    float: left;
     clear: both;
 }
 .docform {
     font-size: 0.9rem;
     font-stretch: condensed;
-    float: left;
     clear: both;
 }
 
@@ -401,14 +411,18 @@ form.inline, div.inline, img.inline  {
     display: inline-block;
 }
 
+.flat-list {
+    padding: 0.2em 0em;
+    margin: 0.2em 0em;
+}
+
 .flat-list ul {
     display: inline-block;
 }
 
 .flat-list > li {
-    list-style: circle;
-    display: inline list-item;
-    padding: 0.5em 1em;
+    display: inline-block;
+    padding: 0em 1em;
 }
 
 .display-none {
