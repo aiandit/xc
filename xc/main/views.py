@@ -146,10 +146,12 @@ class NewdocData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def newdoc(request):
     context = {'xapp': 'main', 'view': 'newdoc', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_newdoc(request):
 
     lsl = ''
@@ -215,10 +217,12 @@ class DeleteData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def delete(request):
     context = {'xapp': 'main', 'view': 'delete', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_delete(request):
 
     lsl = ''
@@ -278,10 +282,12 @@ class NewdirData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def newdir(request):
     context = {'xapp': 'main', 'view': 'newdir', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_newdir(request):
 
     lsl = ''
@@ -435,10 +441,12 @@ class EditData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def edit(request):
     context = {'xapp': 'main', 'view': 'edit', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_edit(request):
 
     lsl = ''
@@ -520,10 +528,12 @@ def ajax_edit(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+@login_required
 def append(request):
     context = {'xapp': 'main', 'view': 'append', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_append(request):
 
     lsl = ''
@@ -623,10 +633,12 @@ class FileuploadData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def fileupload(request):
     context = {'xapp': 'main', 'view': 'fileupload', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_fileupload(request):
 
     lsl = ''
@@ -686,9 +698,11 @@ def ajax_fileupload(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+@login_required
 def replace(request):
     return fileupload(request)
 
+@login_required
 def ajax_replace(request):
     return ajax_fileupload(request)
 
@@ -708,10 +722,12 @@ class MoveData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def move(request):
     context = {'xapp': 'main', 'view': 'move', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_move(request):
 
     lsl = ''
@@ -813,10 +829,12 @@ class CloneData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def clone(request):
     context = {'xapp': 'main', 'view': 'clone', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_clone(request):
 
     errmsg = ''
@@ -890,10 +908,12 @@ class TransformData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def transform(request):
     context = {'xapp': 'main', 'view': 'transform', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_transform(request):
 
     lsl = ''
@@ -1064,6 +1084,7 @@ def runwhich(request):
     context = {'xapp': 'main', 'view': 'runwhich', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_runwhich(request):
 
     lsl = ''
@@ -1859,10 +1880,12 @@ class ActionData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def action(request):
     context = {'xapp': 'main', 'view': 'action', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_action(request):
 
     lsl = ''
@@ -1925,6 +1948,7 @@ def ajax_action(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+@login_required
 def plain_status(request):
 
     lsl = ''
@@ -2004,10 +2028,12 @@ class PsData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def ps(request):
     context = {'xapp': 'main', 'view': 'ps', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_ps(request, plain=False):
 
     lsl = ''
@@ -2065,6 +2091,7 @@ def ajax_ps(request, plain=False):
     return render(request, 'common/xc-msg.xml' if not plain else 'common/xc-atom.xml',
                   context, content_type="application/xml")
 
+@login_required
 def plain_ps(request):
     return ajax_ps(request, plain=True)
 
@@ -2083,12 +2110,14 @@ class CounterData(PathData):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def counter(request):
     context = {'xapp': 'main', 'view': 'counter', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 cre = re.compile(r'>[0-9]+<')
 
+@login_required
 def ajax_counter(request, plain=False):
 
     lsl = ''
@@ -2175,16 +2204,19 @@ def ajax_counter(request, plain=False):
     return render(request, 'common/xc-msg.xml' if not plain else 'common/xc-atom.xml',
                   context, content_type="application/xml")
 
+@login_required
 def plain_counter(request):
     return ajax_counter(request, plain=True)
 
 
+@login_required
 def cid(request):
     context = {'xapp': 'main', 'view': 'cid', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/wframe.html', context)
 
 cre = re.compile(r'>[0-9]+<')
 
+@login_required
 def ajax_cid(request, plain=False):
 
     lsl = ''
@@ -2249,6 +2281,7 @@ def ajax_cid(request, plain=False):
     return render(request, 'common/xcerp-msg.xml' if not plain else 'common/xcerp-atom.xml',
                   context, content_type="application/xml")
 
+@login_required
 def plain_cid(request):
     return ajax_cid(request, plain=True)
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
