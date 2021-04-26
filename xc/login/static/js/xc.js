@@ -104,7 +104,10 @@ xc.mkClassViewFunction = function(targetid, dclass, mode, done) {
     var infoxml = '<viewclass>' + dclass + '</viewclass>'
     infoxml += '<viewmode>' + mode + '</viewmode>'
     infoxml += '<targetid>' + targetid + '</targetid>'
-    //infoxml += '<parameters>' + parameters + '</parameters>'
+    var lsls = xc.curresp.getElementsByTagName('lsl')
+    if (lsls.length > 0) {
+        infoxml += lsls[0].outerHTML
+    }
 
     var res = {
         render: function(xcontdoc, done, preprocess) {
