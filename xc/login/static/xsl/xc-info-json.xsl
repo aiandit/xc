@@ -23,4 +23,6 @@
 
   <xsl:template match="xc" mode="get-class">xc</xsl:template>
 
+  <xsl:template match="xsl:*" mode="get-class">xc</xsl:template>
+
 </xsl:stylesheet>
