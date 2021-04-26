@@ -28,8 +28,14 @@
 
   <xsl:template match="xc">
     <xsl:variable name="loggedin-css">
-      <xsl:if test="dict/user/is_authenticated = 'True'"> logged-in</xsl:if>
+      <xsl:choose>
+        <xsl:when test="dict/user/is_authenticated = 'True'"> logged-in</xsl:when>
+        <xsl:otherwise> logged-out</xsl:otherwise>
+      </xsl:choose>
     </xsl:variable>
+    <div class="xc-alt-pad {dict/view}{$loggedin-css}">
+      <a href="{/*/links/login}">Login</a>
+    </div>
     <div class="xc-pad {dict/view}{$loggedin-css}">
       <div class="everon">
         <div id="pad-acts1">
@@ -622,7 +628,6 @@
     <div>
       <h4>Item type <xsl:value-of select="type"/>: <xsl:value-of select="name"/></h4>
       <div>
-        <h5>Info</h5>
         <table class="collection">
           <xsl:apply-templates select="."/>
         </table>
@@ -633,8 +638,7 @@
   <xsl:template match="lsl/info[type = '-']" mode="lsl-head">
     <div>
       <h4 class="oc-head">Document <xsl:value-of select="name"/></h4>
-      <div class="oc-body oc-open">
-        <h5>Info</h5>
+      <div class="oc-body oc-open doc-lsl-info">
         <table class="collection">
           <xsl:apply-templates select="."/>
         </table>
@@ -644,9 +648,8 @@
 
   <xsl:template match="lsl/info[type = 'd']" mode="lsl-head">
     <div>
-      <h4>Collection <xsl:value-of select="name"/></h4>
-      <div>
-        <h5>Info</h5>
+      <h4 class="oc-head">Collection <xsl:value-of select="name"/></h4>
+      <div class="oc-body oc-open doc-lsl-info">
         <table class="collection">
           <xsl:apply-templates select="."/>
         </table>
@@ -725,14 +728,12 @@
                 <xsl:for-each select="data/findlist/item">
                   <tr>
                     <td class="path">
-                      <!--                  <span data-insert='1' data-fetch='/main/view?path={path}'> -->
                       <a href="/main/path?path={path}">
                         <xsl:value-of select="path"/>
                       </a>
                     </td>
                     <td class="file">
-                      <!--                  <span data-insert='1' data-fetch='/main/view?path={path}/{name}'> -->
-                      <a href="/main/view?path={path}/{name}">
+                      <a href="/main/path?path={path}/{name}">
                         <xsl:value-of select="name"/>
                       </a>
                     </td>
