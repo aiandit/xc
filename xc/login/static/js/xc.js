@@ -447,6 +447,7 @@ var setLinkCallback = function(subtree, handle) {
     var ffunc = function(ev) {
         console.log('link click event for: ' + ev);
         if (ev.target.classList.contains('xc-nocatch')) return true
+        if ((new URL(ev.target.href)).host != xlp.gethost()) return true
         var res = handle(ev)
         console.log(name + ': link click event handler returned: ' + res);
         return res
