@@ -88,7 +88,7 @@ def ajax_login_view(request):
             else:
                 login(request, user)
 #                return redirect('login:ajax_profile')
-                return redirect('main:ajax_path')
+                return redirect('main:ajax_home')
 
     if len(errmsg):
         errors = [ {'errmsg': errmsg, 'type': 'fatal'} ]
@@ -136,7 +136,7 @@ def ajax_logout_view(request):
             errmsg = 'The form data is invalid'
         else:
             logout(request)
-            return redirect('login:ajax_login')
+            return redirect('main:ajax_home')
 
     if len(errmsg):
         errors = [ {'errmsg': errmsg, 'type': 'fatal'} ]
