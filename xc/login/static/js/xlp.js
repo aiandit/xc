@@ -637,6 +637,12 @@ xlp.getbase = function() {
     return baseUrl
 }
 
+xlp.gethost = function() {
+    var getUrl = window.location
+    var baseUrl = getUrl.host
+    return baseUrl
+}
+
 xlp.init = function() {
     console.log('xlp.init')
 }
