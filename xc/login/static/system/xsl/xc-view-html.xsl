@@ -53,10 +53,20 @@
 
   <xsl:template match="/">
     <div>
+      <xsl:apply-templates select="//x:dict/x:data/x:errs"/>
       <xsl:apply-templates/>
     </div>
   </xsl:template>
 
+  <xsl:template match="x:errs">
+    <div class="errors">
+      <xsl:for-each select="x:item">
+        <div class="error {x:type}">
+          <xsl:value-of select="x:errmsg"/>
+        </div>
+      </xsl:for-each>
+    </div>
+  </xsl:template>
 
   <xsl:template match="x:dict[x:view = 'path']">
     <div>
