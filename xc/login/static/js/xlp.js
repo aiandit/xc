@@ -3,6 +3,9 @@
 
 var xlp = xlp || {}
 
+xlp.debug = false
+xlp.debugTarget = 'xlp-debug'
+
 xlp.scopy = ({...str}) => { return {...str} }
 xlp.dcopy = (o) => JSON.parse(JSON.stringify(o))
 
@@ -498,9 +501,18 @@ xlp.mkXSL = function(xslt, xsltbase) {
 
 xlp.XLP =
 xlp.mkXLP = function(xslts, xsltbase, options) {
+    if (!options) options = {}
     function step(xml, toDoc, done, j) {
         if (j == undefined) j = 0
         var xslt = xslts[j]
+        var debug = xlp.debug || options.debug
+        if (debug) {
+            var xlpName = options.name || 'xlp'
+            var dn = document.getElementById(xlp.debugTarget)
+            dn.innerHTML += '<div id="' + xlpName + '-step-' + j + '"><textarea><![CDATA[' +
+                xlp.mkdoc(xml).documentElement.outerHTML +
+                ']]></textarea></div>'
+        }
         var nextStep = function(res) {
             if (j < xslts.length - 1) {
                 step(res, toDoc, done, j+1)
