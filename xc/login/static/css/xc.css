@@ -141,11 +141,11 @@ div#sidebar {
 }
 
 fieldset {
-    border: 0.3em outset grey;
-    border-radius: 0.3em;
+    border: 0.2em outset grey;
+    border-radius: 0.2em;
 }
 
-input {
+input, textarea {
     border: 0.1em solid grey;
     border-radius: 0.2em;
     background-clip: content-box;
@@ -169,15 +169,16 @@ input.error {
 input[type='button'], input[type='submit'], input[type='reset'] {
     background-color: aliceblue;
     padding: 0.5em;
-    margin: 0.1em;
+    margin: 0.2em 0em;
     background-clip: border-box;
 }
 
-input[type='text'], input[type='text'].required, input[type='password'], input[type='password'].required, input[type='email'], input[type='email'].required {
+input[type='text'], input[type='text'].required, input[type='password'], input[type='password'].required, input[type='email'], input[type='email'].required, textarea {
     background-color: aliceblue;
     padding: 0.5em;
     margin: 0.1em;
     background-clip: content-box;
+    font-size: 12pt;
 }
 
 input#id_code {
@@ -329,9 +330,12 @@ table, tr, th, td {
 }
 
 .oc-body {
-    background: aliceblue;
     visibility: hidden;
     display: none;
+    border: 0.1rem outset grey;
+    border-radius: 0.3em;
+    padding: 0.3rem;
+    margin: 0.2rem;
 }
 
 .oc-open.oc-body {
