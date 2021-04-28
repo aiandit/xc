@@ -233,7 +233,10 @@ var updateXDataView = function(ev, done) {
         xcontdoc = xc.getXDoc('', 'xc')
     }
 
-    xc.autoRender(ev, xcontdoc, 'xc', done)
+    xc.autoRender(ev, xcontdoc, 'xc', function(res) {
+        console.log('main render cycle done')
+        done(res)
+    })
 
 }
 
@@ -536,10 +539,14 @@ xc.getCSRFToken = function() {
 }
 
 //var globtO =  (new Date()).getTime()
+xc.polls = {}
 var ppPolls = function(subtree, ev, done) {
     var tms = subtree.querySelectorAll('.xc-sl-poll')
 
     var doPoll = function(el, eldone) {
+        var myid = (new Date()).getTime() + '' + el.dataset.pollUrl
+        xc.polls[myid] = 1
+
 	var getf = function(ciid, count, tlast) {
 	    el = document.getElementById(ciid)
 	    if (!xc.isChainedInterval(ciid)) {
@@ -554,6 +561,7 @@ var ppPolls = function(subtree, ev, done) {
 		var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
 		setTimeout(getf, nexttime, ciid, count+1, t0)
 		if (count == 0) {
+                    xc.polls[myid] = 0
 		    eldone(res)
 		}
             }
@@ -624,7 +632,9 @@ var ppPolls = function(subtree, ev, done) {
 			    handleData(res.responseText)
                         }
 		    }
-		}
+		} else {
+                    xlp.error('Failed to poll ' + url)
+                }
 	    }
 	    var method = el.dataset.pollMethod || 'get'
 	    if (method.toLowerCase() == 'post') {
@@ -660,9 +670,12 @@ xc.id = function() {
     return '' + (new Date()).getTime()
 }
 
+xc.views = {}
 var ppViews = function(subtree, ev, done) {
     var tms = subtree.querySelectorAll('.xc-sl-view')
     var doView = function(el, eldone) {
+        var myid = (new Date()).getTime() + '' + el.dataset.viewUrl
+        xc.views[myid] = 1
 	var getf = function() {
             var viewFilter = el.dataset.viewFilter || 'auto'
             var viewTarget = el.dataset.viewTarget
@@ -676,6 +689,7 @@ var ppViews = function(subtree, ev, done) {
 	        var onloadCode = el.dataset.viewOnload
 	        eval(onloadCode)
 	        console.log('VIEW: sub view ' + url + ' is handled completely')
+                xc.views[myid] = 0
 	        eldone(request)
             }
             if (viewFilter == 'auto') {
