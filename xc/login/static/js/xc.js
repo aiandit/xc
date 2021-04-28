@@ -720,7 +720,9 @@ var ppViews = function(subtree, ev, done) {
                 el.setAttribute('data-view-target', nid)
             }
 	    getf()
-	}
+	} else {
+            eldone()
+        }
         return false
     }
     xlp.amap(tms, doView, function(res) {
