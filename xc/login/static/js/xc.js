@@ -158,9 +158,14 @@ xc.getClassViewFunction = function(targetid, dclass, mode, done) {
         vparam = xc.cursubresp.querySelector('dict > view')
         if (vparam != null) {
 	    verb = vparam.textContent
-            if (verb != 'edit') {
-                verb = 'view'
+        } else {
+            vparam = xc.curresp.querySelector('dict > view')
+            if (vparam != null) {
+	        verb = vparam.textContent
             }
+        }
+        if (verb != 'edit') {
+            verb = 'view'
         }
     }
     dclass += '-' + verb
