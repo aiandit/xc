@@ -563,6 +563,10 @@ xlp.mkXLP = function(xslts, xsltbase, options) {
             done = toDoc
             toDoc = (options != undefined && options.output == 'text') ? false : true
         }
+        if (xslts.length == 0) {
+            done(indoc)
+            return
+        }
         step(indoc, toDoc,
              function(outfrag) {
 //                 if (outfrag.nodeType == outfrag.DOCUMENT_FRAGMENT_NODE) {
@@ -600,7 +604,11 @@ xlp.mkXLP1 = function(xsldocs) {
 xlp.readXLP = function(Xdoc, xslbase, done) {
     var getsteps = xlp.mkXLP(['xlp-get-steps.xsl'], '/main/getf/sys/xsl/')
     getsteps.transform(Xdoc, false, function(res) {
-        var info = JSON.parse(res.textContent)
+        var info = []
+        try {
+            info = JSON.parse(res.textContent)
+        } catch {
+        }
         var sxlp = xlp.mkXLP(info, xslbase)
         done(sxlp)
     })
