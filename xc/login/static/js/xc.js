@@ -571,8 +571,21 @@ var ppPolls = function(subtree, ev, done) {
 		var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
 		setTimeout(getf, nexttime, ciid, count+1, t0)
 		if (count == 0) {
+
+                    var tn = document.getElementById(el.dataset.pollTarget + '-document')
+                    tn.onclick = function(ev) {
+                        if (ev.target.nodeName != 'SELECT'
+                            && ev.target.nodeName != 'OPTION'
+                            && ev.target.nodeName != 'INPUT'
+                            && ev.target.nodeName != 'A') {
+	                    getf(ciid, 1)
+                        }
+                    }
+                    tn.dataset.pollId = ciid
+                    tn.classList.add('xc-sl-poll-target')
                     xc.polls[myid] = 0
-		    eldone(res)
+                    eldone(res)
+
 		}
             }
 	    var handleData = function(text) {
