@@ -83,7 +83,7 @@ def get_ip(ip):
 
 class XCForm(forms.Form):
     method = 'POST'
-    title = 'Xc'
+    title = 'XC'
 
     def to_xml(self, field):
         f = self[field]
