@@ -434,13 +434,29 @@ form.inline, div.inline, img.inline  {
 }
 .float-right {
     float: right;
+}
+.float-left {
+    float: left;
+}
+.clear-left {
+    clear: left;
+}
+.clear-right {
     clear: right;
+}
+.clear-both {
+    clear: both;
 }
 .small {
     font-size: 80%;
 }
 
 .error {
+    color: black;
+    background-color: #ff6050;
+}
+
+.warning {
     color: black;
     background-color: #ff8060;
 }
