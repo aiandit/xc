@@ -251,7 +251,7 @@ def ajax_delete(request):
         else:
             next_ = cdata['next_']
             if len(next_) == 0:
-                next_ = redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
+                next_ = reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path)
             return redirect(next_)
 
     if len(errmsg):
