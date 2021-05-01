@@ -1632,6 +1632,64 @@ def nlines(request):
     return render(request, 'common/xc-atom.xml', context, content_type="application/xml")
 
 
+class EraseLineData(PathData):
+    name = 'headtail'
+    path = forms.CharField(required=False, max_length=1024, label='Mode')
+    n = forms.IntegerField(label='Number', required=False)
+    repl = forms.CharField(required=False, max_length=1024, label='Replacement')
+    comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
+
+def eraseline(request):
+
+    lsl = {}
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = EraseLineData(reqDict)
+    n = 0
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+        n = cdata['n']
+        repl = cdata['repl']
+
+        stat = workdir.eraseline(path, n, repl,
+                                 {'user': request.user.username, 'comment': cdata['comment']})
+        if stat != 0:
+            errmsg = 'could not erase the line nr %d' % (n)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    actions = fileactions
+    try:
+        if lsl['info']['type'] == 'd':
+            actions = diractions
+    except:
+        pass
+
+    data = {
+        'n': n,
+        'stat': stat,
+        'errs': errors
+    }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET),
+                'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata] }
+    return render(request, 'common/xc-atom.xml', context, content_type="application/xml")
+
+
 class FindData(XCForm):
     title = 'Find'
     name = 'find'

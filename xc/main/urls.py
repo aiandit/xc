@@ -49,6 +49,9 @@ urlpatterns = [
     path('nlines', views.nlines, name='nlines'),
     path('ajax_nlines', views.nlines, name='ajax_nlines'),
 
+    path('eraseline', views.eraseline, name='eraseline'),
+    path('ajax_eraseline', views.eraseline, name='ajax_eraseline'),
+
     path('head', views.get_head, name='head'),
     path('ajax_head', views.get_head, name='ajax_head'),
 
