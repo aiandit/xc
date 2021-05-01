@@ -208,10 +208,11 @@ class DeleteData(XCForm):
     required_css_class = 'required'
 
     path = forms.CharField(max_length=1024, label='Path',
-                           widget=forms.TextInput(attrs={'size': 120}))
+                           widget=forms.TextInput(attrs={'size': 90}))
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
 
-    next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action', widget=forms.HiddenInput)
+    next_ = forms.CharField(required=False, max_length=1024,
+                            label='Follow-up action', widget=forms.HiddenInput)
 
     def clean(self):
         cleaned_data = super().clean()
