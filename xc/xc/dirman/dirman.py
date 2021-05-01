@@ -331,6 +331,14 @@ class DirManager:
         lines = self.getlines(name, m, n-m)
         return lines
 
+    def eraseline(self, name, n, repl):
+        stat = 0
+        #        print('retrieve first %d lines of %s' % (n, name))
+        lns = self.getlines(name)
+        lnsnew = lns[0:n] + [repl] + lns[n+1:]
+        self.replacedoc(name, lnsnew.join('\n'))
+        return stat
+
     def renamedoc(self, name1, name2):
         stat = 0
         try:
