@@ -557,7 +557,7 @@ var ppPolls = function(subtree, ev, done) {
         var myid = (new Date()).getTime() + '' + el.dataset.pollUrl
         xc.polls[myid] = 1
 
-	var getf = function(ciid, count, tlast) {
+	var getf = function(ciid, count) {
 	    el = document.getElementById(ciid)
 	    if (!xc.isChainedInterval(ciid)) {
 //		console.log('Chained interval ' + ciid + ' was cancelled')
