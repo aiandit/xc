@@ -1153,7 +1153,7 @@ xc.ensureInput = function(form, name) {
     }
 }
 
-xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done, render) {
+xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done, render, append) {
     var updateconfxlp = xlp.mkXLP(filters, '/main/getf/')
     updateconfxlp.transform(doc, toDoc, function(resconf) {
         xc.ensureInput(form, 'path')
@@ -1162,7 +1162,11 @@ xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done, render
 	form.path.value = ofname
 	form.data.value = toDoc ? resconf.documentElement.outerHTML : resconf.textContent
 	form.csrfmiddlewaretoken.value = xc.getCSRFToken()
-	xlp.submitForm(form, '/main/ajax_edit', function(rdoc, req) {
+        var formAction = '/main/ajax_edit'
+        if (append) {
+            formAction = '/main/ajax_append'
+        }
+	xlp.submitForm(form, formAction, function(rdoc, req) {
 	    console.log('Doc ' + doc.URL + ' transformed with ' + filters + ' and saved as ' + ofname)
             if (render) {
                 processXData(undefined, req, function(res) {
