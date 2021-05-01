@@ -139,6 +139,8 @@
     </div>
   </xsl:template>
 
+  <xsl:template match="cgi"/>
+
   <xsl:template match="dict" mode="xc-control-form">
     <xsl:if test="/*/forms/form[2]">
       <xsl:apply-templates select="." mode="xc-control-form-"/>
@@ -179,8 +181,8 @@
 
   <xsl:template match="dict" mode="xc-form">
     <xsl:variable name="f1" select="/*/forms/form[1]"/>
-    <h4>Form</h4>
-    <xsl:if test="data/errs/item">
+    <h4><xsl:value-of select="$f1/@title"/></h4>
+<!--    <xsl:if test="data/errs/item">
       <div class="aleft">
 	<xsl:if test="cgi/next_">
 	  <p>Form failure: <a href="{cgi/next_}">Return to form page</a></p>
@@ -196,13 +198,13 @@
 	  </xsl:for-each>
 	</ul>
       </div>
-    </xsl:if>
+    </xsl:if> -->
     <form class="xc-form" id="{$f1/@id}" action="/{xapp}/{$f1/@action}" method="{$f1/@method}">
       <fieldset>
-        <legend><xsl:value-of select="/*/forms/form[1]/@title"/></legend>
+        <legend><xsl:value-of select="/*/forms/form[1]/@title"/> form</legend>
         <div>
           <table>
-            <xsl:for-each select="/*/forms/form[1]/field">
+            <xsl:for-each select="/*/forms/form[1]/field[not(input/@type = 'hidden')]">
               <tr>
                 <th>
                   <xsl:apply-templates select="label" mode="to-xhtml"/>
@@ -219,6 +221,9 @@
             <tr>
               <td colspan="3">
                 <input id="input-submit" type="submit" name="submit"/>
+                <xsl:for-each select="/*/forms/form[1]/field[input/@type = 'hidden']">
+                  <xsl:apply-templates select="input" mode="to-xhtml"/>
+                </xsl:for-each>
               </td>
             </tr>
           </table>

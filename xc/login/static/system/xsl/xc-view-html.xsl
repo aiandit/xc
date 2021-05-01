@@ -53,9 +53,15 @@
 
   <xsl:template match="/">
     <div>
-      <xsl:apply-templates select="//x:dict/x:data/x:errs"/>
       <xsl:apply-templates/>
     </div>
+  </xsl:template>
+
+  <xsl:template match="x:xc[x:dict/x:xapp != 'main']"/>
+
+  <xsl:template match="x:xc">
+    <xsl:apply-templates select="//x:dict/x:data/x:errs"/>
+    <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="x:errs">
@@ -150,6 +156,7 @@
     <a href="/main/path?path={x:path}">
       <xsl:value-of select="x:type"/>
     </a>
+    <xsl:text> </xsl:text>
     <span class="lsl-info-dirlink">
       <a href="/main/path?path={x:dir}">
         <xsl:value-of select="x:dir"/>
