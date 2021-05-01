@@ -114,9 +114,11 @@ xframes.mkXframes = function(frames, xsltbase) {
 			    invNode.appendChild(newNode)
 			    newNode.innerHTML = resHTML
 			    preprocess(newNode, function(res) {
-				resHTML = newNode.innerHTML
-				resn.innerHTML = resHTML
 				var oldNode = invNode.removeChild(newNode)
+                                while (resn.firstChild) {
+                                    resn.removeChild(resn.firstChild)
+                                }
+				resn.appendChild(oldNode)
 				console.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)
 				console.log('Invisible children ' + invNode.childElementCount)
 				lastStep(resn)
