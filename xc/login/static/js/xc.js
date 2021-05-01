@@ -344,8 +344,10 @@ xc.handleLinkClickA = function(ev, elem) {
     }
 }
 
-var handleLinkClick = function(ev) {
-    var target = ev.target
+var handleLinkClick = function(ev, target) {
+    if (!target) {
+        target = ev.target
+    }
     while(target.nodeName != 'A' && !target.nodeName.startsWith('#')) {
 	target = target.parentElement
     }
@@ -452,11 +454,14 @@ var setFormCallback = function(subtree, handle) {
 
 var setLinkCallback = function(subtree, handle) {
     var forms = subtree.querySelectorAll('a')
-    var ffunc = function(ev) {
-        console.log('link click event for: ' + ev);
-        if (ev.target.classList.contains('xc-nocatch')) return true
-        if ((new URL(ev.target.href)).host != xlp.gethost()) return true
-        var res = handle(ev)
+    var ffunc = function(ev, x) {
+        if (!x) {
+            x = ev.target
+        }
+        console.log('link click event for: ' + ev + ' on ' + x);
+        if (x.classList.contains('xc-nocatch')) return true
+        if ((new URL(x.href)).host != xlp.gethost()) return true
+        var res = handle(ev, x)
         console.log(name + ': link click event handler returned: ' + res);
         return res
     }
