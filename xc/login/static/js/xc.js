@@ -1136,13 +1136,20 @@ xc.inject = function(id, html) {
 }
 
 xc.submitForm = function(form, url, done) {
+    xc.ensureInput(form, 'csrfmiddlewaretoken')
     form.csrfmiddlewaretoken.value = xc.getCSRFToken()
     xlp.submitForm(form, url, done)
 }
 
 xc.ensureInput = function(form, name) {
-    if (!form.elements[name]) {
-        form.innerHTML += '<input name="' + name + '" type="hidden"/>'
+    if (typeof name == "string") {
+        if (!form.elements[name]) {
+            form.innerHTML += '<input name="' + name + '" type="hidden"/>'
+        }
+    } else {
+        for (var i in name) {
+            xc.ensureInput(form, name[i])
+        }
     }
 }
 
