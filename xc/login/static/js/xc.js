@@ -16,14 +16,14 @@ var frames = [
 
 var myframes = xframes.mkXframes(frames, '/static/xsl/')
 
-var unescapeXML = function(x) {
-    return x.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+xc.unescapeXML = function(x) {
+    return x.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;', '&')
 }
 
 var extractXPath_XPath = function(doc, xpath, toDoc, wrap, done) {
     var rtype = toDoc ? XPathResult.UNORDERED_NODE_ITERATOR_TYPE : XPathResult.STRING_TYPE
     var r = doc.evaluate(xpath, doc, null, rtype, null)
-    var n = toDoc ? r.iterateNext() : unescapeXML(r.stringValue)
+    var n = toDoc ? r.iterateNext() : xc.unescapeXML(r.stringValue)
     done(n)
     // want a document as result...
 }
