@@ -452,11 +452,18 @@ var setFormCallback = function(subtree, handle) {
     }
 }
 
+xc.getParentTag = function(target, name) {
+    while(target.nodeName != 'A' && !target.nodeName.startsWith('#')) {
+	target = target.parentElement
+    }
+    return target
+}
+
 var setLinkCallback = function(subtree, handle) {
     var forms = subtree.querySelectorAll('a')
     var ffunc = function(ev, x) {
         if (!x) {
-            x = ev.target
+            x = xc.getParentTag(ev.target, 'A')
         }
         console.log('link click event for: ' + ev + ' on ' + x);
         if (x.classList.contains('xc-nocatch')) return true
@@ -870,6 +877,12 @@ xc.dictXML = function(data, exclude) {
         rdict[k] = r
     })
     return Object.values(rdict).join('\n')
+}
+
+xc.getInfoXML = function() {
+    var infodata = {date: (new Date()).getTime()*1e-3}
+    return xc.curresp.getElementsByTagName('user')[0].outerHTML +
+        xc.getXDoc(xc.dictXML(infodata), 'info')
 }
 
 xc.getCGIXML = function(form, exclude) {
