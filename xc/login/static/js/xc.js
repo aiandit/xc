@@ -268,58 +268,66 @@ var getXDataXML = function(inxml) {
 }
 
 var getXData = function(ev, request, done) {
-    extractXPath(request.responseXML, '/*/xcontent', true, '', function(xcontdoc) {
-        if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE && xcontdoc.childElementCount > 0
-            && xcontdoc.documentElement.childElementCount >= 1) {
-            if (xcontdoc.documentElement.childElementCount == 1) {
-                extractXPath(request.responseXML, '/*/xcontent/*', true, '', function(xcontdoc) {
-                    done(xcontdoc)
-                })
-            } else {
-                done(xlp.parseXML(xc.getXDoc(xcontdoc.documentElement.innerHTML,
-                                                xcontdoc.documentElement.firstElementChild.nodeName + 's')))
-            }
+    var mimetype = xc.xq('string(/*/xcontent-cdata/@mime-type)', request.responseXML)
+    var xcontdoc = xc.xq('/*/xcontent', request.responseXML)
+    if (xcontdoc.length > 0 &&
+        (xcontdoc = xcontdoc[0]) &&
+        xcontdoc.nodeType == xcontdoc.ELEMENT_NODE &&
+        xcontdoc.childElementCount >= 1) {
+        if (xcontdoc.childElementCount == 1) {
+            r1 = xlp.parseXML(xcontdoc.firstElementChild.outerHTML)
+            done(r1)
         } else {
-	    var mimetype = xlp.xPath_selectString(request.responseXML, '/*/xcontent-cdata/@mime-type')
-            extractXPath(request.responseXML, '/*/xcontent-cdata/text()', false, '', function(xcontdoc) {
-                if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
-		    if (mimetype.length > 0) {
-                        done(xcontdoc, mimetype)
-		    } else {
-                        var xmldata = xcontdoc.textContent
-			var indoc = null
-                        if (xmldata.length > 0) {
-			    indoc = getXDataXML(xmldata)
-                        }
-			if (indoc != null) {
-                            done(indoc)
-			} else {
-                            done(request.responseXML)
-			}
-		    }
-                }
-            })
+            done(xlp.parseXML(xc.getXDoc(r1.innerHTML,
+                                         r1.firstElementChild.nodeName + 's')))
         }
-    })
+    } else {
+        xcontdoc = xc.xq('/*/xcontent-cdata/text()', request.responseXML)
+        if (xcontdoc.length > 0 &&
+            (xcontdoc = xcontdoc[0]) &&
+            xcontdoc.nodeType == xcontdoc.TEXT_NODE) {
+            xcontdoc = xc.unescapeXML(xcontdoc.textContent)
+	    if (mimetype.length > 0) {
+                done(xcontdoc, mimetype)
+	    } else {
+                var xmldata = xcontdoc
+		var indoc = null
+                if (xmldata.length > 0) {
+		    indoc = getXDataXML(xmldata)
+                }
+		if (indoc != null) {
+                    done(indoc)
+		} else {
+                    done(request.responseXML)
+		}
+	    }
+        } else {
+            done(request.responseXML)
+        }
+    }
 }
 
 var processXData = function(ev, request, done) {
     xc.cursubresp = xc.curresp = request.responseXML
     getXData(ev, request, function(xcontdoc, mimetype) {
-        if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE) {
+        if (xcontdoc.nodeType &&
+            xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE) {
             xc.curdoc = xcontdoc
-        } else if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
+	    xc.curtype = 'application/xml'
+        } else if (typeof xcontdoc == 'string') {
             if (mimetype == 'application/xml') {
                 try {
-                    var xdoc = xlp.parseXML(xcontdoc.textContent)
+                    var xdoc = xlp.parseXML(xcontdoc)
                     xcontdoc = xdoc
                 } catch {
+                    xlp.error('failed to parse XML from ' + request.resposeURL)
                 }
             }
             xc.curdoc = xcontdoc
 	    xc.curtype = mimetype
         } else {
             xc.curdoc = xc.getXDoc('<x>no valid data</x>')
+	    xc.curtype = 'application/xml'
         }
         updateXDataView(ev, function(res) {
             done(res)
