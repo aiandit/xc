@@ -362,7 +362,7 @@ var dohandleFormSubmit = function(form, ev) {
         return true
     } else if (form.action.startsWith('javascript:')) {
         var this_ = form
-        var evres = eval(form.action.substr(11))
+        var evres = eval(unescape(form.action.substr(11)))
         console.log(evres)
         var res = evres(ev)
         return false
