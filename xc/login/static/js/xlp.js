@@ -519,9 +519,13 @@ xlp.mkXLP = function(xslts, xsltbase, options) {
             } else {
                 if (res != undefined
                     && res.documentElement != undefined
-                    && res.documentElement.namespaceURI == "http://www.mozilla.org/TransforMiix") {
-                    var tn = res.documentElement.firstChild
-                    var newres = document.createDocumentFragment()
+                    && res.documentElement.namespaceURI == "http://www.w3.org/1999/xhtml"
+                    && res.documentElement.nodeName == "HTML"
+                    && xlp.isChrome) {
+                    var tn = res.documentElement.children[1].firstChild
+                    var newres = toDoc ?
+                        document.implementation.createDocument("http://www.w3.org/1999/xhtml", "") :
+                        document.createDocumentFragment()
                     newres.appendChild(tn)
                     done(newres)
                 } else {
