@@ -563,6 +563,7 @@ var ppPolls = function(subtree, ev, done) {
     var doPoll = function(el, eldone) {
         var myid = (new Date()).getTime() + '' + el.dataset.pollUrl
         xc.polls[myid] = 1
+        var polltext = ''
 
 	var getf = function(ciid, count) {
 	    el = document.getElementById(ciid)
@@ -653,8 +654,22 @@ var ppPolls = function(subtree, ev, done) {
                                 hdict[headers[i][0]] = headers[i][1].trim()
                             }
                             var lineinfo = xc.dictXML(hdict)
+                            var global_rstart = hdict['x-range-start']
+                            var global_rend = hdict['x-range-end']
+                            if (!el.dataset.pollAppend) {
+                                polltext = ''
+                            } else {
+                                var tn = document.getElementById(el.dataset.pollTarget + '-document')
+                                var linestn = tn.querySelector('.linecont')
+                                if (linestn) {
+                                    global_rstart = Math.min(Number(linestn.dataset.rangeStart), global_rstart)
+                                    global_rend = Math.max(Number(linestn.dataset.rangeEnd), global_rend)
+                                    lineinfo = xc.dictXML({start:global_rstart, end:global_rend}) + lineinfo
+                                }
+                            }
+                            polltext += res.responseText
                             var xdoc = xlp.mkdoc(xc.getXDoc(
-                                xc.getXDoc(res.responseText, 'lines')
+                                xc.getXDoc(polltext, 'lines')
                                     + '<headers>' + lineinfo + '</headers>', el.dataset.pollWrap))
                             xc.cursubresp = xdoc
                             handleData(xdoc)
