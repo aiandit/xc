@@ -302,6 +302,7 @@ def ajax_newdir(request):
         reqDict = request.POST
 
     rdata = NewdirData(reqDict)
+    lsl = 0
 
     if request.method == "GET":
         res = rdata.is_valid()
@@ -318,6 +319,7 @@ def ajax_newdir(request):
         res = rdata.is_valid()
         if not res:
             errmsg = 'The form data is invalid'
+            path = ''
         else:
             cdata = rdata.cleaned_data
             path = cdata['path']
@@ -335,6 +337,7 @@ def ajax_newdir(request):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
 
     data = {
+        'status': lsl,
         'errs': errors
     }
     data = { **data, **get_lsl(path) }
