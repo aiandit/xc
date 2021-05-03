@@ -1391,16 +1391,11 @@ xc.getID = function(path, done) {
 }
 
 xc.mkdir_p = function(path, done) {
-    var comps = path.split('/')
-    var path = ''
-    comps.forEach((p)=> {
-        var rdata = 'path=' + path + '&newdir=' + p + '&csrfmiddlewaretoken=' + xc.getCSRFToken()
-        path += p + '/'
-        var headers = {'Content-type': 'application/x-www-form-urlencoded'}
-        xlp.sendPost('/main/ajax_newdir', rdata, headers, function(stat, res) {
-            var num = xc.xq('number(/*/xcontent/xc:*)', res.responseXML)
-            done(num1)
-        })
+    var rdata = 'path=&newdir=' + path + '&csrfmiddlewaretoken=' + xc.getCSRFToken()
+    var headers = {'Content-type': 'application/x-www-form-urlencoded'}
+    xlp.sendPost('/main/ajax_newdir', rdata, headers, function(stat, res) {
+        var num = xc.xq('number(/*/dict/data/status)', res.responseXML)
+        done(num)
     })
 }
 
