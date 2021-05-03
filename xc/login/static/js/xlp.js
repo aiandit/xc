@@ -381,12 +381,22 @@ xlp.mkpre = function(text) {
     return pre
 }
 
+xlp.logHandlers = []
+xlp.addLogHandler = function(h) {
+    xlp.logHandlers.push(h)
+}
+
 xlp.errorHandlers = []
 xlp.addErrorHandler = function(h) {
     xlp.errorHandlers.push(h)
 }
 
-xlp.log = function(txt) { console.log('XLP: ' + txt) }
+xlp.log = function(txt, req) {
+    console.log('XLP: ' + txt)
+    xlp.logHandlers.forEach(function(h) {
+        h(txt, req)
+    })
+}
 xlp.error = function(txt, req) {
     console.error('XLP: ' + txt)
     xlp.errorHandlers.forEach(function(h) {

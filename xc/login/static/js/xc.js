@@ -1434,6 +1434,9 @@ xc.showMessage = function(msg, timeout) {
 }
 
 xlp.addErrorHandler(function(msg, req) {
-    console.error('an XLP request failed')
     xc.showMessage(xc.mkMessage('error', msg))
+})
+
+xlp.addLogHandler(function(msg, req) {
+    xc.showMessage(xc.mkMessage('msg', msg))
 })
