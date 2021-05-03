@@ -1219,7 +1219,7 @@ xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done, render
 	    console.log('Doc ' + doc.URL + ' transformed with ' + filters + ' and saved as ' + ofname)
             if (render) {
                 processXData(undefined, req, function(res) {
-                    done(res, req)
+                    done(res, req, rdoc, resconf)
                 })
             } else {
 	        done(rdoc, req)
