@@ -1202,6 +1202,19 @@ xc.ensureInput = function(form, name) {
     }
 }
 
+xc.setdoc = function(path, doc, done) {
+    var form = document.getElementById('xc-form-edit')
+
+    form.path.value = path
+    form.data.value = xc.getDocText(doc)
+
+    var formAction = '/main/ajax_edit'
+    xc.submitForm(form, formAction, function(rdoc, req) {
+	console.log('Doc ' + doc.URL + ' saved as ' + path)
+	done(rdoc, req)
+    })
+}
+
 xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done, render, append) {
     var updateconfxlp = xlp.mkXLP(filters, '/main/getf/')
     updateconfxlp.transform(doc, toDoc, function(resconf) {
