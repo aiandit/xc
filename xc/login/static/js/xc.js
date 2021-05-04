@@ -1447,9 +1447,9 @@ xc.showMessage = function(msg, timeout) {
 }
 
 xlp.addErrorHandler(function(msg, req) {
-    xc.showMessage(xc.mkMessage('error', msg))
+    xc.showMessage(xc.mkMessage('error', msg), req)
 })
 
 xlp.addLogHandler(function(msg, req) {
-    xc.showMessage(xc.mkMessage('msg', msg))
+    xc.showMessage(xc.mkMessage('msg', msg), req)
 })
