@@ -79,23 +79,25 @@
       <h5><xsl:value-of select="x:xapp"/>::<xsl:value-of select="x:view"/></h5>
 
       <div>
-        <div class="xc-sl-view"
-             data-view-url="/main/ajax_view?path={x:data/x:lsl/x:info/x:path}"
-             data-view-filter="auto"
-             data-view-target="dict-path-view">
-        </div>
-        <h6>Autoview</h6>
-        <div>
-          <button onclick="xc.showContent">Content</button>
-          <button onclick="xc.go2(this.dataset.url)"
-                  data-url="/main/view?path={x:data/x:lsl/x:path}">View</button>
-          <button onclick="xc.go2(this.dataset.url)"
-                  data-url="/main/edit?path={x:data/x:lsl/x:path}">Edit</button>
-        </div>
-        <div
-            id="dict-path-view-document"
-            >
-        </div>
+        <xsl:if test="x:data/x:lsl/x:info/x:path">
+          <div class="xc-sl-view"
+               data-view-url="/main/ajax_view?path={x:data/x:lsl/x:info/x:path}"
+               data-view-filter="auto"
+               data-view-target="dict-path-view">
+          </div>
+          <h6>Autoview</h6>
+          <div>
+            <button onclick="xc.showContent">Content</button>
+            <button onclick="xc.go2(this.dataset.url)"
+                    data-url="/main/view?path={x:data/x:lsl/x:path}">View</button>
+            <button onclick="xc.go2(this.dataset.url)"
+                    data-url="/main/edit?path={x:data/x:lsl/x:path}">Edit</button>
+          </div>
+          <div
+              id="dict-path-view-document"
+              >
+          </div>
+        </xsl:if>
       </div>
 
       <h5>Code</h5>
