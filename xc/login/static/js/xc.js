@@ -1408,8 +1408,49 @@ xc.mkdir_p = function(path, done) {
     var headers = {'Content-type': 'application/x-www-form-urlencoded'}
     xlp.sendPost('/main/ajax_newdir', rdata, headers, function(stat, res) {
         var num = xc.xq('number(/*/dict/data/status)', res.responseXML)
+        xlp.log('mkdir ' + path)
         done(num)
     })
+}
+
+xc.exists = function(path, done) {
+    xlp.loadXML('/main/ajax_path?path='+path, function(res) {
+        xlp.log('if !exist ' + path)
+        var name = xc.xq('string(//lsl/info/name)', res)
+        var exists = name.length>0 && path.endsWith(name)
+        done(exists)
+    })
+}
+
+xc.touch = function(path, done, defdoc) {
+    xc.exists(path, function(exists) {
+        if (!exists) {
+            var rdata = 'path=' + path + '&data=' + encodeURI(defdoc ? defdoc : '') +
+                '&csrfmiddlewaretoken=' + xc.getCSRFToken()
+            var headers = {'Content-type': 'application/x-www-form-urlencoded'}
+            xlp.sendPost('/main/ajax_edit', rdata, headers, function(stat, res) {
+                var num = xc.xq('number(/*/dict/data/status)', res.responseXML)
+                xlp.log('create ' + path)
+                done(num)
+            })
+        } else {
+            done(0)
+        }
+    })
+}
+
+xc.basename = function(path) {
+    var p = path.split('/')
+    if (p.length)
+        return p[p.length-1]
+    return ''
+}
+
+xc.namestem = function(path) {
+    var p = path.split('.')
+    if (p.length>1)
+        return p[p.length-2]
+    return path
 }
 
 xc.registeredHandles = {}
