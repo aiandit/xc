@@ -41,7 +41,7 @@ var extractXPath = function(doc, xpath, toDoc, wrap, done) {
         seltrans.transform(doc, toDoc, function(result) {
             if (xlp.isMozilla) {
                 if (!toDoc) {
-                    result.textContent = unescapeXML(result.textContent)
+                    result.textContent = xc.unescapeXML(result.textContent)
                 }
             }
             done(result)
