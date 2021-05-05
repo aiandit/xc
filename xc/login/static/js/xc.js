@@ -721,8 +721,9 @@ var ppPolls = function(subtree, ev, done) {
 
 }
 
-xc.id = function() {
-    return '' + (new Date()).getTime()
+xc.id = function(cl) {
+    if (!cl) cl = 'id'
+    return cl + (new Date()).getTime()
 }
 
 xc.views = {}
