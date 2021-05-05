@@ -758,13 +758,14 @@ var ppViews = function(subtree, ev, done) {
                     xc.autoRender(ev, dt, viewTarget, lastStep)
                 })
             } else {
+                var targetId = viewTarget + '-document'
 	        var localframes = [
-		    {target: viewTarget,
+		    {target: targetId,
 		     filters: [ viewFilter ]}
 	        ]
 	        var mylframes = xframes.mkXframes(localframes, xc.xslpath)
-                mylframes.renderLink(ev.target, xframes.ajaxPathName(xlp.getbase() + url), function(request) {
-		    updateTreeFinal(document.querySelector('#' + el.dataset.viewTarget), ev, lastStep)
+                mylframes.renderLink(ev.target, url, function(request) {
+		    updateTreeFinal(document.querySelector('#' + targetId), ev, lastStep)
                 }, viewCache)
             }
 	    el.dataset.viewDone = '1'
