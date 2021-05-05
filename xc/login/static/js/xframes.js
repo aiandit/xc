@@ -73,6 +73,7 @@ xframes.mkXframes = function(frames, xsltbase) {
         }
     }
     var render = function(indoc, done, preprocess) {
+        var this_ = this
         var stepsDone = Array(frames.length);
         var stepsRes = Array(frames.length);
         [...Array(frames.length).keys()].forEach(function(framen) {
@@ -118,7 +119,14 @@ xframes.mkXframes = function(frames, xsltbase) {
                                 while (resn.firstChild) {
                                     resn.removeChild(resn.firstChild)
                                 }
-				resn.appendChild(oldNode)
+                                if (!this_.replace) {
+				    resn.appendChild(oldNode.firstElementChild)
+                                } else {
+                                    var parent = resn.parentElement
+                                    var inspos = parent.previousSibling
+                                    var rem = parent.removeChild(resn)
+                                    parent.insertChild(oldNode.firstElementChild, inspos)
+                                }
 				console.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)
 				console.log('Invisible children ' + invNode.childElementCount)
 				lastStep(resn)
@@ -164,6 +172,7 @@ xframes.mkXframes = function(frames, xsltbase) {
         xlp.reqXML(src, {URL: url, method: method, callback: (a,b)=>renderRespHandler(a,b,done, src,url)})
     }
     var Xframes = {
+        replace: false,
 	renderRespHandler: renderRespHandler,
         frames: frames,
         xsltbase: xsltbase,
