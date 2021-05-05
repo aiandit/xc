@@ -595,7 +595,9 @@ var ppPolls = function(subtree, ev, done) {
                             && ev.target.nodeName != 'INPUT'
                             && ev.target.nodeName != 'A') {
 	                    getf(ciid, 1)
+                            return false
                         }
+                        return true
                     }
                     tn.dataset.pollId = ciid
                     tn.classList.add('xc-sl-poll-target')
