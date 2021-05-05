@@ -85,14 +85,15 @@ xc.isXC = function(dclass) {
 }
 
 xc.classViewFunctions = {}
-xc.mkClassViewFunction = function(targetid, dclass, mode, done) {
+xc.mkClassViewFunction = function(targetid, dclass, mode, opts, done) {
     var transformName = dclass + '-' + mode
 
     var frames = [
         {target: targetid + '-title',
          xlp: xlp.mkXLP(['xc-app-title.xsl'], '/main/getf/xsl/', {output: 'text'})},
         {target: targetid + '-document',
-         xlp: xlp.mkXLP(['pipelines/' + transformName + '.xml'], '/main/getf/')},
+         xlp: xlp.mkXLP(['pipelines/' + transformName + '.xml'], '/main/getf/'),
+         replace: opts.replace, skip: opts.skip},
         {target: targetid + '-document-actions',
          xlp: xlp.mkXLP(['docactions-html.xsl'], '/main/getf/xsl/')},
         {target: targetid + '-document-info',
@@ -149,7 +150,7 @@ xc.mkClassViewFunction = function(targetid, dclass, mode, done) {
     done(res)
 }
 
-xc.getClassViewFunction = function(targetid, dclass, mode, done) {
+xc.getClassViewFunction = function(targetid, dclass, mode, opts, done) {
     var verb = 'view'
     var vparam = xc.curresp.querySelector('cgi > v')
     if (vparam != null) {
@@ -172,7 +173,7 @@ xc.getClassViewFunction = function(targetid, dclass, mode, done) {
     var key = targetid + '-' + dclass + '-' + mode
     var incache = xc.classViewFunctions[key]
     if (typeof incache == 'undefined') {
-        xc.mkClassViewFunction(targetid, dclass, mode, function(res) {
+        xc.mkClassViewFunction(targetid, dclass, mode, opts, function(res) {
             incache = res
             xc.classViewFunctions[key] = res
             done(res)
@@ -188,8 +189,8 @@ var updateXView = function(ev) {
     })
 }
 
-xc.autoRender = function(ev, xcontdoc, targetid, done) {
-
+xc.autoRender = function(xcontdoc, targetid, opts, done) {
+    var ev = opts.ev
     var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
     xinfo.transform(xcontdoc, false, function(jinfo) {
         var dclass = 'default'
@@ -210,7 +211,7 @@ xc.autoRender = function(ev, xcontdoc, targetid, done) {
         }
 	console.log('XC: class is ' + dclass)
 	xc.docs[dclass] = xcontdoc
-        xc.getClassViewFunction(targetid, dclass, mode, function(viewFun) {
+        xc.getClassViewFunction(targetid, dclass, mode, opts, function(viewFun) {
 	    viewFun.render(xcontdoc, function(res) {
                 console.log('Done with autoRender cycle ' + targetid)
                 done(res)
@@ -237,8 +238,7 @@ var updateXDataView = function(ev, done) {
         console.log('No XML data')
         xcontdoc = xc.getXDoc('', 'xc')
     }
-
-    xc.autoRender(ev, xcontdoc, 'xc', function(res) {
+    xc.autoRender(xcontdoc, 'xc', {ev: ev}, function(res) {
         console.log('main render cycle done')
         done(res)
     })
@@ -630,7 +630,7 @@ var ppPolls = function(subtree, ev, done) {
                         finalStep(res)
 		    })
                 } else {
-                    xc.autoRender(ev, text, el.dataset.pollTarget, function(res) {
+                    xc.autoRender(text, el.dataset.pollTarget, {ev: ev}, function(res) {
                         console.log('poll auto render done')
                         finalStep(res)
                     })
@@ -737,6 +737,8 @@ var ppViews = function(subtree, ev, done) {
             var viewTarget = el.dataset.viewTarget
 	    var viewName = el.dataset.viewName || 'unknown-view'
 	    var viewWrap = el.dataset.viewWrap
+	    var viewReplace = el.dataset.viewReplace || false
+	    var viewSkip = el.dataset.viewSkip || 0
 	    var viewMode = el.dataset.viewMode || 'xml'
 	    var viewCache = el.dataset.viewCache || false
 	    var url = el.dataset.viewUrl
@@ -755,7 +757,9 @@ var ppViews = function(subtree, ev, done) {
                         dt = xc.getXDoc(dt, viewWrap)
                     }
                     xc.cursubresp = xlp.mkdoc(dt)
-                    xc.autoRender(ev, dt, viewTarget, lastStep)
+                    xc.autoRender(dt, viewTarget,
+                                  {ev: ev, replace: viewReplace, skip: viewSkip},
+                                  lastStep)
                 })
             } else {
                 var targetId = viewTarget + '-document'

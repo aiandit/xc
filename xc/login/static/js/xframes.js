@@ -119,13 +119,20 @@ xframes.mkXframes = function(frames, xsltbase) {
                                 while (resn.firstChild) {
                                     resn.removeChild(resn.firstChild)
                                 }
-                                if (!this_.replace) {
-				    resn.appendChild(oldNode.firstElementChild)
+                                var toins = oldNode
+                                if (frame.skip > 0) {
+                                    for (var s = 0; s < frame.skip; ++s) {
+                                        toins = toins.firstElementChild
+                                    }
+                                }
+                                toins = Array(...toins.children)
+                                if (!frame.replace) {
+                                    toins.forEach((c) => resn.appendChild(c))
                                 } else {
                                     var parent = resn.parentElement
-                                    var inspos = parent.previousSibling
+                                    var inspos = resn.nextSibling
                                     var rem = parent.removeChild(resn)
-                                    parent.insertChild(oldNode.firstElementChild, inspos)
+                                    toins.forEach((c) => parent.insertBefore(c, inspos))
                                 }
 				console.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)
 				console.log('Invisible children ' + invNode.childElementCount)
