@@ -154,7 +154,7 @@ xc.getClassViewFunction = function(targetid, dclass, mode, done) {
     var vparam = xc.curresp.querySelector('cgi > v')
     if (vparam != null) {
 	verb = vparam.textContent
-    } else {
+    } else if (xc.cursubresp.querySelector) {
         vparam = xc.cursubresp.querySelector('dict > view')
         if (vparam != null) {
 	    verb = vparam.textContent
