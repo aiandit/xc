@@ -1475,7 +1475,9 @@ xc.register = function(mode, handle) {
 
 xc.mkMessage = function(mode, msg) {
     var res = ''
-    res += '<div class="' + mode + '">' + msg + '</div>'
+    res += '<div class="' + mode + '"><span class="unixtm">' +
+        ((new Date()).getTime()/1000) +
+        '</span><span>' + msg + '<span></div>'
     return res
 }
 
@@ -1486,7 +1488,7 @@ xc.showMessage = function(msg, timeout) {
     }
     p.innerHTML += msg
     if (!timeout) {
-        timeout = 1800
+        timeout = 3800
     }
     if (timeout) {
         setTimeout(function() {
