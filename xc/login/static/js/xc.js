@@ -641,6 +641,14 @@ var ppPolls = function(subtree, ev, done) {
                 }
                 return [s]
             }
+            var nlines = function(t) {
+                if (t.length == 0) return 0
+                else {
+                    if (t.indexOf('\n') >= 0) {
+                        return t.split('\n').length
+                    } else return 1
+                }
+            }
 	    var handleResult = function(st, res) {
 		if (st == 0) {
 		    if (res.responseXML != undefined) {
@@ -664,6 +672,7 @@ var ppPolls = function(subtree, ev, done) {
                             var lineinfo = xc.dictXML(hdict)
                             var global_rstart = hdict['x-range-start']
                             var global_rend = hdict['x-range-end']
+                            xlp.log('DL Range: ' + global_rstart + ' - ' + global_rend)
                             if (!el.dataset.pollAppend) {
                                 polltext = ''
                             } else {
@@ -674,8 +683,11 @@ var ppPolls = function(subtree, ev, done) {
                                     global_rend = Math.max(Number(linestn.dataset.rangeEnd), global_rend)
                                     lineinfo = xc.dictXML({start:global_rstart, end:global_rend}) + lineinfo
                                 }
+                                polltext += '\n'
                             }
                             polltext += res.responseText
+                            xlp.log('Avail Range: ' + global_rstart + ' - ' + global_rend + ' ' +
+                                    nlines(polltext))
                             var xdoc = xlp.mkdoc(xc.getXDoc(
                                 xc.getXDoc(polltext, 'lines')
                                     + '<headers>' + lineinfo + '</headers>', el.dataset.pollWrap))
