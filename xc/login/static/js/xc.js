@@ -568,20 +568,18 @@ xc.polls = {}
 var ppPolls = function(subtree, ev, done) {
     var tms = subtree.querySelectorAll('.xc-sl-poll')
 
-    var doPoll = function(el, eldone) {
-        var myid = (new Date()).getTime() + '' + el.dataset.pollUrl
+    var doPoll = function(inel, eldone) {
+        var myid = (new Date()).getTime() + '' + inel.dataset.pollUrl
         xc.polls[myid] = 1
         var polltext = ''
 
 	var getf = function(ciid, count) {
-	    el = document.getElementById(ciid)
-	    if (!xc.isChainedInterval(ciid)) {
-//		console.log('Chained interval ' + ciid + ' was cancelled')
+	    var el = document.getElementById(ciid)
+	    if (!el) {
 		return
 	    }
 	    var url = el.dataset.pollUrl
 	    var t0 = (new Date()).getTime()
-//	    console.log('getf: ' + (t0 - globtO) + ': '  + url)
 	    var ppFun = eval(el.dataset.postprocess)
             var finalStep = function(res) {
 		var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
@@ -701,12 +699,12 @@ var ppPolls = function(subtree, ev, done) {
 		xlp.sendGet(url, handleResult)
 	    }
 	}
-	if (el.attributes.id == undefined) {
-	    el.setAttribute('id', 'pid' + String((new Date()).getTime()))
+	if (inel.attributes.id == undefined) {
+	    inel.setAttribute('id', 'pid' + String((new Date()).getTime()))
 	}
-	var pollid = el.attributes.id.value
-	if (el.dataset.pollRunning == undefined) {
-	    el.dataset.pollRunning = true
+	var pollid = inel.attributes.id.value
+	if (inel.dataset.pollRunning == undefined) {
+	    inel.dataset.pollRunning = true
 	    xc.setChainedInterval(pollid)
 	    getf(pollid, 0, (new Date()).getTime())
 	}
