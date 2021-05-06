@@ -132,9 +132,9 @@ div.messages {
     border-radius: 0.3em;
 }
 
-div.doc-messages {
-    background: aliceblue;
-    overflow-y: scroll;
+div.doc-float-messages {
+    background: #ffffff00;
+    border-radius: 0.3em;
     max-height: 15em;
 }
 
@@ -361,7 +361,8 @@ table, tr, th, td {
     padding: 0.3rem;
     margin-left: 0rem;
     display: grid;
-    grid-template-columns: 0.08fr auto;
+    grid-template-columns: 0.18fr auto;
+    grid-column-gap: 0.5em;
 }
 .msg.own {
     border: 0.1rem outset lightblue;
@@ -465,4 +466,8 @@ form.inline, div.inline, img.inline  {
 .warning {
     color: black;
     background-color: #ff8060;
+}
+
+.hidden {
+    visibility: hidden;
 }
