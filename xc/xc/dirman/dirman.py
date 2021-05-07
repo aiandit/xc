@@ -322,10 +322,12 @@ class DirManager:
         print('File %s is %g s old' %(self.getpath(name), ltd))
         nlines = self.nlines(name)
         offs = nlines - n
+        nmax = self.nlines(name)
         if ltd < 2:
             offs -= 1
+            nmax -= 1
         lines = self.getlines(name, offs, n)
-        return (lines, self.nlines(name))
+        return (lines, nmax)
 
     def range(self, name, m, n):
         lines = self.getlines(name, m, n-m)
