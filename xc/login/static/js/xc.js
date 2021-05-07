@@ -573,7 +573,7 @@ var ppPolls = function(subtree, ev, done) {
         xc.polls[myid] = 1
         var polltext = ''
 
-	var getf = function(ciid, count) {
+	var getf = function(ciid, count, getf_done, getf_ev) {
 	    var el = document.getElementById(ciid)
 	    if (!el) {
 		return
@@ -583,16 +583,16 @@ var ppPolls = function(subtree, ev, done) {
 	    var ppFun = eval(el.dataset.postprocess)
             var finalStep = function(res) {
 		var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
-		setTimeout(getf, nexttime, ciid, count+1, t0)
+		setTimeout(getf, nexttime, ciid, count+1)
 		if (count == 0) {
 
                     var tn = document.getElementById(el.dataset.pollTarget + '-document')
-                    tn.onclick = function(ev) {
+                    tn.onclick = function(ev, done) {
                         if (ev.target.nodeName != 'SELECT'
                             && ev.target.nodeName != 'OPTION'
                             && ev.target.nodeName != 'INPUT'
                             && ev.target.nodeName != 'A') {
-	                    getf(ciid, 1)
+	                    getf(ciid, 1, done, ev)
                             return false
                         }
                         return true
@@ -603,6 +603,9 @@ var ppPolls = function(subtree, ev, done) {
                     eldone(res)
 
 		}
+                if (getf_done) {
+                    getf_done(getf_ev, res)
+                }
             }
 	    var handleData = function(text) {
 		var res
@@ -717,7 +720,7 @@ var ppPolls = function(subtree, ev, done) {
 	if (inel.dataset.pollRunning == undefined) {
 	    inel.dataset.pollRunning = true
 	    xc.setChainedInterval(pollid)
-	    getf(pollid, 0, (new Date()).getTime())
+	    getf(pollid, 0)
 	}
     }
 
