@@ -674,7 +674,7 @@ var ppPolls = function(subtree, ev, done) {
                             var global_rend = hdict['x-range-end']
                             xlp.log('DL Range: ' + global_rstart + ' - ' + global_rend)
                             if (!el.dataset.pollAppend) {
-                                polltext = ''
+                                polltext = res.responseText
                             } else {
                                 var tn = document.getElementById(el.dataset.pollTarget + '-document')
                                 var linestn = tn.querySelector('.linecont')
@@ -683,9 +683,8 @@ var ppPolls = function(subtree, ev, done) {
                                     global_rend = Math.max(Number(linestn.dataset.rangeEnd), global_rend)
                                     lineinfo = xc.dictXML({start:global_rstart, end:global_rend}) + lineinfo
                                 }
-                                polltext += '\n'
+                                polltext = res.responseText + '\n' + polltext
                             }
-                            polltext += res.responseText
                             xlp.log('Avail Range: ' + global_rstart + ' - ' + global_rend + ' ' +
                                     nlines(polltext))
                             var xdoc = xlp.mkdoc(xc.getXDoc(
