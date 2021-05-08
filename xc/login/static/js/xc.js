@@ -1561,22 +1561,35 @@ xc.mkMessage = function(mode, msg) {
     return res
 }
 
-xc.showMessage = function(msg, timeout) {
-    var p = document.querySelector('.doc-float-messages')
+xc.getMsgElem = function(cl) {
+    var p = document.querySelectorAll('.doc-float-messages')
     if (!p) {
         p = document.querySelector('body')
+    } else {
+        p = p[p.length-1]
     }
+    return p
+}
+xc.showMessage = function(msg, timeout) {
+    var p = xc.getMsgElem()
     p.innerHTML += msg
     updateTree2(p.lastElementChild)
     if (!timeout) {
         timeout = 3800
     }
     if (timeout) {
-        setTimeout(function() {
-            try {
-                var p = document.querySelector('.doc-float-messages')
+        setTimeout(() => {
+            var p = xc.getMsgElem()
+            var q = document.querySelector('.doc-old-messages')
+            if (q) {
+                var n = p.firstElementChild
+                if (n) {
+                    n = p.removeChild(n)
+                    q.appendChild(n)
+                    q.previousElementSibling.classList.remove('hidden')
+                }
+            } else {
                 p.firstElementChild.remove()
-            } catch {
             }
         }, timeout)
     }
