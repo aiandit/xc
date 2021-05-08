@@ -238,6 +238,9 @@ var updateXDataView = function(ev, done) {
         console.log('No XML data')
         xcontdoc = xc.getXDoc('', 'xc')
     }
+
+    updateTree2(document)
+
     xc.autoRender(xcontdoc, 'xc', {ev: ev}, function(res) {
         console.log('main render cycle done')
         done(res)
