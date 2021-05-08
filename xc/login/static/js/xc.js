@@ -563,15 +563,65 @@ xc.getCSRFToken = function() {
     return csrf
 }
 
+var mkLineCache = function(max_size) {
+    var array = Object()
+    var insert = function(inds, lines) {
+        Object.keys(inds).forEach((k) => {
+            array[inds[k]] = lines[k]
+        })
+    }
+    var insertText = function(text, offs, end) {
+        var len = end - offs
+        var nlines = text.split('\n')
+        if (nlines.length != len) {
+            console.error('Number of lines is wrong')
+        }
+        var inds = Array()
+        for (var k = 0; k < len; ++k) {
+            inds[k] = offs + k
+        }
+        insert(inds, nlines)
+    }
+    var getText = function(inds, lines) {
+        return Object.keys(array).map((k)=>array[k]).join('\n')
+    }
+    var nlines = function() {
+        return Object.keys(array).length
+    }
+    var keys = function() {
+        return Object.keys(array)
+    }
+    var lines = function() {
+        return array
+    }
+    var start = function() {
+        return Math.min(...Object.keys(array))
+    }
+    var end = function() {
+        return Math.max(...Object.keys(array))+1
+    }
+    return {
+        lines:lines,
+        keys:keys,
+        nlines:nlines,
+        getText:getText,
+        insert:insert,
+        insertText:insertText,
+        start:start,
+        end:end
+    }
+}
+
 //var globtO =  (new Date()).getTime()
 xc.polls = {}
 var ppPolls = function(subtree, ev, done) {
     var tms = subtree.querySelectorAll('.xc-sl-poll')
-
     var doPoll = function(inel, eldone) {
         var myid = (new Date()).getTime() + '' + inel.dataset.pollUrl
         xc.polls[myid] = 1
-        var polltext = ''
+        // var polltext = ''
+        var polltext = mkLineCache()
+        xc.lines = polltext
 
 	var getf = function(ciid, count, getf_done, getf_ev) {
 	    var el = document.getElementById(ciid)
@@ -673,25 +723,25 @@ var ppPolls = function(subtree, ev, done) {
                                 hdict[headers[i][0]] = headers[i][1].trim()
                             }
                             var lineinfo = xc.dictXML(hdict)
-                            var global_rstart = hdict['x-range-start']
-                            var global_rend = hdict['x-range-end']
+                            var global_rstart = Number(hdict['x-range-start'])
+                            var global_rend = Number(hdict['x-range-end'])
                             xlp.log('DL Range: ' + global_rstart + ' - ' + global_rend)
                             if (!el.dataset.pollAppend) {
-                                polltext = res.responseText
+                                xc.lines = polltext = mkLineCache()
+                                polltext.insertText(res.responseText, global_rstart, global_rend)
                             } else {
+                                polltext.insertText(res.responseText, global_rstart, global_rend)
                                 var tn = document.getElementById(el.dataset.pollTarget + '-document')
                                 var linestn = tn.querySelector('.linecont')
                                 if (linestn) {
-                                    global_rstart = Math.min(Number(linestn.dataset.rangeStart), global_rstart)
-                                    global_rend = Math.max(Number(linestn.dataset.rangeEnd), global_rend)
-                                    lineinfo = xc.dictXML({start:global_rstart, end:global_rend}) + lineinfo
+                                    const ddata = {start:polltext.start(), end:polltext.end()}
+                                    lineinfo = xc.dictXML(ddata) + lineinfo
                                 }
-                                polltext = res.responseText + '\n' + polltext
                             }
-                            xlp.log('Avail Range: ' + global_rstart + ' - ' + global_rend + ' ' +
-                                    nlines(polltext))
+                            xlp.log('Avail Range: ' + polltext.start() + ' - ' + polltext.end() + ' ' +
+                                    polltext.nlines())
                             var xdoc = xlp.mkdoc(xc.getXDoc(
-                                xc.getXDoc(polltext, 'lines')
+                                xc.getXDoc(polltext.getText(), 'lines')
                                     + '<headers>' + lineinfo + '</headers>', el.dataset.pollWrap))
                             xc.cursubresp = xdoc
                             handleData(xdoc)
