@@ -330,8 +330,11 @@ class DirManager:
         return (lines, nmax)
 
     def range(self, name, m, n):
+        nl = self.nlines(name)
+        m = max(0, min(m, nl))
+        n = max(0, min(n, nl))
         lines = self.getlines(name, m, n-m)
-        return lines
+        return (lines, m, n)
 
     def eraseline(self, name, n, repl):
         stat = 0

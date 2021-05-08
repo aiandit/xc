@@ -1379,10 +1379,10 @@ def getrange(request, path, mode, start, end, transpose=False):
             start = -1
         elif mode == 'tail':
             (fdata, nmax) = workdir.tail(path, start)
-            start = nmax - start
+            start = max(0, nmax - start)
             end = nmax
         elif mode == 'range':
-            fdata = workdir.range(path, start, end)
+            (fdata, start, end) = workdir.range(path, start, end)
             t1 = time.time()
             print('Load %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
         aenc = request.headers['Accept-Encoding']
