@@ -361,8 +361,8 @@ table, tr, th, td {
     padding: 0.3rem;
     margin-left: 0rem;
     display: grid;
-    grid-template-columns: 0.18fr auto;
-    grid-column-gap: 0.5em;
+    grid-template-columns: auto;
+    grid-row-gap: 0.5em;
 }
 .msg.own {
     border: 0.1rem outset lightblue;
