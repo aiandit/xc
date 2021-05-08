@@ -131,12 +131,12 @@ xc.mkClassViewFunction = function(targetid, dclass, mode, opts, done) {
                 xlp.amap(frames, (k, done) => {
                     var n = document.getElementById(k.target)
                     if (n) {
-                        updateTree2(n)
+                        //updateTree2(n)
                     }
                     done(n)
                 }, function(res) {
                     console.log('Class render fully complete')
-                    updateTree2(document)
+                    // updateTree2(document)
                     done(res)
                 })
             }, function(res, pdone) {
@@ -1563,6 +1563,7 @@ xc.showMessage = function(msg, timeout) {
         p = document.querySelector('body')
     }
     p.innerHTML += msg
+    updateTree2(p.lastElementChild)
     if (!timeout) {
         timeout = 3800
     }
