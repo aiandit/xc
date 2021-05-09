@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import os, sys, time, shutil, subprocess, csv, io
+import os, sys, time, shutil, subprocess, csv, io, pathlib
 
 from xc import settings
 
@@ -189,13 +189,10 @@ class DirManager:
         info = getlsl(self.getpath(path), self.normalizepath(path))
         return info
 
-    def mkdir(self, name):
-        try:
-            print('mkdir', name)
-            os.makedirs(self.getpath(name))
+    def mkdir(self, name, *more):
+        stat = pathlib.Path(self.getpath(name)).mkdir(parents=True, exist_ok=True)
+        if stat is None:
             stat = 0
-        except:
-            stat = -1
         return stat
 
     def rmdir(self, name, rec=False):
@@ -263,7 +260,7 @@ class DirManager:
             file.close()
         return stat
 
-    def appenddoc(self, name, doc):
+    def appenddoc(self, name, doc, *more):
         stat = 0
         try:
             fpath = self.realpath(name)
@@ -304,24 +301,48 @@ class DirManager:
         t1 = time.time()
         #        print('File read: %s, %g s' % (name, t1 - t0))
         lines = content.split('\n')
+        if offs < 0:
+            offs = 0
         if len > 0:
             lines = lines[offs:(offs+len)]
-        return lines
+        return '\n'.join(lines)
 
     def nlines(self, name):
-        return len(self.getlines(name))
+        return len(self.getlines(name).split('\n'))
 
     def head(self, name, n):
 #        print('retrieve first %d lines of %s' % (n, name))
         return self.getlines(name, 0, n)
 
     def tail(self, name, n):
-#        print('retrieve last %d lines of %s' % (n, name))
-        lines = self.getlines(name, self.nlines(name) - n,  n)
-        return (lines, self.nlines(name))
+        # print('retrieve last %d lines of %s' % (n, name))
+        # don't try to read the last line...
+        ltime = os.path.getctime(self.getpath(name))
+        ltd = time.time() - ltime
+        print('File %s is %g s old' %(self.getpath(name), ltd))
+        nlines = self.nlines(name)
+        offs = nlines - n
+        nmax = self.nlines(name)
+        if ltd < 2:
+            offs -= 1
+            nmax -= 1
+        lines = self.getlines(name, offs, n)
+        return (lines, nmax)
 
     def range(self, name, m, n):
+        nl = self.nlines(name)
+        m = max(0, min(m, nl))
+        n = max(0, min(n, nl))
         lines = self.getlines(name, m, n-m)
+        return (lines, m, n)
+
+    def eraseline(self, name, n, repl):
+        stat = 0
+        #        print('retrieve first %d lines of %s' % (n, name))
+        lns = self.getlines(name)
+        lnsnew = lns[0:n] + [repl] + lns[n+1:]
+        self.replacedoc(name, lnsnew.join('\n'))
+        return stat
 
     def renamedoc(self, name1, name2):
         stat = 0
@@ -362,7 +383,6 @@ class DirManager:
         return sout
 
     def findsort(self, name, pattern, path=True, sys=True, case=True):
-        print('findsort')
         args = self.findcmd(name, pattern, path, sys, case)
         p2 = subprocess.Popen(('sort',), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT, encoding='utf8')
@@ -379,7 +399,7 @@ class DirManager:
     def which(self, name, pattern, path=None, sys=True):
         if path is None:
             path = '/' in pattern
-        ftrans = self.find(name, pattern, path=path, sys=sys)
+        ftrans = self.findsort(name, pattern, path=path, sys=sys)
         if len(ftrans) > 0:
             ftrans = [ftrans[0]]
         return ftrans
@@ -490,7 +510,7 @@ def gitlog(func, wdir=settings.XC_WORKDIR, *args, **kw):
 class GitDirManager(DirManager):
 
     def __init__(self, base='.'):
-        super.__init__(base=base)
+        super().__init__(base=base)
 
     @gitlog()
     def chroot(self, path, comment):

@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-import os
+import os, sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -31,7 +31,7 @@ ALLOWED_HOSTS = [
     'localhost'
 ]
 
-LOGIN_URL = 'login/'
+LOGIN_URL = 'login:login'
 
 # Application definition
 
@@ -144,10 +144,22 @@ EMAIL_USE_TLS = True
 xc_appdir = '/var/lib/xc/xc-application'
 try:
     os.lstat(xc_appdir)
-    XC_WORKDIR = '/var/lib/xc/xc-application'
 except:
-    XC_WORKDIR = os.path.join(os.path.abspath(os.path.join(BASE_DIR, '..')), 'data')
+    xc_appdir = os.path.join(os.path.abspath(os.path.join(BASE_DIR, '..')), 'data')
+XC_WORKDIR = xc_appdir
+
+XC_HOME_PATH = 'config.xml'
 
 XC_USE_GIT=False
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200
+
+userPyPath = XC_WORKDIR + '/files/py'
+if os.path.exists(userPyPath):
+    sys.path.append(userPyPath)
+
+try:
+    from email_settings import *
+except ImportError as e:
+    print(e)
+    pass

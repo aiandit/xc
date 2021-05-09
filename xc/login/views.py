@@ -20,7 +20,7 @@ from xc import settings
 def index(request):
     context = {'xapp': 'login', 'view': 'index', 'cgi': request.GET,
                'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_index(request):
     print(list(request.GET.items()))
@@ -38,6 +38,7 @@ def login_view(request):
     return render(request, 'common/xframe.html', context)
 
 class LoginData(XCForm):
+    title = 'Login'
     name = 'login'
     auto_id='id_for_%s'
     error_css_class = 'error'
@@ -88,7 +89,7 @@ def ajax_login_view(request):
             else:
                 login(request, user)
 #                return redirect('login:ajax_profile')
-                return redirect('main:ajax_path')
+                return redirect('main:ajax_home')
 
     if len(errmsg):
         errors = [ {'errmsg': errmsg, 'type': 'fatal'} ]
@@ -103,6 +104,7 @@ def ajax_login_view(request):
 
 
 class LogoutData(XCForm):
+    title = 'Logout'
     name = 'logout'
     auto_id='id_for_%s'
     error_css_class = 'error'
@@ -116,7 +118,7 @@ class LogoutData(XCForm):
 def logout_view(request):
     context = {'xapp': 'login', 'view': 'logout', 'cgi': getAllCGI(request.POST),
                'data': []}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 @login_required
 def ajax_logout_view(request):
@@ -136,7 +138,7 @@ def ajax_logout_view(request):
             errmsg = 'The form data is invalid'
         else:
             logout(request)
-            return redirect('login:ajax_login')
+            return redirect('main:ajax_home')
 
     if len(errmsg):
         errors = [ {'errmsg': errmsg, 'type': 'fatal'} ]
@@ -151,7 +153,7 @@ def ajax_logout_view(request):
 
 
 class DeleteprofileData(XCForm):
-    title = 'Delete Profile'
+    title = 'Delete profile'
     name = 'deleteprofile'
     auto_id='id_for_%s'
     error_css_class = 'error'
@@ -167,7 +169,7 @@ class DeleteprofileData(XCForm):
 def deleteprofile(request):
     context = {'xapp': 'login', 'view': 'deleteprofile', 'cgi': getAllCGI(request.POST),
                'data': []}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 @login_required
 def ajax_deleteprofile(request):
@@ -234,7 +236,7 @@ class EditProfileData(XCForm):
 def profile(request):
     user = request.user
     context = {'xapp': 'login', 'view': 'profile', 'cgi': getAllCGI(request.POST), 'data': [], 'user': user}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 @login_required
 def ajax_profile(request):
@@ -255,7 +257,7 @@ def ajax_profile(request):
 def edit_profile(request):
     user = request.user
     context = {'xapp': 'login', 'view': 'edit_profile', 'cgi': getAllCGI(request.POST), 'data': [], 'user': user}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 @login_required
 def ajax_edit_profile(request):
@@ -344,7 +346,7 @@ class SetPasswordData(XCForm):
 def set_password(request):
     user = request.user
     context = {'xapp': 'login', 'view': 'set_password', 'cgi': getAllCGI(request.POST), 'data': [], 'user': user}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 @login_required
 def ajax_set_password(request):
@@ -394,6 +396,7 @@ class ResetPasswordData(XCForm):
         self.request = request
         super(ResetPasswordData, self).__init__(*args, **kwargs)
 
+    title = 'Reset password'
     name = 'reset_password'
     auto_id='id_for_%s'
     error_css_class = 'error'
@@ -465,6 +468,7 @@ def ajax_reset_password(request):
 
 
 class ResendpasswordData(XCForm):
+    title = 'Resend password'
     name = 'resendpassword'
     auto_id='id_for_%s'
     error_css_class = 'error'
@@ -544,5 +548,5 @@ def ajax_resendpassword(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 def favicon(request):
-    return redirect('/main/getf/' + 'favicon.ico')
+    return redirect('/main/get/' + 'favicon.ico')
 #    return redirect(settings.STATIC_URL + 'favicon.ico')

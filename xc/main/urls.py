@@ -14,6 +14,7 @@ urlpatterns = [
     path('delete', views.delete, name='delete'),
     path('view', views.view, name='view'),
     path('edit', views.edit, name='edit'),
+    path('append', views.append, name='append'),
     path('which', views.which, name='which'),
     path('runwhich', views.runwhich, name='runwhich'),
     path('clone', views.clone, name='clone'),
@@ -48,6 +49,9 @@ urlpatterns = [
     path('nlines', views.nlines, name='nlines'),
     path('ajax_nlines', views.nlines, name='ajax_nlines'),
 
+    path('eraseline', views.eraseline, name='eraseline'),
+    path('ajax_eraseline', views.eraseline, name='ajax_eraseline'),
+
     path('head', views.get_head, name='head'),
     path('ajax_head', views.get_head, name='ajax_head'),
 
@@ -73,6 +77,7 @@ urlpatterns = [
     path('ajax_delete', views.ajax_delete, name='ajax_delete'),
     path('ajax_view', views.ajax_view, name='ajax_view'),
     path('ajax_edit', views.ajax_edit, name='ajax_edit'),
+    path('ajax_append', views.ajax_append, name='ajax_append'),
     path('ajax_which', views.ajax_which, name='ajax_which'),
     path('ajax_runwhich', views.ajax_runwhich, name='ajax_runwhich'),
     path('ajax_clone', views.ajax_clone, name='ajax_clone'),

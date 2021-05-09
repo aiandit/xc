@@ -3,6 +3,9 @@
 
 var xlp = xlp || {}
 
+xlp.debug = false
+xlp.debugTarget = 'xlp-debug'
+
 xlp.scopy = ({...str}) => { return {...str} }
 xlp.dcopy = (o) => JSON.parse(JSON.stringify(o))
 
@@ -64,19 +67,21 @@ xlp.parseXMLC = function(xmlStr) {
     }
 }
 
-xlp.sendRequest = function(URL, method, callback, headers, data) {
+xlp.sendRequest = function(URL, method, callback, headers, data, mode) {
     if (typeof URL == 'object') {
         return xlp.sendRequest(URL.URL || URL.src || URL.href,
                                URL.method || undefined,
                                URL.callback || undefined,
                                URL.headers || undefined,
-                               URL.data || undefined)
+                               URL.data || undefined,
+                               URL.mode)
     }
 
     if (!method) method = 'GET'
     if (!callback) callback = function(){}
     if (!headers) headers = {}
     if (!data) data = ''
+    if (!mode) mode = ''
 
     var request, k
 
@@ -84,6 +89,10 @@ xlp.sendRequest = function(URL, method, callback, headers, data) {
         request = new ActiveXObject("Msxml2.XMLHTTP")
     } else if (window.XMLHttpRequest) {
         request = new XMLHttpRequest()
+    }
+
+    if (mode) {
+        request.overrideMimeType(mode)
     }
 
     request.onreadystatechange = function () {
@@ -180,6 +189,13 @@ xlp.reqXML = function(src, obj) {
         }
     }
     var cur_callback = obj.callback
+    if (!obj.mode) {
+        if (obj.returnJSON) {
+            obj.mode = 'text/plain'
+        } else if (obj.returnData) {
+            obj.mode = 'application/octet-stream'
+        }
+    }
     obj.callback = function(status, request) {
         if (status == 0) {
 	    if (obj.returnJSON) {
@@ -202,13 +218,15 @@ xlp.reqXML = function(src, obj) {
 		}
 		if (rdoc) {
                     cur_callback(rdoc, request)
+		} else if (obj.mode) {
+                    cur_callback(request.responseText, request)
 		} else {
                     xlp.error('No valid XML response from server: ' + obj.URL)
                     cur_callback(0, request, 'no XML')
 		}
 	    }
         } else {
-            xlp.error('Error response: ' + request.status + ' ' + request.statusText)
+            xlp.error('Error response: ' + request.status + ' ' + request.statusText, request)
             cur_callback(0, request, 'request failed')
         }
     }
@@ -233,6 +251,10 @@ xlp.loadXML = function(path, callback) {
     xlp.reqXML(document,  {'method': 'GET', 'URL': path, 'callback': callback})
 }
 
+xlp.loadText = function(path, callback) {
+    xlp.reqXML(document,  {'method': 'GET', 'URL': path, 'callback': callback, 'mode': 'text/plain'})
+}
+
 xlp.loadJSON = function(path, callback) {
     xlp.reqJSON(document,  {'method': 'GET', 'URL': path, 'callback': callback})
 }
@@ -246,22 +268,22 @@ xlp.mkLoadCached = function() {
     var loadCached = function(url, done) {
         var lev
         if (docs[url]) {
-            done(docs[url])
+            done(docs[url].doc, docs[url].resp)
         } else {
             if (requested[url]) {
                 var levHandler = function(ev) {
-                    done(docs[url])
+                    done(docs[url].doc, docs[url].resp)
                     document.removeEventListener('doc-loaded'+url, levHandler)
                 }
                 document.addEventListener('doc-loaded'+url, levHandler)
             } else {
                 requested[url] = 1
-                xlp.loadXML(url, function(doc) {
-                    docs[url] = doc
+                xlp.loadXML(url, function(doc, resp) {
+                    docs[url] = {doc: doc, resp: resp}
                     lev = document.createEvent('Event')
                     lev.initEvent('doc-loaded'+url, true, true)
                     document.dispatchEvent(lev)
-                    done(doc)
+                    done(doc, resp)
                 })
             }
         }
@@ -359,14 +381,50 @@ xlp.mkpre = function(text) {
     return pre
 }
 
-xlp.log = function(txt) { console.log('XLP: ' + txt) }
-xlp.error = function(txt) { console.error('XLP: ' + txt) }
+xlp.logHandlers = []
+xlp.addLogHandler = function(h) {
+    xlp.logHandlers.push(h)
+}
+
+xlp.errorHandlers = []
+xlp.addErrorHandler = function(h) {
+    xlp.errorHandlers.push(h)
+}
+
+xlp.log = function(txt, req) {
+    console.log('XLP: ' + txt)
+    xlp.logHandlers.forEach(function(h) {
+        h(txt, req)
+    })
+}
+xlp.error = function(txt, req) {
+    console.error('XLP: ' + txt)
+    xlp.errorHandlers.forEach(function(h) {
+        h(txt, req)
+    })
+}
+
+xlp.mkdoc = function(docstr) {
+    var res = docstr
+    if (typeof docstr == "string" && docstr[0] == "<") {
+        try {
+            res = xlp.parseXML(docstr)
+        } catch (e) {
+            xlp.error('failed to parse XML' + e)
+        }
+    }
+    return res
+}
 
 xlp.getdoc = function(docstr, opts, done) {
     var res = docstr
     if (typeof docstr == "string") {
         if (docstr[0] == "<") {
-            res = xlp.parseXML(docstr)
+            try {
+                res = xlp.parseXML(docstr)
+            } catch (e) {
+                xlp.error('failed to parse XML' + e)
+            }
             done(res)
         } else if (docstr.length < 1024 && opts.xsltbase != undefined) {
             xlp.loadXML(opts.xsltbase + docstr, function(doc) {
@@ -453,18 +511,31 @@ xlp.mkXSL = function(xslt, xsltbase) {
 
 xlp.XLP =
 xlp.mkXLP = function(xslts, xsltbase, options) {
+    if (!options) options = {}
     function step(xml, toDoc, done, j) {
         if (j == undefined) j = 0
         var xslt = xslts[j]
+        var debug = xlp.debug || options.debug
+        if (debug) {
+            var xlpName = options.name || 'xlp'
+            var dn = document.getElementById(xlp.debugTarget)
+            dn.innerHTML += '<div id="' + xlpName + '-step-' + j + '"><textarea><![CDATA[' +
+                xlp.mkdoc(xml).documentElement.outerHTML +
+                ']]></textarea></div>'
+        }
         var nextStep = function(res) {
             if (j < xslts.length - 1) {
                 step(res, toDoc, done, j+1)
             } else {
                 if (res != undefined
                     && res.documentElement != undefined
-                    && res.documentElement.namespaceURI == "http://www.mozilla.org/TransforMiix") {
-                    var tn = res.documentElement.firstChild
-                    var newres = document.createDocumentFragment()
+                    && res.documentElement.namespaceURI == "http://www.w3.org/1999/xhtml"
+                    && res.documentElement.nodeName == "HTML"
+                    && xlp.isChrome) {
+                    var tn = res.documentElement.children[1].firstChild
+                    var newres = toDoc ?
+                        document.implementation.createDocument("http://www.w3.org/1999/xhtml", "") :
+                        document.createDocumentFragment()
                     newres.appendChild(tn)
                     done(newres)
                 } else {
@@ -506,6 +577,10 @@ xlp.mkXLP = function(xslts, xsltbase, options) {
             done = toDoc
             toDoc = (options != undefined && options.output == 'text') ? false : true
         }
+        if (xslts.length == 0) {
+            done(indoc)
+            return
+        }
         step(indoc, toDoc,
              function(outfrag) {
 //                 if (outfrag.nodeType == outfrag.DOCUMENT_FRAGMENT_NODE) {
@@ -543,13 +618,17 @@ xlp.mkXLP1 = function(xsldocs) {
 xlp.readXLP = function(Xdoc, xslbase, done) {
     var getsteps = xlp.mkXLP(['xlp-get-steps.xsl'], '/main/getf/sys/xsl/')
     getsteps.transform(Xdoc, false, function(res) {
-        var info = JSON.parse(res.textContent)
+        var info = []
+        try {
+            info = JSON.parse(res.textContent)
+        } catch {
+        }
         var sxlp = xlp.mkXLP(info, xslbase)
         done(sxlp)
     })
 }
 xlp.loadXLP = function(XURL, xslbase, done) {
-    xlp.loadXML(XURL, function(doc, req) {
+    xlp.loadCached(XURL, function(doc, req) {
         xlp.readXLP(doc, xslbase, done)
     })
 }
@@ -566,7 +645,6 @@ xlp.amap = function(array, func, done) {
     }
     Object.keys(array).forEach(function(k) {
         func(array[k], function(res) {
-            console.log('amap: ' + k + ' of ' + n + ' ' + array[k])
             dones[k] = 1
             results[k] = res
             if (dones.every((x) => { return x>0 })) {
@@ -574,6 +652,9 @@ xlp.amap = function(array, func, done) {
             }
         })
     })
+    if (n == 0) {
+	done(results)
+    }
 }
 
 xlp.mloadXML = function(URLs, done) {
@@ -587,6 +668,12 @@ xlp.mloadXML = function(URLs, done) {
 xlp.getbase = function() {
     var getUrl = window.location
     var baseUrl = getUrl.protocol + '//' + getUrl.host + '/'
+    return baseUrl
+}
+
+xlp.gethost = function() {
+    var getUrl = window.location
+    var baseUrl = getUrl.host
     return baseUrl
 }
 

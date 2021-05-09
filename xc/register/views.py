@@ -13,7 +13,10 @@ from register.models import ActivationCode, UserIP, unsign_acode
 
 import uuid
 
+from xc import settings
+
 class RegistrationData(XCForm):
+    title = 'Registration'
     name = 'register'
     auto_id='id_for_%s'
     error_css_class = 'error'
@@ -55,6 +58,7 @@ class RegistrationData(XCForm):
 
 
 class ActivationData(XCForm):
+    title = 'Activation'
     name = 'activate'
     auto_id='id_for_%s'
     error_css_class = 'error'
@@ -69,6 +73,7 @@ class ActivationData(XCForm):
 
 
 class ResendActivationData(XCForm):
+    title = 'Resend activation'
     name = 'resend_activation'
     auto_id='id_for_%s'
     error_css_class = 'error'
@@ -101,7 +106,7 @@ class ResendActivationData(XCForm):
 def index(request):
     context = {'xapp': 'register', 'view': 'index', 'cgi': request.GET,
                'data': [], 'number': 0}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_index(request):
     print(list(request.GET.items()))
@@ -115,7 +120,7 @@ def ajax_index(request):
 def register(request):
     context = {'xapp': 'register', 'view': 'index', 'cgi': getAllCGI(request.POST),
                'data': []}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_register(request):
 
@@ -171,7 +176,7 @@ def ajax_register(request):
 def activate(request):
     context = {'xapp': 'register', 'view': 'activate', 'cgi': getAllCGI(request.POST),
                'data': []}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_activate(request):
     errmsg = ''
@@ -237,7 +242,7 @@ def ajax_activate(request):
 def resend_activation(request):
     context = {'xapp': 'register', 'view': 'resend_activation', 'cgi': getAllCGI(request.POST),
                'data': []}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_resend_activation(request):
 

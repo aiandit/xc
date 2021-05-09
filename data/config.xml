@@ -1,6 +1,6 @@
-<config xmlns="http://ai-and-it.de/xmlns/2020/xc">
-<Test test="112" a="1" c="3" b="2">
-</Test>
-<clock/>
-<env/>
+<config>
+  <get-help>
+    <online-docs></online-docs>
+    <code-repo>https://github.com/ai-and-it/xc</code-repo>
+  </get-help>
 </config>

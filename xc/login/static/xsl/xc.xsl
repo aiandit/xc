@@ -28,8 +28,14 @@
 
   <xsl:template match="xc">
     <xsl:variable name="loggedin-css">
-      <xsl:if test="dict/user/is_authenticated = 'True'"> logged-in</xsl:if>
+      <xsl:choose>
+        <xsl:when test="dict/user/is_authenticated = 'True'"> logged-in</xsl:when>
+        <xsl:otherwise> logged-out</xsl:otherwise>
+      </xsl:choose>
     </xsl:variable>
+    <div class="xc-alt-pad {dict/view}{$loggedin-css}">
+      <a href="{/*/links/login}">Login</a>
+    </div>
     <div class="xc-pad {dict/view}{$loggedin-css}">
       <div class="everon">
         <div id="pad-acts1">
@@ -81,17 +87,22 @@
         <h3 id="pad-XC" class="oc-head">XC</h3>
         <div id="pad-docinfo" class="oc-body">
           <xsl:apply-templates select="dict/data/lsl/info" mode="lsl-info"/>
-          <div id="document-info"></div>
-          <div id="document-actions"></div>
+          <div id="xc-document-info"></div>
+          <div id="xc-document-actions"></div>
           <xsl:apply-templates select="." mode="xc-pad"/>
         </div>
       </div>
     </div>
     <div class="main">
-      <h2 class="xc-title {dict/view}" title="XC view: {dict/xapp}/{dict/view}">
-        <xsl:apply-templates select="dict" mode="xc-title"/>
+      <h2 id="xc-title" class="xc-title {dict/view}" title="XC view: {dict/xapp}/{dict/view}">
+        &#160;
+<!--        <xsl:apply-templates select="dict" mode="xc-title"/> -->
       </h2>
       <xsl:apply-templates select="dict"/>
+      <div class="doc-messages">
+        <div class="doc-float-messages">
+        </div>
+      </div>
     </div>
     <xsl:apply-templates select="dict" mode="doc-xcont"/>
     <xsl:apply-templates select="dict" mode="post-xcont"/>
@@ -127,6 +138,8 @@
       <xsl:apply-templates/>
     </div>
   </xsl:template>
+
+  <xsl:template match="cgi"/>
 
   <xsl:template match="dict" mode="xc-control-form">
     <xsl:if test="/*/forms/form[2]">
@@ -168,8 +181,8 @@
 
   <xsl:template match="dict" mode="xc-form">
     <xsl:variable name="f1" select="/*/forms/form[1]"/>
-    <h4>Form</h4>
-    <xsl:if test="data/errs/item">
+    <h4><xsl:value-of select="$f1/@title"/></h4>
+<!--    <xsl:if test="data/errs/item">
       <div class="aleft">
 	<xsl:if test="cgi/next_">
 	  <p>Form failure: <a href="{cgi/next_}">Return to form page</a></p>
@@ -185,13 +198,13 @@
 	  </xsl:for-each>
 	</ul>
       </div>
-    </xsl:if>
+    </xsl:if> -->
     <form class="xc-form" id="{$f1/@id}" action="/{xapp}/{$f1/@action}" method="{$f1/@method}">
       <fieldset>
-        <legend><xsl:value-of select="/*/forms/form[1]/@title"/></legend>
+        <legend><xsl:value-of select="/*/forms/form[1]/@title"/> form</legend>
         <div>
           <table>
-            <xsl:for-each select="/*/forms/form[1]/field">
+            <xsl:for-each select="/*/forms/form[1]/field[not(input/@type = 'hidden')]">
               <tr>
                 <th>
                   <xsl:apply-templates select="label" mode="to-xhtml"/>
@@ -208,6 +221,9 @@
             <tr>
               <td colspan="3">
                 <input id="input-submit" type="submit" name="submit"/>
+                <xsl:for-each select="/*/forms/form[1]/field[input/@type = 'hidden']">
+                  <xsl:apply-templates select="input" mode="to-xhtml"/>
+                </xsl:for-each>
               </td>
             </tr>
           </table>
@@ -617,7 +633,6 @@
     <div>
       <h4>Item type <xsl:value-of select="type"/>: <xsl:value-of select="name"/></h4>
       <div>
-        <h5>Info</h5>
         <table class="collection">
           <xsl:apply-templates select="."/>
         </table>
@@ -628,8 +643,7 @@
   <xsl:template match="lsl/info[type = '-']" mode="lsl-head">
     <div>
       <h4 class="oc-head">Document <xsl:value-of select="name"/></h4>
-      <div class="oc-body oc-open">
-        <h5>Info</h5>
+      <div class="oc-body oc-open doc-lsl-info">
         <table class="collection">
           <xsl:apply-templates select="."/>
         </table>
@@ -639,9 +653,8 @@
 
   <xsl:template match="lsl/info[type = 'd']" mode="lsl-head">
     <div>
-      <h4>Collection <xsl:value-of select="name"/></h4>
-      <div>
-        <h5>Info</h5>
+      <h4 class="oc-head">Collection <xsl:value-of select="name"/></h4>
+      <div class="oc-body oc-open doc-lsl-info">
         <table class="collection">
           <xsl:apply-templates select="."/>
         </table>
@@ -681,7 +694,7 @@
   </xsl:template>
 
   <xsl:template match="text()" mode="xc-pad"/>
-  <xsl:template match="dict[view = 'dirmanform' and /*/forms/form[1]/@action = 'edit' or view = 'view' or view = 'path']" mode="xc-pad">
+  <xsl:template match="dict[view = 'edit' or view = 'view' or view = 'path']" mode="xc-pad">
     <div class="docform" id="xc-form">
       <h4 class="oc-head">Forms</h4>
       <div class="oc-body">
@@ -703,15 +716,7 @@
 
   <xsl:template match="dict[view = 'dirmanform']">
     <div>
-      <xsl:if test="/*/forms/form[1]/@action != 'edit'">
-	<xsl:apply-templates select="." mode="xc-form"/>
-      </xsl:if>
-<!--      <xsl:if test="/*/forms/form[1]/@action = 'find'">
-        <xsl:apply-templates select="." mode="findcmd"/>
-      </xsl:if>
-      <xsl:if test="/*/forms/form[1]/@action = 'edit'">
-        <xsl:apply-templates select="." mode="xc-control-form"/>
-      </xsl:if> -->
+      <xsl:apply-templates select="." mode="xc-form"/>
       <xsl:if test="data/findlist">
         <div class="find">
           <xsl:choose>
@@ -728,14 +733,12 @@
                 <xsl:for-each select="data/findlist/item">
                   <tr>
                     <td class="path">
-                      <!--                  <span data-insert='1' data-fetch='/main/view?path={path}'> -->
                       <a href="/main/path?path={path}">
                         <xsl:value-of select="path"/>
                       </a>
                     </td>
                     <td class="file">
-                      <!--                  <span data-insert='1' data-fetch='/main/view?path={path}/{name}'> -->
-                      <a href="/main/view?path={path}/{name}">
+                      <a href="/main/path?path={path}/{name}">
                         <xsl:value-of select="name"/>
                       </a>
                     </td>
@@ -753,18 +756,20 @@
 
 
   <xsl:template match="dict[xapp = 'main' and view = 'view']" mode="xc-title">
-<!--    <xsl:text>View </xsl:text> -->
+    <xsl:text>View </xsl:text>
     <xsl:value-of select="/*/dict/cgi/path"/>
   </xsl:template>
+  <!-- no output with 'view' -->
   <xsl:template match="dict[xapp = 'main' and view = 'view']">
   </xsl:template>
 
-  <!-- no output from dirmanform -->
-  <xsl:template match="dict[view = 'dirmanform']">
+  <xsl:template match="dict[xapp = 'main' and view = 'edit']" mode="xc-title">
+    <xsl:text>Edit </xsl:text>
+    <xsl:value-of select="/*/dict/cgi/path"/>
   </xsl:template>
-  <xsl:template match="dict[view = 'dirmanform']" mode="xc-title">
+  <!-- no output with 'edit' -->
+  <xsl:template match="dict[xapp = 'main' and view = 'edit']">
   </xsl:template>
-
 
   <xsl:template match="dict[view = 'sendmsg']" mode="xc-title">
     <xsl:value-of select="/*/forms/form[1]/@title"/>
