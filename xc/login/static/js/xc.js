@@ -1563,7 +1563,7 @@ xc.mkMessage = function(mode, msg) {
 
 xc.getMsgElem = function(cl) {
     var p = document.querySelectorAll('.doc-float-messages')
-    if (!p) {
+    if (p.length == 0) {
         p = document.querySelector('body')
     } else {
         p = p[p.length-1]
