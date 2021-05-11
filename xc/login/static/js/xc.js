@@ -876,12 +876,18 @@ var ppActions = function(subtree, ev) {
 
 var ppTimestamps = function(subtree) {
     var tms = subtree.querySelectorAll('span.unixtm')
+    var tnow = (new Date()).getTime()
     tms.forEach(function(el) {
         if (el.dataset.unixtm != 1) {
             var flval = Number(el.innerHTML)
             var d = new Date(flval*1000)
+            var options_full = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                                 hour: 'numeric', minute: 'numeric', second: 'numeric',
+                                 hour12: false
+                               }
             var options = { hour: 'numeric', minute: 'numeric', second: 'numeric' }
-            var us = (new Intl.DateTimeFormat(navigator.language, options)).format(d)
+            var us = (new Intl.DateTimeFormat(navigator.language,
+                                              (tnow - d) > 3600*24 ? options_full : options)).format(d)
             var sd = d.toISOString()
             // var ts = d.toLocaleTimeString()
             el.innerHTML = '<span title="' + sd + '">' + us + '</span>'
