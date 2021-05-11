@@ -1586,19 +1586,25 @@ xc.showMessage = function(msg, timeout) {
                 if (n) {
                     n = p.removeChild(n)
                     q.appendChild(n)
-                    q.previousElementSibling.classList.remove('hidden')
+                    try {
+                        q.parentElement.previousElementSibling.classList.remove('hidden')
+                    } catch(e) {
+                    }
                 }
             } else {
-                p.firstElementChild.remove()
+                var fc = p.firstElementChild
+                if (fc.classList.contains('msg')) {
+                    fc.remove()
+                }
             }
         }, timeout)
     }
 }
 
-xlp.addErrorHandler(function(msg, req) {
-    xc.showMessage(xc.mkMessage('error', msg), req)
+xlp.addErrorHandler(function(msg, req, timeout) {
+    xc.showMessage(xc.mkMessage('error', msg), timeout)
 })
 
-xlp.addLogHandler(function(msg, req) {
-    xc.showMessage(xc.mkMessage('msg', msg), req)
+xlp.addLogHandler(function(msg, timeout) {
+    xc.showMessage(xc.mkMessage('', msg), timeout)
 })
