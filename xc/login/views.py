@@ -548,5 +548,5 @@ def ajax_resendpassword(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 def favicon(request):
-    return redirect('/main/get/' + 'favicon.ico')
+    return redirect('/main/get/' + 'files/favicon.ico')
 #    return redirect(settings.STATIC_URL + 'favicon.ico')
