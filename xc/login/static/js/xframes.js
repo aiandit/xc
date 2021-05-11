@@ -100,7 +100,7 @@ xframes.mkXframes = function(frames, xsltbase) {
 		    lastStep()
                 } else {
                     if (result.nodeType == result.ELEMENT_NODE) {
-                        resn.innerHTML = result.outerHTML
+                        resn.innerHTML = result.outerHTML || ''
 			lastStep(resn)
                     } else if (result.nodeType == result.DOCUMENT_NODE
                                || result.nodeType == result.DOCUMENT_FRAGMENT_NODE) {
@@ -121,7 +121,7 @@ xframes.mkXframes = function(frames, xsltbase) {
                                 }
                                 var toins = oldNode
                                 if (frame.skip > 0) {
-                                    for (var s = 0; s < frame.skip; ++s) {
+                                    for (var s = 0; s < frame.skip && toins.firstElementChild; ++s) {
                                         toins = toins.firstElementChild
                                     }
                                 }
@@ -139,7 +139,7 @@ xframes.mkXframes = function(frames, xsltbase) {
 				lastStep(resn)
 			    })
                         } else {
-                            resn.innerHTML = result.textContent
+                            resn.innerHTML = result.textContent || ''
 			    lastStep(resn)
                         }
                     } else {
