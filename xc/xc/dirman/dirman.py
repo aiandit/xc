@@ -498,13 +498,13 @@ def gitcommit(wdir, diffnumstat, srcfun, comment):
     ], wdir)
 
 @decorator
-def gitlog(func, wdir=settings.XC_WORKDIR, *args, **kw):
-#    print(args)
-#    print(kw)
-    result = func(*args, **kw)
-    gitadd(wdir)
-    sout = gitdiff(wdir)
-    gitcommit(wdir, sout, func.__name__, args[len(args)-1])
+def gitlog(func, dirman, path, *args, **kw):
+    fpath = dirman.realpath(path)
+    cdir = os.path.dirname(fpath)
+    result = func(dirman, path, *args, **kw)
+    gitadd(cdir)
+    sout = gitdiff(cdir)
+    gitcommit(cdir, sout, func.__name__, args[len(args)-1])
     return result
 
 class GitDirManager(DirManager):
@@ -512,43 +512,43 @@ class GitDirManager(DirManager):
     def __init__(self, base='.'):
         super().__init__(base=base)
 
-    @gitlog()
+    @gitlog
     def chroot(self, path, comment):
         return super().chroot(path)
 
-    @gitlog()
+    @gitlog
     def chdir(self, path, comment):
         return super().chdir(path)
 
-    @gitlog()
+    @gitlog
     def deletedoc(self, path, comment):
         return super().deletedoc(path)
 
-    @gitlog()
+    @gitlog
     def mkdir(self, path, comment):
         return super().mkdir(path)
 
-    @gitlog()
+    @gitlog
     def rmdir(self, path, comment):
         return super().rmdir(path)
 
-    @gitlog()
+    @gitlog
     def newdoc(self, path, comment):
         return super().newdoc(path)
 
-    @gitlog()
+    @gitlog
     def replacedoc(self, path, cont, comment):
         return super().replacedoc(path, cont)
 
-    @gitlog()
+    @gitlog
     def appenddoc(self, path, cont, comment):
         return super().appenddoc(path, cont)
 
-    @gitlog()
+    @gitlog
     def renamedoc(self, path, newpath, comment):
         return super().renamedoc(path, newpath)
 
-    @gitlog()
+    @gitlog
     def execute(self, args, comment):
         return super().execute(args)
 
