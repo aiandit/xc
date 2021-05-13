@@ -1591,7 +1591,7 @@ xc.register = function(mode, handle) {
 
 xc.mkMessage = function(mode, msg) {
     var res = ''
-    res += '<div class="' + mode + '"><span class="unixtm">' +
+    res += '<div class="' + mode + ' msg"><span class="unixtm">' +
         ((new Date()).getTime()/1000) +
         '</span><span>' + msg + '<span></div>'
     return res
