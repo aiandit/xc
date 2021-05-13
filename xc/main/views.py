@@ -1254,8 +1254,8 @@ def getxmlifposs(path):
     fstr = ''
     try:
        Npdata = 128
-       if Npdata > lsl['info']['statdict']['st_size']:
-           Npdata = lsl['info']['statdict']['st_size']
+       if Npdata > lsl['info']['stat']['st_size']:
+           Npdata = lsl['info']['stat']['st_size']
        fpeek = fdata[0:Npdata]
        #                print('peek %d data B: "%s"' % (Npdata, fpeek))
        canDecodePeek = False

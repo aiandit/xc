@@ -63,7 +63,7 @@ def getfinfo(path, relpath, follow=True):
 #            'perms': filepermletters(stat),
             'exec': isexec(stat),
 #            'stattxt': stat.__repr__(),
-            'statdict': statdict
+            'stat': statdict
 #            'stat': stat
     }
     return (data, stat)

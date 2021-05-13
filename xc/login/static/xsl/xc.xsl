@@ -688,8 +688,8 @@
       <td><xsl:value-of select="type"/><xsl:value-of select="perms"/></td>
       <td><a href="{/*/links/path}?path={path}"><xsl:value-of select="name[. != '']|path"/></a></td>
       <td class="unit-value">
-       <span class="unit" data-unit="B" data-targetunit="KB"><xsl:value-of select="statdict/st_size"/>&#xa0;B</span></td>
-      <td><span class="unixtm"><xsl:value-of select="statdict/st_mtime"/></span></td>
+       <span class="unit" data-unit="B" data-targetunit="KB"><xsl:value-of select="stat/st_size"/>&#xa0;B</span></td>
+      <td><span class="unixtm"><xsl:value-of select="stat/st_mtime"/></span></td>
     </tr>
   </xsl:template>
 
