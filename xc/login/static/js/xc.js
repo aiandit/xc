@@ -1629,7 +1629,7 @@ xc.showMessage = function(msg, timeout) {
                 }
             } else {
                 var fc = p.firstElementChild
-                if (fc.classList.contains('msg')) {
+                if (fc && fc.classList.contains('msg')) {
                     fc.remove()
                 }
             }
