@@ -1,5 +1,7 @@
 #! /bin/sh
 
+set -x
+
 # https://uwsgi-docs.readthedocs.io/en/latest/tutorials/Django_and_nginx.html
 
 apt-get -y update
