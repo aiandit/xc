@@ -786,9 +786,16 @@ var ppPolls = function(subtree, ev, done) {
 
 }
 
-xc.id = function(cl) {
+xc.id = function(cl, len) {
     if (!cl) cl = 'id'
-    return cl + (new Date()).getTime()
+    if (!len) len = 8
+    var idnum = Math.round((Math.random() * Math.pow(10, len)))
+    var id = new Intl.NumberFormat('en', { minimumIntegerDigits: 10, useGrouping: false }).format(idnum)
+    return cl + id
+}
+
+xc.ts = function(cl) {
+    return (new Date()).getTime()
 }
 
 xc.views = {}
@@ -1049,6 +1056,10 @@ xc.createElement = function(ev, name) {
         console.log('Done with xc.createElement ' + name)
         updateTree(document, ev)
     })
+}
+
+xc.getXEl = function(xcontdoc, nodename) {
+    return '<' + nodename + '>' + xcontdoc + '</' + nodename + '>'
 }
 
 xc.getXDoc = function(xcontdoc, nodename) {
@@ -1497,7 +1508,26 @@ xc.getID = function(path, done) {
     var headers = {'Content-type': 'application/x-www-form-urlencoded'}
     xlp.sendPost('/main/plain_counter', rdata, headers, function(stat, res) {
         var num = xc.xq('number(/*/xcontent/xc:*)', res.responseXML)
+        if (String(num) == 'NaN') {
+            xlp.log('failed to get ID ' + path)
+        }
         done(num)
+    })
+}
+
+xc.getID2 = function(path, done) {
+    var id = xc.id('id')
+    var rdata = 'path=' + path + '&data=' + xc.getXEl(id, 'id') +
+        '&csrfmiddlewaretoken=' + xc.getCSRFToken()
+    var headers = {'Content-type': 'application/x-www-form-urlencoded'}
+    xlp.sendPost('/main/ajax_append', rdata, headers, function(stat, res) {
+        var xep = '/*/dict/data/lsl/info/name = "' + path + '" and /*/dict/data/lsl/info/stat/st_size > 0'
+        var xres = xc.xq(xep, res.responseXML)
+        if (!(typeof xres == "boolean" && xres === true)) {
+            xlp.log('Failed to get ID from ' + path)
+            id = ''
+        }
+        done(id)
     })
 }
 
