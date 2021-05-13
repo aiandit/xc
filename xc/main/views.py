@@ -131,6 +131,41 @@ def ajax_path(request):
     context = { 'context_xml': dx, 'forms': [ rdata] }
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
+def plain_path(request):
+
+    lsl = {}
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = PathData(reqDict)
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+
+        lsl = workdir.lsl(path)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = {
+        'lsl': lsl,
+        'errs': errors
+    }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx }
+    return render(request, 'common/xc-atom.xml', context, content_type="application/xml")
+
 class NewdocData(XCForm):
     title = 'New Document'
     name = 'newdoc'
@@ -580,7 +615,7 @@ def ajax_append(request):
                 fdata = data
                 next_ = cdata['next_']
                 if len(next_) == 0:
-                    next_ = reverse('main:ajax_edit') + '?path=%s' % (path,)
+                    next_ = reverse('main:plain_path') + '?path=%s' % (path,)
                 return redirect(next_)
 
             else:

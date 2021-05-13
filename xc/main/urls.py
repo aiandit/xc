@@ -72,6 +72,7 @@ urlpatterns = [
 
     path('ajax_index', views.ajax_index, name='ajax_index'),
     path('ajax_path', views.ajax_path, name='ajax_path'),
+    path('plain_path', views.plain_path, name='plain_path'),
     path('ajax_newdoc', views.ajax_newdoc, name='ajax_newdoc'),
     path('ajax_newdir', views.ajax_newdir, name='ajax_newdir'),
     path('ajax_delete', views.ajax_delete, name='ajax_delete'),
