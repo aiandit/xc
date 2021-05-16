@@ -35,7 +35,7 @@ def ajax_index(request):
 def login_view(request):
     context = {'xapp': 'login', 'view': 'login', 'cgi': getAllCGI(request.POST),
                'data': []}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 class LoginData(XCForm):
     title = 'Login'
@@ -428,7 +428,7 @@ class ResetPasswordData(XCForm):
 def reset_password(request):
     user = request.user
     context = {'xapp': 'login', 'view': 'reset_password', 'cgi': getAllCGI(request.POST), 'data': [], 'user': user}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 @login_required
 def ajax_reset_password(request):
@@ -503,7 +503,7 @@ class ResendpasswordData(XCForm):
 def resendpassword(request):
     context = {'xapp': 'login', 'view': 'resendpassword', 'cgi': getAllCGI(request.POST),
                'data': []}
-    return render(request, 'common/xframe.html', context)
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_resendpassword(request):
 
