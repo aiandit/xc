@@ -411,9 +411,14 @@
       <p>
         A member already? Login <a href="{/*/links/login}">here</a>
       </p>
-      <p>
-        Registration code arrived? Activate account <a href="{/*/links/activate}">here</a>
-      </p>
+      <xsl:if test="data/results">
+        <p>
+          <xsl:value-of select="data/results/*/descr"/>
+        </p>
+        <p>
+          Has the code arrived? Reset your password <a href="{/*/links/activate}">here</a>
+        </p>
+      </xsl:if>
     </div>
   </xsl:template>
 

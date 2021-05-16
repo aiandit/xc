@@ -484,16 +484,18 @@ class ResendpasswordData(XCForm):
 
         user = User.objects.filter(email=email).first()
         if user is None:
-            msg = forms.ValidationError('%(value)s',
-                                        code='invalid',
-                                        params={'value': 'No user for this email address found'})
-            self.add_error('email', msg)
+            print('Resend password attempt to %s, who is not registered' % (email,))
+            # msg = forms.ValidationError('%(value)s',
+            #                             code='invalid',
+            #                             params={'value': 'No user for this email address found'})
+            # self.add_error('email', msg)
 
         elif not user.is_active:
-            msg = forms.ValidationError('%(value)s',
-                                        code='invalid',
-                                        params={'value': 'User account is not active'})
-            self.add_error('email', msg)
+            print('Resend password attempt to %s, who is not active' % (email,))
+            # msg = forms.ValidationError('%(value)s',
+            #                             code='invalid',
+            #                             params={'value': 'User account is not active'})
+            # self.add_error('email', msg)
 
         return cleaned_data
 
@@ -507,6 +509,7 @@ def ajax_resendpassword(request):
 
     errmsg = ''
     errors = []
+    resmsg = ''
 
     if request.method == "GET":
         rdata = ResendpasswordData()
@@ -523,16 +526,19 @@ def ajax_resendpassword(request):
 
             user = User.objects.filter(email=email).first()
 
+            resmsg = 'If your email is found in our database, an email with a password ' + \
+                'reset code has been is sent to you.'
             if user is None:
-                errmsg = 'No such email found'
+                pass
+                # errmsg = 'No such email found'
+            elif not user.is_active:
+                pass
+                # errmsg = 'User is not activate'
             else:
-                if not user.is_active:
-                    errmsg = 'User is not activate'
-                else:
-                    email = user.email
-                    actcode = ActivationCode.objects.create(code=uuid.uuid4(), user=user, userip=get_ip(request), mode='acc.login')
-                    sendActivationEmail(actcode.user.email, actcode.sign())
-                    return redirect('register:ajax_activate')
+                actcode = ActivationCode.objects.create(code=uuid.uuid4(), user=user,
+                                                        userip=get_ip(request), mode='acc.login')
+                sendActivationEmail(actcode.user.email, actcode.sign())
+                # return redirect('register:ajax_activate')
 
     else:
         errmsg = 'Invalid request method'
@@ -543,6 +549,8 @@ def ajax_resendpassword(request):
     data = {
         'errs': errors
     }
+    if len(resmsg):
+        data['results'] = [{ 'type': 'action', 'descr': resmsg }]
     xcontext = {'xapp': 'login', 'view': 'resendpassword', 'cgi': getAllCGI(request.POST), 'data': data}
     context = { 'context_xml': dictxml(xcontext), 'forms': [rdata] }
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
