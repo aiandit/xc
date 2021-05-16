@@ -234,9 +234,9 @@
             <p>Errors occured:</p>
             <ul>
               <xsl:for-each select="/*/dict/data/errs/item">
-                <li class="error error-type-{type}">
-                  <div class="error">
-                    <p class="error-msg">
+                <li class="error-type-{type}">
+                  <div>
+                    <p class="error msg">
                       <xsl:value-of select="errmsg"/>
                     </p>
                     <xsl:if test="details">
