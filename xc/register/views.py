@@ -32,7 +32,6 @@ class RegistrationData(XCForm):
     confirmtos = forms.BooleanField(required=False, label='Confirm TOS and PP')
 
     def clean(self):
-        print('form.clean')
         cleaned_data = super().clean()
         pass1 = cleaned_data.get("password")
         pass2 = cleaned_data.get("password2")
@@ -48,7 +47,6 @@ class RegistrationData(XCForm):
                                         params={'value': 'Password is too short (6 chars min)'})
             self.add_error('password', msg)
         tos = cleaned_data.get("confirmtos")
-        print('tos', tos)
         if not tos:
             msg = forms.ValidationError('%(value)s',
                                         code='invalid',
