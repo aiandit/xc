@@ -67,6 +67,11 @@
                   <td>
                     <a class="xc-nocatch" href="/admin">Admin Page</a>
                   </td>
+                  <xsl:if test="/*/links/invite">
+                    <td>
+                      <a href="{/*/links/invite}">Invite</a>
+                    </td>
+                  </xsl:if>
                 </xsl:if>
                 <td>
                   <a href="{/*/links/profile}"><xsl:value-of select="dict/user/username"/></a>
@@ -356,12 +361,98 @@
         Welcome to XC. Please login below
       </p>
       <xsl:apply-templates select="." mode="xc-form"/>
-      <p>
-        Want to become a member? Register in a minute with our <a
-        href="{/*/links/register}">registration form</a>.
-      </p>
+      <xsl:if test="/*/links/register">
+        <p>
+          Want to become a member? Register in a minute with our <a
+          href="{/*/links/register}">registration form</a>.
+        </p>
+      </xsl:if>
       <p>
         Forgot password? Resend <a href="{/*/links/resendpassword}">here</a>
+      </p>
+    </div>
+  </xsl:template>
+
+  <xsl:template match="text()" mode="invite-mode"/>
+  <xsl:template match="mode" mode="invite-mode">
+    <xsl:value-of select="."/>
+  </xsl:template>
+  <xsl:template match="mode[. = 'acc.invite']" mode="invite-mode">Invite sent</xsl:template>
+  <xsl:template match="mode[. = 'acc.createUser']" mode="invite-mode">Creating account</xsl:template>
+  <xsl:template match="mode[. = 'noacc.created']" mode="invite-mode">Account created<br/>@<xsl:value-of select="../user"/></xsl:template>
+
+  <xsl:template match="invites[not(*)]"/>
+  <xsl:template match="invites">
+    <h5>Invites</h5>
+    <table class="invites">
+      <thead>
+          <tr>
+            <th>Code</th>
+            <th>Email</th>
+            <th>Mode</th>
+            <th>Time</th>
+            <th></th>
+          </tr>
+      </thead>
+      <tbody>
+        <xsl:for-each select="../invites/*">
+          <tr>
+            <td>
+              <span class="uuid">
+                <xsl:value-of select="id"/>
+              </span>
+            </td>
+            <td>
+              <xsl:value-of select="email"/>
+            </td>
+            <td>
+              <xsl:apply-templates select="mode" mode="invite-mode"/>
+            </td>
+            <td>
+              <span class="unixtm">
+                <xsl:value-of select="date"/>
+              </span>
+            </td>
+            <td>
+              <h4 class="oc-head">Delete</h4>
+              <div class="oc-body">
+                <form action="/login/deleteinvite" method="post">
+                  <input type="hidden" name="code" value="{id}"/>
+                  <xsl:copy-of select="/*/csrf/*"/>
+                  <input type="submit"/>
+                </form>
+              </div>
+            </td>
+          </tr>
+        </xsl:for-each>
+      </tbody>
+    </table>
+  </xsl:template>
+
+  <xsl:template match="dict[xapp = 'login' and view = 'invite']" mode="xc-title">XC Invites</xsl:template>
+  <xsl:template match="dict[xapp = 'login' and view = 'invite']">
+    <div>
+      <p>
+        Welcome to XC. Invite new users below
+      </p>
+      <xsl:apply-templates select="." mode="xc-form"/>
+      <xsl:apply-templates select="../invites"/>
+    </div>
+  </xsl:template>
+
+
+  <xsl:template match="dict[xapp = 'register']" mode="xc-title">XC Registration</xsl:template>
+  <xsl:template match="dict[xapp = 'register']">
+    <div>
+      <p>
+        Welcome to XC User registration.
+      </p>
+      <xsl:apply-templates select="." mode="xc-form"/>
+      <p>
+        A member already? Login <a href="{/*/links/login}">here</a>
+      </p>
+      <p>
+        Registration code arrived? Activate account <a href="{/*/links/activate}">here</a>
       </p>
     </div>
   </xsl:template>
@@ -442,6 +533,20 @@
       </p>
       <p>
         Registration code arrived? Activate account <a href="{/*/links/activate}">here</a>
+      </p>
+    </div>
+  </xsl:template>
+
+  <xsl:template match="dict[xapp = 'register' and view = 'createuser']" mode="xc-title">XC Create Account</xsl:template>
+  <xsl:template match="dict[xapp = 'register' and view = 'createuser']">
+    <div>
+      <p>
+        Welcome to XC. Here you can create your user account by
+        filling out the profile details below.
+      </p>
+      <xsl:apply-templates select="." mode="xc-form"/>
+      <p>
+        A member already? Login <a href="{/*/links/login}">here</a>
       </p>
     </div>
   </xsl:template>
