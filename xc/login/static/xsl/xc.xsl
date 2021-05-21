@@ -179,9 +179,12 @@
     </form>
   </xsl:template>
 
+  <xsl:template match="dict" mode="xc-form-title">
+    <h4><xsl:value-of select="$f1/@title"/></h4>
+  </xsl:template>
+
   <xsl:template match="dict" mode="xc-form">
     <xsl:variable name="f1" select="/*/forms/form[1]"/>
-    <h4><xsl:value-of select="$f1/@title"/></h4>
 <!--    <xsl:if test="data/errs/item">
       <div class="aleft">
 	<xsl:if test="cgi/next_">
@@ -201,7 +204,7 @@
     </xsl:if> -->
     <form class="xc-form" id="{$f1/@id}" action="/{xapp}/{$f1/@action}" method="{$f1/@method}">
       <fieldset>
-        <legend><xsl:value-of select="/*/forms/form[1]/@title"/> form</legend>
+        <legend><xsl:value-of select="/*/forms/form[1]/@title"/></legend>
         <div>
           <table>
             <xsl:for-each select="/*/forms/form[1]/field[not(input/@type = 'hidden')]">
