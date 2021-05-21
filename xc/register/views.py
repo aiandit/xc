@@ -108,7 +108,8 @@ def index(request):
 
 def ajax_index(request):
     print(list(request.GET.items()))
-    xcontext = {'xapp': 'register', 'view': 'register', 'cgi': getAllCGI(request.GET), 'data': []}
+    xcontext = {'xapp': 'register', 'view': 'register',
+               'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': []}
     dx = dictxml(xcontext)
     print(xcontext)
     print(dx)
@@ -172,8 +173,8 @@ def ajax_register(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 def activate(request):
-    context = {'xapp': 'register', 'view': 'activate', 'cgi': getAllCGI(request.POST),
-               'data': []}
+    context = {'xapp': 'register', 'view': 'activate',
+               'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': []}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_activate(request):
@@ -238,8 +239,8 @@ def ajax_activate(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 def resend_activation(request):
-    context = {'xapp': 'register', 'view': 'resend_activation', 'cgi': getAllCGI(request.POST),
-               'data': []}
+    context = {'xapp': 'register', 'view': 'resend_activation',
+               'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': []}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 def ajax_resend_activation(request):
