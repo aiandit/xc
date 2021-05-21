@@ -143,16 +143,16 @@ class XCForm(forms.Form):
 #        print('asxml', s)
         return s
 
-siteDomain = 'example.com'
-siteName = 'Xc'
+siteDomain = xc.settings.siteDomain
+siteName = xc.settings.siteName
 
-def sendActivationEmail(to, actcode):
+def sendActivationEmail(to, actcode, text = "someone, hopefully you, signed you up to {site}."):
     from email.mime.text import MIMEText
 
     msgTxt = """
 Hello,
 
-someone, hopefully you, signed you up to Xc.
+%s
 
 Please complete the registration by clicking on the link below
 
@@ -167,13 +167,14 @@ into the following form
 %s
 
 Cheers,
-Your team @ Xc
+Your team @ %s
 """
 
-    actURLPlain = "https://%s/register/activate/" % (siteDomain,)
+    actURLPlain = "https://%s%s" % (siteDomain,reverse('register:activate'))
     actURL      = "%s?code=%s" % (actURLPlain, actcode)
 
-    msgTxt = msgTxt % (actURL, actcode, actURLPlain)
+    text = text.format(site=siteName,)
+    msgTxt = msgTxt % (text, actURL, actcode, actURLPlain, siteName)
 
     msg = MIMEText(msgTxt)
 
