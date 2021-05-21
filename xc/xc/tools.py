@@ -1,3 +1,6 @@
+# render
+import django.shortcuts
+
 from django import forms
 
 from django.core.mail import send_mail
@@ -251,3 +254,12 @@ def get_lsl(path):
     else:
         actions = fileactions
     return {'lsl': lsl, 'dir-actions': actions}
+
+def render(req, templ, conte, *more, **keys):
+    conte.update({'XC_TRACE': xc.settings.XC_TRACE,
+                  'XC_INVITE': xc.settings.XC_INVITE,
+                  'XC_REGISTER': xc.settings.XC_REGISTER,
+                  'siteDomain': xc.settings.siteDomain,
+                  'siteName': xc.settings.siteName,
+                  })
+    return django.shortcuts.render(req, templ, conte, *more, **keys)

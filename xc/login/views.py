@@ -1,6 +1,6 @@
 import uuid
 
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 
 from django.http import HttpResponse
 
