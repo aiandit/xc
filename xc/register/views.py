@@ -5,6 +5,8 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 
+from django.urls import reverse
+
 from xc.tools import *
 
 from django import forms
@@ -67,6 +69,38 @@ class ActivationData(XCForm):
     def clean(self):
         print('form.clean')
         cleaned_data = super().clean()
+        return cleaned_data
+
+class CreateUserData(RegistrationData):
+    title = 'CreateUser'
+    name = 'createuser'
+    auto_id='id_for_%s'
+    error_css_class = 'error'
+    required_css_class = 'required'
+
+    code = forms.CharField(widget=forms.HiddenInput)
+    email = forms.CharField(widget=forms.HiddenInput, required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        rcode = cleaned_data.get("code")
+        email = cleaned_data["email"]
+
+        try:
+            code = unsign_acode(rcode)
+            actcode = ActivationCode.objects.filter(code=code).first()
+        except BaseException as ce:
+            errmsg = 'Activation code is invalid'
+            self.add_error('code', errmsg)
+            actcode = None
+
+        if actcode is None or len(actcode.email) == 0 or len(email) > 0:
+            msg = forms.ValidationError('%(value)s',
+                                        code='invalid',
+                                        params={'value': 'Registration code not found'})
+            self.add_error('code', msg)
+
         return cleaned_data
 
 
@@ -224,6 +258,12 @@ def ajax_activate(request):
                         login(request, user)
                         actcode.delete()
                         return redirect('login:ajax_reset_password')
+                elif actcode.mode == 'acc.invite':
+                    actcode.mode = 'acc.createUser'
+                    actcode.save()
+                    return redirect(reverse('register:ajax_createuser') + '?code=' + actcode.sign())
+                elif actcode.mode == 'acc.createUser':
+                    return redirect(reverse('register:ajax_createuser') + '?code=' + actcode.sign())
 
     else:
         errmsg = 'Invalid request method'
@@ -284,5 +324,65 @@ def ajax_resend_activation(request):
         'errs': errors
     }
     xcontext = {'xapp': 'register', 'view': 'resend_activation', 'cgi': getAllCGI(request.POST), 'data': data}
+    context = { 'context_xml': dictxml(xcontext), 'forms': [rdata] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
+def createuser(request):
+    context = {'xapp': 'register', 'view': 'createuser',
+               'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': []}
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
+
+def ajax_createuser(request):
+
+    errmsg = ''
+    errors = []
+    res = False
+
+    if request.method == "GET":
+        rdata = CreateUserData(initial=request.GET)
+    elif request.method == "POST":
+        rdata = CreateUserData(request.POST)
+
+        res = rdata.is_valid()
+        if not res:
+            errmsg = 'The form data is invalid'
+        else:
+            cdata = rdata.cleaned_data
+
+            actcode = ActivationCode.objects.filter(code=unsign_acode(cdata['code'])).first()
+
+            username = cdata['username']
+            email = actcode.email
+            fname = cdata['firstname']
+            lname = cdata['lastname']
+            if not settings.XC_INVITE:
+                errmsg = 'User invitations are disabled'
+            elif User.objects.filter(username=username).first() is not None:
+                errmsg = 'User exists'
+                rdata.add_error('username', errmsg)
+            elif User.objects.filter(email=email).first() is not None:
+                errmsg = 'User email exists'
+                rdata.add_error('username', errmsg)
+            else:
+                newuser = User.objects.create_user(username, email, cdata['password'], is_active=True)
+                newuser.first_name = fname
+                newuser.last_name = lname
+                newuser.save()
+                actcode.user = newuser
+                actcode.mode = 'noacc.created'
+                actcode.save()
+                return redirect('login:ajax_index')
+
+    if len(errmsg):
+        errors = [ {'errmsg': errmsg, 'type': 'fatal'} ]
+
+    data = {
+        'valid': res,
+        'errs': errors
+    }
+    xcontext = {'xapp': 'register', 'view': 'createuser',
+                'cgi': getAllCGI(request.POST),
+                'data': data}
     context = { 'context_xml': dictxml(xcontext), 'forms': [rdata] }
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
