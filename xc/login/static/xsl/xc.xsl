@@ -4,7 +4,7 @@
   xmlns="http://www.w3.org/1999/xhtml"
   version="1.0">
 
-  <xsl:output method="xml" encoding="utf-8"/>
+  <xsl:output method="html" encoding="utf-8"/>
 
   <xsl:template match="*" mode="to-xhtml">
     <xsl:element name="{local-name()}" namespace="http://www.w3.org/1999/xhtml">
