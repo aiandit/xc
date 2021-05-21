@@ -516,8 +516,6 @@
     </div>
   </xsl:template>
 
-
-
   <xsl:template match="dict[xapp = 'register' and view = 'resend_activation']" mode="xc-title">XC Resend Activation</xsl:template>
   <xsl:template match="dict[xapp = 'register' and view = 'resend_activation']">
     <div>
