@@ -555,6 +555,136 @@ def ajax_resendpassword(request):
     context = { 'context_xml': dictxml(xcontext), 'forms': [rdata] }
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
+
+class SendinviteData(XCForm):
+    title = 'Invite'
+    name = 'invite'
+    auto_id='id_for_%s'
+    error_css_class = 'error'
+    required_css_class = 'required'
+
+    email = forms.EmailField(max_length=100)
+
+    def clean(self):
+        print('form.clean')
+        cleaned_data = super().clean()
+        return cleaned_data
+
+def sendinvite(data, request):
+    email = data['email']
+    actcode = ActivationCode.objects.create(mode='acc.invite',email=email,
+                                            user=request.user,creator=request.user,userip=get_ip(request))
+    actcode.save()
+    sendActivationEmail(email, actcode.sign(), text = "you have been invited to join {site}.")
+
+@login_required
+def sendinvite_view(request):
+    context = {'xapp': 'login', 'view': 'invite', 'cgi': getAllCGI(request.POST),
+               'data': []}
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
+
+@login_required
+def ajax_sendinvite_view(request):
+
+    errmsg = ''
+    errors = []
+
+    user = request.user
+
+    if request.method == "GET":
+        rdata = SendinviteData()
+    elif request.method == "POST":
+        rdata = SendinviteData(request.POST)
+
+        res = rdata.is_valid()
+        if not res:
+            errmsg = 'The form data is invalid'
+        else:
+            data = rdata.cleaned_data
+            ouser = User.objects.filter(email=data['email']).first()
+            if not settings.XC_INVITE:
+                errmsg = 'User invites are disabled'
+            elif ouser is not None:
+                errmsg = 'User with this email exists'
+            else:
+                sendinvite(data, request)
+                return redirect('login:ajax_invite')
+
+    if len(errmsg):
+        errors = [ {'errmsg': errmsg, 'type': 'fatal'} ]
+
+    def atox(acode):
+        return acode.asxml()
+
+    invites = list(map(atox, ActivationCode.objects.filter(creator=request.user)))
+    data = {
+        'errs': errors
+    }
+    print('ajax_sendinvite_view:', rdata)
+    xcontext = {'xapp': 'login', 'view': 'invite',
+                'cgi': getAllCGI(request.POST), 'data': data, 'user': userdict(user)}
+    context = { 'context_xml': dictxml(xcontext) + ('<invites>%s</invites>' % ('\n'.join(invites),)), 'forms': [rdata] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
+class DeleteinviteData(XCForm):
+    title = 'Delete invite'
+    name = 'deleteinvite'
+    auto_id='id_for_%s'
+    error_css_class = 'error'
+    required_css_class = 'required'
+
+    code = forms.CharField(max_length=100)
+
+    def clean(self):
+        print('form.clean')
+        cleaned_data = super().clean()
+        return cleaned_data
+
+@login_required
+def deleteinvite_view(request):
+    context = {'xapp': 'login', 'view': 'invite', 'cgi': getAllCGI(request.POST),
+               'data': []}
+    return render(request, 'common/' + settings.MAIN_FRAME, context)
+
+@login_required
+def ajax_deleteinvite_view(request):
+
+    errmsg = ''
+    errors = []
+
+    user = request.user
+
+    if request.method == "GET":
+        rdata = DeleteinviteData(initial=request.GET)
+    elif request.method == "POST":
+        rdata = DeleteinviteData(request.POST)
+
+        res = rdata.is_valid()
+        if not res:
+            errmsg = 'The form data is invalid'
+        else:
+            data = rdata.cleaned_data
+            acode = ActivationCode.objects.filter(code=data['code']).first()
+            if acode is None:
+                errmsg = 'Not found'
+            else:
+                acode.delete()
+                return redirect('login:ajax_invite')
+
+    if len(errmsg):
+        errors = [ {'errmsg': errmsg, 'type': 'fatal'} ]
+
+    data = {
+        'errs': errors
+    }
+    print('ajax_sendinvite_view:', rdata)
+    xcontext = {'xapp': 'login', 'view': 'dirmanform',
+                'cgi': getAllCGI(request.POST), 'data': data, 'user': userdict(user)}
+    context = { 'context_xml': dictxml(xcontext), 'forms': [rdata] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
 def favicon(request):
     return redirect('/main/get/' + 'files/favicon.ico')
 #    return redirect(settings.STATIC_URL + 'favicon.ico')

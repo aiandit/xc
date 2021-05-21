@@ -19,6 +19,8 @@ urlpatterns = [
     path('reset_password', views.reset_password, name='reset_password'),
     path('deleteprofile', views.deleteprofile, name='deleteprofile'),
     path('resendpassword', views.resendpassword, name='resendpassword'),
+    path('invite', views.sendinvite_view, name='invite'),
+    path('deleteinvite', views.deleteinvite_view, name='deleteinvite'),
 #    path('user', views.user, name='user'),
 #    path('delete_profile', views.delete_profile, name='delete_profile'),
 
@@ -28,6 +30,8 @@ urlpatterns = [
     path('ajax_reset_password', views.ajax_reset_password, name='ajax_reset_password'),
     path('ajax_deleteprofile', views.ajax_deleteprofile, name='ajax_deleteprofile'),
     path('ajax_resendpassword', views.ajax_resendpassword, name='ajax_resendpassword'),
+    path('ajax_invite', views.ajax_sendinvite_view, name='ajax_invite'),
+    path('ajax_deleteinvite', views.ajax_deleteinvite_view, name='ajax_deleteinvite'),
 #    path('ajax_user', views.ajax_user, name='ajax_user'),
 #    path('ajax_delete_profile', views.ajax_delete_profile, name='ajax_delete_profile'),
 
