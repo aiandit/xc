@@ -412,6 +412,7 @@ var runxc = function(x, ev) {
     myframes.renderLink(document, ajaxurl, function(res) {
         console.log('done xerp load')
         renderPostProc(ev, res)
+        xc.cururl =  '/' + xframe_xapp + '/' + xframe_view + paramss
     })
 
     window.addEventListener("popstate", function (event) {
