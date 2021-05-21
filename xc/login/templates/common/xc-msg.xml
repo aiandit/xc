@@ -3,27 +3,29 @@
   <csrf>
     {% csrf_token %}</input>
   </csrf>
-  {{ userxml|safe }}
-  <links>
+  {{ userxml|safe }}<links>
     <login>{% url 'login:login' %}</login>
     <logout>{% url 'login:logout' %}</logout>
     <profile>{% url 'login:profile' %}</profile>
     <edit-profile>{% url 'login:edit_profile' %}</edit-profile>
     <delete-profile>{% url 'login:deleteprofile' %}</delete-profile>
     <set-password>{% url 'login:set_password' %}</set-password>
-    <register>{% url 'register:register' %}</register>
     <activate>{% url 'register:activate' %}</activate>
     <resend-activation>{% url 'register:resend_activation' %}</resend-activation>
     <resendpassword>{% url 'login:resendpassword' %}</resendpassword>
     <path>{% url 'main:path' %}</path>
     <newdoc>{% url 'main:newdoc' %}</newdoc>
     <view>{% url 'main:view' %}</view>
-    <msgs>{% url 'msgs:index' %}</msgs>
+    <msgs>{% url 'msgs:index' %}</msgs>{% if XC_REGISTER %}
+    <register>{% url 'register:register' %}</register>{% endif %}{% if XC_INVITE %}
+    <invite>{% url 'login:invite' %}</invite>{% endif %}
   </links>
+  <info>
+    <site-name>{{ siteName }}</site-name>
+    <site-domain>{{ siteDomain }}</site-domain>
+  </info>
   <forms>
-    {% for form in forms %}
-    <form id="xc-form-{{ form.name }}" action="{{ form.name }}" method="{{ form.method }}" title="{{ form.title }}">
-      {{ form.asxml|safe }}
+    {% for form in forms %}<form id="xc-form-{{ form.name }}" action="{{ form.name }}" method="{{ form.method }}" title="{{ form.title }}">{{ form.asxml|safe }}
     </form>
     {% endfor %}
   </forms>
