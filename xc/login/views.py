@@ -535,7 +535,7 @@ def ajax_resendpassword(request):
                 pass
                 # errmsg = 'User is not activate'
             else:
-                actcode = ActivationCode.objects.create(code=uuid.uuid4(), user=user,
+                actcode = ActivationCode.objects.create(code=uuid.uuid4(), user=user, creator=user,
                                                         userip=get_ip(request), mode='acc.login')
                 sendActivationEmail(actcode.user.email, actcode.sign())
                 # return redirect('register:ajax_activate')
