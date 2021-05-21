@@ -181,7 +181,7 @@ def ajax_activate(request):
     errors = []
 
     if request.method == "GET":
-        rdata = ActivationData()
+        rdata = ActivationData(initial=request.GET)
     elif request.method == "POST":
         rdata = ActivationData(request.POST)
 
@@ -191,12 +191,12 @@ def ajax_activate(request):
             errmsg = 'The form data is invalid'
         else:
             cdata = rdata.cleaned_data
-            code = cdata['code']
+            code = rcode = cdata['code']
 
             # d10fbef5-5cdd-4fd6-9121-802cdc62daae
 
             try:
-                code = unsign_acode(code)
+                code = unsign_acode(rcode)
                 actcode = ActivationCode.objects.filter(code=code).first()
             except BaseException as ce:
                 print(ce)
