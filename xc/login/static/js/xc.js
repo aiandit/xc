@@ -391,10 +391,9 @@ var handleFormSubmit = function(ev) {
 }
 
 var runxc = function(x, ev) {
-    console.log('run: x ' + x)
-    console.log('run: ev ' + ev)
-
-    console.log('run: xframe ' + xframe)
+    // console.log('run: x ' + x)
+    // console.log('run: ev ' + ev)
+    // console.log('run: xframe ' + xframe)
 
     var paramss = ''
     if (xframes.cgij.length > 0) {
@@ -407,7 +406,7 @@ var runxc = function(x, ev) {
 
     var ajaxurl = '/' + xframe_xapp + '/ajax_' + xframe_view + paramss
 
-    console.log('run: ajax URL ' + ajaxurl)
+    // console.log('run: ajax URL ' + ajaxurl)
 
     myframes.renderLink(document, ajaxurl, function(res) {
         console.log('done xerp load')
