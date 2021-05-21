@@ -8,13 +8,15 @@ from django.utils import timezone
 
 import uuid
 
+from xc import settings
+
 class UserIP(models.Model):
 #    ip = models.IPAddressField(primary_key=True)
     ip = models.GenericIPAddressField(protocol='both', unpack_ipv4=True, unique=True)
     def __unicode__(self):
         return "%s" % self.ip
 
-salt='acctcode9d898'
+salt = settings.SECRET_KEY
 
 class ActivationCode(models.Model):
     code = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
