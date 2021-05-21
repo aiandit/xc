@@ -32,10 +32,6 @@ body, fieldset, div.messages, div#content {
     padding: 0.5em;
 }
 
-fieldset table {
-    display: inline;
-}
-
 code.list {
     white-space: pre;
     max-width: 50rem;
@@ -470,4 +466,17 @@ form.inline, div.inline, img.inline  {
 
 .hidden {
     visibility: hidden;
+}
+
+.invites {
+    border-collapse: collapse;
+}
+.invites td {
+    border: 0.2em solid lightblue;
+    padding: 0.2em;
+}
+
+.uuid {
+    white-space: pre;
+    font-family: mono;
 }
