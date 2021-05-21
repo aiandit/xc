@@ -175,7 +175,9 @@ def ajax_register(request):
             email = cdata['email']
             fname = cdata['firstname']
             lname = cdata['lastname']
-            if User.objects.filter(username=username).first() is not None:
+            if not settings.XC_REGISTER:
+                errmsg = 'User invitations are disabled'
+            elif User.objects.filter(username=username).first() is not None:
                 errmsg = 'User exists'
                 rdata.add_error('username', errmsg)
             elif User.objects.filter(email=email).first() is not None:
@@ -184,7 +186,7 @@ def ajax_register(request):
             else:
                 actcode = uuid.uuid4()
                 newuser = User.objects.create_user(username, email, cdata['password'], is_active=False)
-                actcode = ActivationCode.objects.create(code=actcode, user=newuser, userip=get_ip(ip=request.META['REMOTE_ADDR']))
+                actcode = ActivationCode.objects.create(code=actcode, user=newuser, creator=newuser, userip=get_ip(ip=request.META['REMOTE_ADDR']))
                 if newuser is None:
                     errmsg = 'Failed to create User'
                 elif actcode is None:
