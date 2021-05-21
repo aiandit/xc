@@ -894,7 +894,7 @@ var ppTimestamps = function(subtree) {
                                }
             var options = { hour: 'numeric', minute: 'numeric', second: 'numeric' }
             var us = (new Intl.DateTimeFormat(navigator.language,
-                                              (tnow - d) > 3600*24 ? options_full : options)).format(d)
+                                              (tnow - d) > 3.6e6*24 ? options_full : options)).format(d)
             var sd = d.toISOString()
             // var ts = d.toLocaleTimeString()
             el.innerHTML = '<span title="' + sd + '">' + us + '</span>'
