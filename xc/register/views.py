@@ -28,7 +28,7 @@ class RegistrationData(XCForm):
     firstname = forms.CharField(max_length=100, required=False, label='First name')
     lastname = forms.CharField(max_length=100, required=False, label='Last name')
     password = forms.CharField(max_length=100, label='Choose password', widget=forms.PasswordInput)
-    password2 = forms.CharField(max_length=100, label='Confirm Password', widget=forms.PasswordInput)
+    password2 = forms.CharField(max_length=100, label='Confirm password', widget=forms.PasswordInput)
     confirmtos = forms.BooleanField(required=False, label='Confirm TOS and PP')
 
     def clean(self):
@@ -39,7 +39,7 @@ class RegistrationData(XCForm):
         if pass1 != pass2:
             msg = forms.ValidationError('%(value)s',
                                         code='invalid',
-                                        params={'value': 'Passwords do not coincide'})
+                                        params={'value': 'Passwords are not the same'})
             self.add_error('password', msg)
             self.add_error('password2', msg)
         if len(pass1) < 6:
