@@ -2,6 +2,8 @@ from django import forms
 
 from django.core.mail import send_mail
 
+from django.urls import reverse
+
 from register.models import UserIP
 
 import xc.settings
@@ -74,6 +76,8 @@ def getAllCGI(cgiobj):
     return cgidict
 
 def get_ip(ip):
+    if type(ip) != type(""):
+        ip = ip.META['REMOTE_ADDR']
     try:
         userip = UserIP.objects.get(ip=ip)
     except:
