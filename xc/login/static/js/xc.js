@@ -16,6 +16,9 @@ var frames = [
 
 var myframes = xframes.mkXframes(frames, '/static/xsl/')
 
+xc.escapeXML = function(x) {
+    return x.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+}
 xc.unescapeXML = function(x) {
     return x.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;', '&')
 }
@@ -997,13 +1000,16 @@ xc.setButtonLinkHandlers = function(subtree) {
 }
 
 xc.dictXML = function(data, exclude) {
-    var rdict = {}
-    Object.keys(data).forEach(function(k) {
-//        if (exclude && k in exclude) return
-        var r = '<' + k + '>' + data[k] + '</' + k + '>'
-        rdict[k] = r
-    })
-    return Object.values(rdict).join('\n')
+    if (typeof data == 'number') {
+        return String(data)
+    } else if (typeof data == 'string') {
+        return xc.escapeXML(data)
+    } else if (data.length != undefined) {
+        return data.map((k)=> '<item>' + xc.dictXML(k, exclude) + '</item>').join('\n')
+    }
+    return Object.keys(data).map((k) =>
+        '<' + k + '>' + xc.dictXML(data[k], exclude) + '</' + k + '>'
+    ).join('\n')
 }
 
 xc.getInfoXML = function() {
