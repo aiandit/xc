@@ -210,9 +210,12 @@ def userdict(user):
         return dict( (key, getattr(user, key)) for key in ['username',
                                                            'is_authenticated', 'is_superuser'] )
     else:
-        return dict( (key, getattr(user, key)) for key in ['username', 'email', 'first_name',
-                                                           'last_name', 'last_login', 'date_joined',
-                                                           'is_authenticated', 'is_superuser'] )
+        res = dict( (key, getattr(user, key)) for key in ['username', 'email', 'first_name',
+                                                          'last_name', 'is_authenticated', 'is_superuser'] )
+        res['last_login'] = user.last_login.timestamp()
+        res['date_joined'] = user.date_joined.timestamp()
+        return res
+
 workdir_base = xc.settings.XC_WORKDIR
 
 if xc.settings.XC_USE_GIT:
