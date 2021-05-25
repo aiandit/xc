@@ -127,6 +127,8 @@ xc.mkClassViewFunction = function(targetid, dclass, mode, opts, done) {
             } catch {
             }
 
+            linfoxml += xc.dictXML({stack: opts.ev.stack.stack, cururl: xc.cururl})
+
             var indoc = xc.getCurDoc(xcontdoc, xc.cgiParams() + linfoxml)
 
             sframes.render(indoc, function(res) {
@@ -352,6 +354,7 @@ xc.handleLinkClickA = function(ev, elem) {
 	xc.clearIntervals();
         // console.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
         myframes.renderLink(elem, xframes.ajaxPathName(elem.href), function(request) {
+            ev = {ev: ev, stack: xc.mkStack(xc.mkSItem('click', xframes.ajaxPathName(elem.href)))}
             renderPostProc(ev, request)
         })
         return false
@@ -410,18 +413,22 @@ var runxc = function(x, ev) {
     var ajaxurl = '/' + xframe_xapp + '/ajax_' + xframe_view + paramss
 
     // console.log('run: ajax URL ' + ajaxurl)
+    xc.cururl =  '/' + xframe_xapp + '/' + xframe_view + paramss
 
     myframes.renderLink(document, ajaxurl, function(res) {
-        console.log('done xerp load')
+        console.log('done xc load')
+
+        ev = {ev: ev, stack: xc.mkStack(xc.mkSItem('main', xc.cururl))}
+
         renderPostProc(ev, res)
-        xc.cururl =  '/' + xframe_xapp + '/' + xframe_view + paramss
     })
 
     window.addEventListener("popstate", function (event) {
         console.log('popstate: ' + event.state)
 	if (event.state != null) {
 	    myframes.renderLink(document, xframes.ajaxPathName(event.state), function(res) {
-		renderPostProc(event, res)
+                var ev = {ev: event, stack: xc.mkStack(xc.mkSItem('main', xc.cururl))}
+		renderPostProc(ev, res)
 	    })
 	}
     })
@@ -665,6 +672,7 @@ var ppPolls = function(subtree, ev, done) {
             }
 	    var handleData = function(text) {
 		var res
+                var subev = {ev: ev.ev, stack: xc.mkStack(ev.stack.stack.concat(xc.mkSItem('poll', url)))}
                 if (ppFun != undefined) {
 		    try {
 		        res = ppFun(text, el)
@@ -687,7 +695,7 @@ var ppPolls = function(subtree, ev, done) {
                         finalStep(res)
 		    })
                 } else {
-                    xc.autoRender(text, el.dataset.pollTarget, {ev: ev}, function(res) {
+                    xc.autoRender(text, el.dataset.pollTarget, {ev: subev}, function(res) {
                         console.log('poll auto render done')
                         finalStep(res)
                     })
@@ -825,6 +833,7 @@ var ppViews = function(subtree, ev, done) {
                 xc.views[myid] = 0
 	        eldone(request)
             }
+            var subev = {ev: ev.ev, stack: xc.mkStack(ev.stack.stack.concat(xc.mkSItem('view', url)))}
             if (viewFilter == 'auto') {
                 var lfun = viewCache ? xlp.loadCached : (viewMode == 'xml' ? xlp.loadXML : xlp.loadText)
                 lfun(url, function(dt) {
@@ -833,7 +842,7 @@ var ppViews = function(subtree, ev, done) {
                     }
                     xc.cursubresp = xlp.mkdoc(dt)
                     xc.autoRender(dt, viewTarget,
-                                  {ev: ev, replace: viewReplace, skip: viewSkip},
+                                  {ev: subev, replace: viewReplace, skip: viewSkip},
                                   lastStep)
                 })
             } else {
@@ -843,8 +852,8 @@ var ppViews = function(subtree, ev, done) {
 		     filters: [ viewFilter ]}
 	        ]
 	        var mylframes = xframes.mkXframes(localframes, xc.xslpath)
-                mylframes.renderLink(ev.target, url, function(request) {
-		    updateTreeFinal(document.querySelector('#' + targetId), ev, lastStep)
+                mylframes.renderLink(subev.ev.target, url, function(request) {
+		    updateTreeFinal(document.querySelector('#' + targetId), subev, lastStep)
                 }, viewCache)
             }
 	    el.dataset.viewDone = '1'
@@ -1193,6 +1202,22 @@ var updateTree2 = function(subtree, ev) {
         xc.registeredHandles['tree2'].forEach(function(handle) {
             handle(subtree)
         })
+    }
+}
+
+xc.mkSItem = function(name, path) {
+    return [{name: name, path: path, level: 0, data: {}}]
+}
+xc.mkStack = function(stack_) {
+    var stack = {s: [...stack_]}
+    var top = function() {
+        if (stack.s.length)
+            return stack.s[stack.s.length -1]
+    }
+    var nstack = function() { return stack.s.length }
+    top().level = stack.s.length
+    return {
+        top: top, nstack: nstack, stack: stack.s
     }
 }
 
