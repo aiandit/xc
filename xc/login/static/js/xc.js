@@ -1168,7 +1168,7 @@ var updateTree = function(subtree, ev) {
         var f = forms[k]
         var t = f.nextElementSibling
         var iso = t.classList.contains('oc-open')
-        f.onclick = function() {
+        f.onclick = function(ev) {
             if (t.style.visibility == 'visible' || (t.style.visibility == "" && iso)) {
                 t.style.visibility = 'hidden'
                 t.style.display = 'none'
@@ -1176,6 +1176,8 @@ var updateTree = function(subtree, ev) {
                 t.style.visibility = 'visible'
                 t.style.display = t.dataset.display || 'block'
             }
+            ev.cancelBubble = true
+            return false
         }
     })
 
