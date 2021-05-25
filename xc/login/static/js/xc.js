@@ -354,7 +354,7 @@ xc.handleLinkClickA = function(ev, elem) {
 	xc.clearIntervals();
         // console.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
         myframes.renderLink(elem, xframes.ajaxPathName(elem.href), function(request) {
-            ev = {ev: ev, stack: xc.mkStack(xc.mkSItem('click', xframes.ajaxPathName(elem.href)))}
+            ev = {ev: ev, stack: xc.setStack('click', xframes.ajaxPathName(elem.href)) }
             renderPostProc(ev, request)
         })
         return false
@@ -387,6 +387,7 @@ var dohandleFormSubmit = function(form, ev) {
 	xc.clearIntervals();
         myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
             // console.log('A form POST submit is handled completely')
+            ev = {ev: ev, stack: xc.setStack('submit', xframes.ajaxPathName(form.action)) }
             renderPostProc(ev, request)
         })
         return false
@@ -418,7 +419,7 @@ var runxc = function(x, ev) {
     myframes.renderLink(document, ajaxurl, function(res) {
         console.log('done xc load')
 
-        ev = {ev: ev, stack: xc.mkStack(xc.mkSItem('main', xc.cururl))}
+        ev = {ev: ev, stack: xc.setStack('main', xc.cururl)}
 
         renderPostProc(ev, res)
     })
@@ -427,7 +428,7 @@ var runxc = function(x, ev) {
         console.log('popstate: ' + event.state)
 	if (event.state != null) {
 	    myframes.renderLink(document, xframes.ajaxPathName(event.state), function(res) {
-                var ev = {ev: event, stack: xc.mkStack(xc.mkSItem('main', xc.cururl))}
+                var ev = {ev: event, stack: xc.setStack('main', xc.cururl)}
 		renderPostProc(ev, res)
 	    })
 	}
@@ -672,7 +673,7 @@ var ppPolls = function(subtree, ev, done) {
             }
 	    var handleData = function(text) {
 		var res
-                var subev = {ev: ev.ev, stack: xc.mkStack(ev.stack.stack.concat(xc.mkSItem('poll', url)))}
+                var subev = {ev: ev.ev, stack: xc.setStack('poll', url, ev.stack)}
                 if (ppFun != undefined) {
 		    try {
 		        res = ppFun(text, el)
@@ -833,7 +834,7 @@ var ppViews = function(subtree, ev, done) {
                 xc.views[myid] = 0
 	        eldone(request)
             }
-            var subev = {ev: ev.ev, stack: xc.mkStack(ev.stack.stack.concat(xc.mkSItem('view', url)))}
+            var subev = {ev: ev.ev, stack: xc.setStack('view', url, ev.stack)}
             if (viewFilter == 'auto') {
                 var lfun = viewCache ? xlp.loadCached : (viewMode == 'xml' ? xlp.loadXML : xlp.loadText)
                 lfun(url, function(dt) {
@@ -1220,6 +1221,11 @@ xc.mkStack = function(stack_) {
         top: top, nstack: nstack, stack: stack.s
     }
 }
+xc.setStack = function(name, path, exstack) {
+    var top = xc.mkSItem(name, path)
+    var r = xc.mkStack(exstack ? exstack.stack.concat(top) : top)
+    return r
+}
 
 var updateTreeFinal = function(subtree, ev, done) {
     updateTree2(subtree, ev)
@@ -1371,9 +1377,13 @@ xc.transformAndSaveAs = function(doc, filters, ofname, form, opts, done) {
 	xlp.submitForm(form, formAction, function(rdoc, req) {
 	    console.log('Doc ' + doc.URL + ' transformed with ' + filters + ' and saved as ' + ofname)
             if (opts.render) {
-                processXData(opts.ev, req, function(res) {
+                const ev = {ev: opts.ev, stack: xc.setStack(opts.append ? 'app' : 'write', ofname) }
+                renderPostProc(ev, req, undefined, function(res) {
                     done(res, req, rdoc, resconf)
                 })
+                // processXData(opts.ev, req, function(res) {
+                //     done(res, req, rdoc, resconf)
+                // })
             } else {
 	        done(rdoc, req)
             }
