@@ -441,14 +441,15 @@ var runxc = function(x, ev) {
     return false
 }
 
-var renderPostProc = function(ev, request, subreq) {
+var renderPostProc = function(ev, request, subreq, done) {
     console.log('render: ' + request)
     if (subreq == undefined) {
 	xframes.pushhist(request)
     }
     if (!isNonXMLResponse(request)) {
-        processXData(ev, request, function() {
+        processXData(ev, request, function(r) {
             console.log('processXData done')
+            if (done) done(r)
         })
     } else {
         console.error('Got non XML response')
