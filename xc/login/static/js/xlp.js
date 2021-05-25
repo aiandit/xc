@@ -410,7 +410,11 @@ xlp.mkdoc = function(docstr) {
         try {
             res = xlp.parseXML(docstr)
         } catch (e) {
-            xlp.error('failed to parse XML' + e)
+            xlp.error('Exception in parseXML: ' + e)
+        }
+        if (res.documentElement.nodeName == 'parsererror') {
+            xlp.error('failed to parse XML:<br/><code class="pre">' +
+                      res.documentElement.textContent + '</pre>')
         }
     }
     return res
@@ -420,11 +424,7 @@ xlp.getdoc = function(docstr, opts, done) {
     var res = docstr
     if (typeof docstr == "string") {
         if (docstr[0] == "<") {
-            try {
-                res = xlp.parseXML(docstr)
-            } catch (e) {
-                xlp.error('failed to parse XML' + e)
-            }
+            res = xlp.mkdoc(docstr)
             done(res)
         } else if (docstr.length < 1024 && opts.xsltbase != undefined) {
             xlp.loadXML(opts.xsltbase + docstr, function(doc) {
