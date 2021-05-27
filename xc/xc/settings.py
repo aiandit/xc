@@ -163,6 +163,8 @@ try:
 except ImportError as e:
     print(e)
     pass
+XC_TRACE = DEBUG
+
 
 XC_INVITE = True
 XC_REGISTER = False
