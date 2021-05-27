@@ -163,3 +163,9 @@ try:
 except ImportError as e:
     print(e)
     pass
+
+XC_INVITE = True
+XC_REGISTER = False
+
+siteDomain = 'localhost:8000'
+siteName = 'AONA News'
