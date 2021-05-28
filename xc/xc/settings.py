@@ -163,7 +163,11 @@ try:
 except ImportError as e:
     print(e)
     pass
-XC_TRACE = DEBUG
+
+try:
+    XC_TRACE = DEBUG
+except:
+    XC_TRACE = False
 
 
 XC_INVITE = True
