@@ -158,8 +158,18 @@ userPyPath = XC_WORKDIR + '/files/py'
 if os.path.exists(userPyPath):
     sys.path.append(userPyPath)
 
+sysPyPath = '/etc/xc/py'
+if os.path.exists(sysPyPath):
+    sys.path.append(sysPyPath)
+
 try:
-    from email_settings import *
+    from local_settings import *
+except ImportError as e:
+    print(e)
+    pass
+
+try:
+    from system_settings import *
 except ImportError as e:
     print(e)
     pass
