@@ -59,6 +59,10 @@ if ! grep -E "$nginx_mt +xsl" $nginx_mt_file; then
 fi
 
 cd $mydir/xc && ./manage.py migrate
+res=$?
+if [[ "$res" != 0 ]]; then
+    exit $res
+fi
 
 sed -i -e 's/DEBUG = True/#DEBUG = True/' xc/settings.py
 sed -i -e "s/'example.local'/'$UMW_HOSTNAME', '$UMW_HOSTNAME.$UMW_DOMAIN', '$UMW_HOSTNAME_GENERIC', '$UMW_HOSTNAME_GENERIC.$UMW_DOMAIN'/" xc/settings.py
