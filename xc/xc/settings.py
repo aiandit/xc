@@ -135,11 +135,11 @@ MAIN_FRAME = 'xframe.html'
 
 DEFAULT_FROM_EMAIL = 'info@example.com'
 
-EMAIL_HOST = 'example.com'
-EMAIL_HOST_USER = 'user'
-EMAIL_HOST_PASSWORD = 'secret'
+EMAIL_HOST = 'smtp.example.com'
+EMAIL_HOST_USER = 'emailuser'
+EMAIL_HOST_PASSWORD = 'emailsecret'
 EMAIL_USE_TLS = True
-#EMAIL_USE_SSL = True
+EMAIL_USE_SSL = False
 
 xc_appdir = '/var/lib/xc/xc-application'
 try:
@@ -173,5 +173,5 @@ except:
 XC_INVITE = True
 XC_REGISTER = False
 
-siteDomain = 'localhost:8000'
-siteName = 'AONA News'
+siteDomain = 'www.example.com'
+siteName = 'XC'
