@@ -433,7 +433,7 @@
   <xsl:template match="dict[xapp = 'login' and view = 'invite']">
     <div>
       <p>
-        Welcome to XC. Invite new users below
+        Welcome to XC. Invite new users below.
       </p>
       <xsl:apply-templates select="." mode="xc-form"/>
       <xsl:apply-templates select="../invites"/>
