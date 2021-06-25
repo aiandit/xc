@@ -4,6 +4,7 @@ pipeline {
     string(name: 'user',         defaultValue: "developer",   description: 'Username')
     string(name: 'depldir',      defaultValue: "/opt/ai-and-it", description: 'Install directory')
     string(name: 'repo',         defaultValue: "dev-host:git/xc", description: 'XC Repo')
+    string(name: 'branch',       defaultValue: "master", description: 'XC Repo Branch')
   }
 
   agent {
@@ -40,7 +41,7 @@ pipeline {
                    " \"sudo mkdir -p $params.depldir\""
 		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"sudo chown -R $params.user $params.depldir\""
 		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir && rm -rf xc\""
-		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir && git clone $params.repo\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir && git clone -b $params.branch $params.repo xc\""
 	    }
 	}
     }
