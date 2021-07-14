@@ -4,13 +4,14 @@
 
 set -x
 
-HOST=${1:-$(hostname)}
+DOMAIN=${1:-$(hostname)}
+HOST=${HOST:-$(hostname)}
 
-UMW_HOSTNAME=${UMW_HOSTNAME:-$HOST}
-UMW_HOSTNAME_GENERIC=${UMW_HOSTNAME_GENERIC:-xchost}
-UMW_DOMAIN=${UMW_DOMAIN:-local}
+XC_HOSTNAME=${XC_HOSTNAME:-$DOMAIN}
+XC_HOSTNAME_GENERIC=${XC_HOSTNAME_GENERIC:-$HOST}
+XC_TDOMAIN=${XC_TDOMAIN:-local}
 
-export UMW_DOMAIN UMW_HOSTNAME UMW_HOSTNAME_GENERIC
+export XC_TDOMAIN XC_HOSTNAME XC_HOSTNAME_GENERIC
 
 mydir=$(readlink -f $(dirname $BASH_SOURCE)/..)
 
@@ -26,10 +27,10 @@ ln -sfT $mydir/xc_uwsgi.ini /etc/uwsgi-emperor/vassals/xc_uwsgi.ini
 HOSTNAME=$(hostname -f)
 
 sed -e "s§/path/to/your/project§$XC_HOME§" \
-    -e "s/example.local/$UMW_HOSTNAME.$UMW_DOMAIN/" \
-    -e "s/generic.local/$UMW_HOSTNAME_GENERIC.$UMW_DOMAIN/" \
-    -e "s/server_name example/server_name $UMW_HOSTNAME/" \
-    -e "s;http://example;http://$UMW_HOSTNAME;" \
+    -e "s/example.local/$XC_HOSTNAME/" \
+    -e "s/generic.local/$XC_HOSTNAME_GENERIC.$XC_TDOMAIN/" \
+    -e "s/server_name example/server_name $XC_HOSTNAME/" \
+    -e "s;http://example;http://$XC_HOSTNAME;" \
     $mydir/ci/xc_nginx.conf > xc_nginx.conf
 
 ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
@@ -65,7 +66,7 @@ if [[ "$res" != 0 ]]; then
 fi
 
 sed -i -e 's/DEBUG = True/#DEBUG = True/' xc/settings.py
-sed -i -e "s/'example.local'/'$UMW_HOSTNAME', '$UMW_HOSTNAME.$UMW_DOMAIN', '$UMW_HOSTNAME_GENERIC', '$UMW_HOSTNAME_GENERIC.$UMW_DOMAIN'/" xc/settings.py
+sed -i -e "s/'example.local'/'$XC_HOSTNAME', '$XC_HOSTNAME_GENERIC', '$XC_HOSTNAME_GENERIC.$XC_TDOMAIN'/" xc/settings.py
 
 if ! grep do_start_prepare /etc/init.d/uwsgi-emperor; then
     cat >> /etc/init.d/uwsgi-emperor <<EOF
@@ -76,6 +77,10 @@ do_start_prepare() {
 }
 EOF
     fi
+
+if ! [[ -f $XC_HOME/xc/local_settings.py ]]; then
+    :
+fi
 
 systemctl daemon-reload
 systemctl restart nginx
