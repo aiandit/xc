@@ -4,7 +4,7 @@
 
 set -x
 
-HOST=${HOST:-$(hostname)}
+HOST=${host:-$(hostname)}
 
 UMW_HOSTNAME=${UMW_HOSTNAME:-$HOST}
 UMW_HOSTNAME_GENERIC=${UMW_HOSTNAME_GENERIC:-xchost}
