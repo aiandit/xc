@@ -15,6 +15,7 @@ pipeline {
     stage('get-version') {
 	steps {
             sh 'ls -l'
+            sh 'whoami; hostname; env|sort'
 	    sshagent (credentials: ['dev-key']) {
 		sh 'ssh-add -l -E md5'
 	    }
