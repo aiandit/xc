@@ -41,6 +41,10 @@ pipeline {
                    " \"sudo mkdir -p $params.depldir\""
 		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"sudo chown -R $params.user $params.depldir\""
 		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir && rm -rf xc\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"whoami\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"ssh-add -l -E md5\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"ping -c 1 famserv.local\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"ssh joy@famserv.local ls -lA\""
 		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir && git clone $params.repo\""
 	    }
 	}
