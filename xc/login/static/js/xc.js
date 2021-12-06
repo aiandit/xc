@@ -433,9 +433,9 @@ var setFormCallback = function(subtree, handle) {
 
 var setLinkCallback = function(subtree, handle) {
     var forms = subtree.querySelectorAll('a')
-    var ffunc = function(ev) {
+    var ffunc = function(ev, y, formk) {
         console.log('link click event for: ' + ev);
-        if (ev.target.classList.contains('xc-nocatch')) return true
+        if (formk.classList.contains('xc-nocatch')) return true
         var res = handle(ev)
         console.log(name + ': link click event handler returned: ' + res);
         return res
@@ -443,7 +443,7 @@ var setLinkCallback = function(subtree, handle) {
     Object.keys(forms).forEach(function(k) {
         var oldHandler = forms[k].onclick
         forms[k].onclick = function(x, y) {
-            return ffunc(x, y)
+            return ffunc(x, y, forms[k])
         }
     })
 }
