@@ -21,7 +21,7 @@ var unescapeXML = function(x) {
 
 var extractXPath_XPath = function(doc, xpath, toDoc, wrap, done) {
     var rtype = toDoc ? XPathResult.UNORDERED_NODE_ITERATOR_TYPE : XPathResult.STRING_TYPE
-    var r = doc.evaluate(xpath, doc, null, rtype, null)
+    var r = document.evaluate(xpath, doc, null, rtype, null)
     var n = toDoc ? r.iterateNext() : unescapeXML(r.stringValue)
     done(n)
     // want a document as result...
