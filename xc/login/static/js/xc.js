@@ -1096,10 +1096,10 @@ xc.nsResolver = function(prefix) {
 
 xc.xq = function(exp, node) {
     // https://stackoverflow.com/questions/19146056/document-evaluate-allways-returns-null-in-singlenodevalue-on-some-pages-sites
-    var xqres = node.evaluate(exp, node, xc.nsResolver, XPathResult.ANY_TYPE, null);
+    var xqres = document.evaluate(exp, node, xc.nsResolver, XPathResult.ANY_TYPE, null);
     var res
     if (xqres.resultType == XPathResult.UNORDERED_NODE_ITERATOR_TYPE) {
-	xqres = node.evaluate(exp, node, xc.nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	xqres = document.evaluate(exp, node, xc.nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 	res = []
 	for (var i = 0; i < xqres.snapshotLength; ++i) {
 	    var node = xqres.snapshotItem(i)
