@@ -578,6 +578,8 @@ var ppPolls = function(subtree, done) {
 		    } else {
 			handleData(res.responseText)
 		    }
+		} else {
+		    handleData('')
 		}
 	    }
 	    var method = el.dataset.pollMethod || 'get'
