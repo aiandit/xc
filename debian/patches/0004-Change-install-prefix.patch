@@ -1,0 +1,19 @@
+From: Johannes Willkomm <j.willkomm@fionec.de>
+Date: Thu, 7 Jul 2022 13:56:30 +0200
+Subject: Change install prefix
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 5d48225..bcc2ccc 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,5 +1,5 @@
+ 
+-PREFIX = /opt/ai-and-it-test
++PREFIX = /var/lib/ai-and-it
+ 
+ PKGNAME = xc
+ 

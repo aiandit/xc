@@ -1,3 +1,4 @@
 0001-Fix-gitignore.patch
 0002-Use-copy-instead-of-git-clone-for-install.patch
 0003-Install-dirs-individually.patch
+0004-Change-install-prefix.patch
