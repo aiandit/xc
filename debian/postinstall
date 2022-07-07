@@ -1,5 +1,10 @@
 #! /bin/sh
 
-XC_HOME=/opt/ai-and-it/xc
+echo "postinstall XC"
+
+echo "environment"
+env | sort
+
+XC_HOME=/var/lib/ai-and-it/xc
 
 $XC_HOME/ci/config-system.sh
