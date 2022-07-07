@@ -19,12 +19,28 @@ XC_HOME=$mydir
 
 cd $XC_HOME
 
+#
+# configure uwsgi-emperor
+#
+
+#
+# xc_uwsgi.ini: setup and install file
+#
+
 sed -e "s§/path/to/your/project§$XC_HOME§" $mydir/ci/xc_uwsgi.ini > xc_uwsgi.ini
 
 sudo mkdir -p /etc/uwsgi-emperor/vassals
 rm /etc/uwsgi-emperor/vassals/xc_uwsgi.ini
 ln -sfT $mydir/xc_uwsgi.ini /etc/uwsgi-emperor/vassals/xc_uwsgi.ini
 
+
+#
+# configure nginx
+#
+
+#
+# xc_nginx.conf: setup and install file
+#
 
 HOSTNAME=$(hostname -f)
 
@@ -36,31 +52,41 @@ sed -e "s§/path/to/your/project§$XC_HOME§" \
 
 ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
 
-if [[ -f /etc/nginx/sites-enabled/default ]]; then
-    rm /etc/nginx/sites-enabled/default
-fi
-
 cp $mydir/ci/uwsgi_params $mydir/
 
 cd /etc/nginx/sites-enabled && ln -sf ../sites-available/xc_nginx.conf
 
 # ln -sfT $mydir/ci/xc.service /etc/systemd/system/xc.service
 
+
+#
+# /etc/xc/allowed_path.txt: install file
+#
+
 mkdir -p /etc/xc
 echo "$mydir" > /etc/xc/allowed_path.txt
 echo "/usr/share/fonts" >> /etc/xc/allowed_path.txt
 
-chown www-data -R $mydir
-
-#adduser www-data root
-#chmod g+w $mydir
-#chgrp root $mydir
+#
+# /etc/nginx/mime.types: add line to config file
+#
 
 nginx_mt_file=/etc/nginx/mime.types
 nginx_mt=text/xml
 if ! grep -E "$nginx_mt +xsl" $nginx_mt_file; then
     sed -i.bak -e "/text\/xml/ a \ \ \ \ $nginx_mt                            xsl;" $nginx_mt_file
 fi
+
+
+#
+# prepare installation dir
+#
+
+chown www-data -R $mydir
+
+#adduser www-data root
+#chmod g+w $mydir
+#chgrp root $mydir
 
 cd $mydir/xc && ./manage.py migrate
 
