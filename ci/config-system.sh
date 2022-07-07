@@ -7,8 +7,9 @@ set -x
 HOST=${HOST:-$(hostname)}
 
 UMW_HOSTNAME=${UMW_HOSTNAME:-$HOST}
-UMW_HOSTNAME_GENERIC=${UMW_HOSTNAME_GENERIC:-xchost}
 UMW_DOMAIN=${UMW_DOMAIN:-local}
+UMW_HOSTNAME_GENERIC=${UMW_HOSTNAME}.${UMW_DOMAIN}
+UMW_HOSTNAME_FQN=${UMW_HOSTNAME_FQN:-example.com}
 
 export UMW_DOMAIN UMW_HOSTNAME UMW_HOSTNAME_GENERIC
 
@@ -28,15 +29,16 @@ ln -sfT $mydir/xc_uwsgi.ini /etc/uwsgi-emperor/vassals/xc_uwsgi.ini
 HOSTNAME=$(hostname -f)
 
 sed -e "s§/path/to/your/project§$XC_HOME§" \
-    -e "s/example.local/$UMW_HOSTNAME.$UMW_DOMAIN/" \
-    -e "s/generic.local/$UMW_HOSTNAME_GENERIC.$UMW_DOMAIN/" \
-    -e "s/server_name example/server_name $UMW_HOSTNAME/" \
+    -e "s/hostname.local/$UMW_HOSTNAME.$UMW_DOMAIN/" \
+    -e "s/example.com/$UMW_HOSTNAME_FQN/" \
     -e "s;http://example;http://$UMW_HOSTNAME;" \
     $mydir/ci/xc_nginx.conf > xc_nginx.conf
 
 ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
 
-rm /etc/nginx/sites-enabled/default
+if [[ -f /etc/nginx/sites-enabled/default ]]; then
+    rm /etc/nginx/sites-enabled/default
+fi
 
 cp $mydir/ci/uwsgi_params $mydir/
 
