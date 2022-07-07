@@ -1,1 +1,2 @@
 0001-Fix-gitignore.patch
+0002-Use-copy-instead-of-git-clone-for-install.patch
