@@ -10,6 +10,8 @@ install:
 	mkdir -p $(DESTDIR)$(PREFIX)
 	rm -rf $(DESTDIR)$(PREFIX)/$(PKGNAME)
 	git clone $(shell pwd) $(DESTDIR)$(PREFIX)/$(PKGNAME)
+
+configure-system:
 	$(DESTDIR)$(PREFIX)/$(PKGNAME)/ci/config-system.sh
 
 update:
