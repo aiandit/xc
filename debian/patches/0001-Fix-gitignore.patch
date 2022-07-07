@@ -1,0 +1,20 @@
+From: Johannes Willkomm <j.willkomm@fionec.de>
+Date: Thu, 7 Jul 2022 13:02:56 +0200
+Subject: Fix gitignore
+
+---
+ .gitignore | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/.gitignore b/.gitignore
+index 3ae7034..067d45e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -3,5 +3,5 @@ __pycache__
+ db.sqlite3
+ *.bundle
+ test.*
+-*.conf
+-*.ini
++files/*.conf
++files/*.ini
