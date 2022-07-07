@@ -16,6 +16,8 @@ mydir=$(readlink -f $(dirname $BASH_SOURCE)/..)
 
 XC_HOME=$mydir
 
+cd $XC_HOME
+
 sed -e "s§/path/to/your/project§$XC_HOME§" $mydir/ci/xc_uwsgi.ini > xc_uwsgi.ini
 
 sudo mkdir -p /etc/uwsgi-emperor/vassals
