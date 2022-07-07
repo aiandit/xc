@@ -1,0 +1,5 @@
+xc (0.1.1-1) unstable; urgency=medium
+
+  * Initial release of debian package, version 0.1.1
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Thu, 07 Jul 2022 12:24:53 +0200

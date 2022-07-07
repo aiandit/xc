@@ -1,0 +1,5 @@
+#! /bin/sh
+
+XC_HOME=/opt/ai-and-it/xc
+
+$XC_HOME/ci/config-system.sh
