@@ -1,3 +1,11 @@
+xc (0.1.2-1) unstable; urgency=medium
+
+  * version 0.1.2
+  * Use DOCYPE html for standards mode
+  * version file
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Wed, 20 Jul 2022 13:38:55 +0200
+
 xc (0.1.1-1) unstable; urgency=medium
 
   * Initial release of debian package, version 0.1.1
