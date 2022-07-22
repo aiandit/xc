@@ -650,6 +650,9 @@ var ppViews = function(subtree, ev, done) {
 	}
 	if (el.dataset.viewDone != '1') {
 	    getf()
+	} else {
+	    console.log('view is done already')
+	    eldone()
 	}
         return false
     }
