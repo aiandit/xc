@@ -171,9 +171,10 @@ xc.getClassViewFunction = function(dclass, mode, done) {
     }
 }
 
-var updateXView = function(ev) {
-    updateXDataView(ev, function() {
+var updateXView = function(ev, done) {
+    updateXDataView(ev, function(a, b) {
         console.log('XView render by event ' + ev + ' complete')
+	done(a, b)
     })
 }
 
@@ -398,14 +399,17 @@ var runxc = function(x, ev) {
     return false
 }
 
-var renderPostProc = function(ev, request, subreq) {
+var renderPostProc = function(ev, request, subreq, done) {
     console.log('render: ' + request)
     if (subreq == undefined) {
 	xframes.pushhist(request)
     }
     if (!isNonXMLResponse(request)) {
-        processXData(ev, request, function() {
+        processXData(ev, request, function(a, b) {
             console.log('processXData done')
+	    if (done) {
+		done(a, b)
+	    }
         })
     } else {
         console.error('Got non XML response')
@@ -650,6 +654,9 @@ var ppViews = function(subtree, ev, done) {
 	}
 	if (el.dataset.viewDone != '1') {
 	    getf()
+	} else {
+	    console.log('view is done already')
+	    eldone()
 	}
         return false
     }

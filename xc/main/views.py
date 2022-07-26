@@ -1893,10 +1893,9 @@ def ajax_action(request):
 
             else:
                 result = workdir.execute([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
-                if result.returncode == 0:
-                    return redirect(next_)
-                else:
+                if result.returncode != 0:
                     errmsg = 'Run command failed'
+                return redirect(next_)
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
