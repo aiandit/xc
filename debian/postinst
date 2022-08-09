@@ -7,4 +7,6 @@ env | sort
 
 XC_HOME=/var/lib/ai-and-it/xc
 
+python3 -m pip install Django==3.1.1
+
 $XC_HOME/ci/config-system.sh
