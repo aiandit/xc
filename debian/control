@@ -10,7 +10,7 @@ Rules-Requires-Root: no
 Package: xc
 Architecture: all
 Depends: ${misc:Depends}, python3, python3-decorator, python3-brotli,
- nginx, uwsgi-plugin-python3, uwsgi-emperor
+ nginx, uwsgi-plugin-python3, uwsgi-emperor, python3-ilff
 Suggests: zsh
 Description: An XML document management system
  Framework for working with and managing XML documents over the
