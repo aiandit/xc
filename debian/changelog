@@ -1,3 +1,9 @@
+xc (0.1.3-5) fionec-unstable; urgency=medium
+
+  * Package requires pip
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Thu, 11 Aug 2022 16:04:02 +0200
+
 xc (0.1.3-4) fionec-unstable; urgency=medium
 
   * Depends on ILFF
