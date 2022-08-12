@@ -1842,6 +1842,7 @@ class ActionData(XCForm):
     path = forms.CharField(max_length=1024, label='Path')
     next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action')
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
+    nowait = forms.ChoiceField(required=False, label='NoWait', choices=(0,1))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1891,6 +1892,10 @@ def ajax_action(request):
             elif lsl['info']['exec'] == 0:
                 errmsg = 'File is not executable'
 
+            elif cdata['nowait'] == 1:
+                result = workdir.execbg([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
+                print('xc started process:', result)
+                return redirect(next_)
             else:
                 result = workdir.execute([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
                 if result.returncode != 0:

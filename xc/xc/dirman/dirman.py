@@ -392,6 +392,10 @@ class DirManager:
         p = runproc(args, self.getpath('/'))
         return p
 
+    def execbg(self, args, *moreArgs):
+        p = runbg(args, self.getpath('/'))
+        return p
+
     def pipe(self, args):
         p = runproc(args, self.getpath('/'), capture_output=True, encoding='utf8')
         return p
@@ -427,6 +431,12 @@ def getlock(fname, Tmax=4, tries=40):
 def rellock(t):
     t[1].close()
     os.remove(t[0])
+
+def runbg(cmdlist, wdir):
+    t0 = time.time()
+#    print('exec:', ' '.join(cmdlist))
+    p = subprocess.Popen(cmdlist, cwd = wdir, **kw)
+    return p
 
 def runproc(cmdlist, wdir, timelimit=60, **kw):
     if cmdlist[0] == 'git':
