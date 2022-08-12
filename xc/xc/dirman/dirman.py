@@ -435,7 +435,7 @@ def rellock(t):
 def runbg(cmdlist, wdir):
     t0 = time.time()
 #    print('exec:', ' '.join(cmdlist))
-    p = subprocess.Popen(cmdlist, cwd = wdir, **kw)
+    p = subprocess.Popen(cmdlist, cwd = wdir)
     return p
 
 def runproc(cmdlist, wdir, timelimit=60, **kw):
