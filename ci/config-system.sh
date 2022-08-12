@@ -52,6 +52,10 @@ sed -e "s§/path/to/your/project§$XC_HOME§" \
 
 ln -sfT $mydir/xc_nginx.conf /etc/nginx/sites-available/xc_nginx.conf
 
+if [[ -f /etc/nginx/sites-enabled/default ]]; then
+    rm /etc/nginx/sites-enabled/default
+fi
+
 cp $mydir/ci/uwsgi_params $mydir/
 
 cd /etc/nginx/sites-enabled && ln -sf ../sites-available/xc_nginx.conf

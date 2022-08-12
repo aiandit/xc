@@ -1842,6 +1842,7 @@ class ActionData(XCForm):
     path = forms.CharField(max_length=1024, label='Path')
     next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action')
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
+    nowait = forms.ChoiceField(required=False, label='NoWait', choices=[(0,0),(1,1)])
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1880,6 +1881,9 @@ def ajax_action(request):
             cdata = rdata.cleaned_data
             path = cdata['path']
             next_ = cdata['next_']
+
+            print('action', cdata['path'], cdata['next_'], cdata['nowait'])
+
             if len(next_) == 0:
                 next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
 
@@ -1891,10 +1895,15 @@ def ajax_action(request):
             elif lsl['info']['exec'] == 0:
                 errmsg = 'File is not executable'
 
+            elif int(cdata['nowait']) == 1:
+                result = workdir.execbg([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
+                print('xc started process async:', result)
+                return redirect(next_)
             else:
                 result = workdir.execute([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
                 if result.returncode != 0:
                     errmsg = 'Run command failed'
+                print('xc started process sync:', result)
                 return redirect(next_)
 
     if len(errmsg):
