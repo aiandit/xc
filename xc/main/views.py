@@ -1842,7 +1842,7 @@ class ActionData(XCForm):
     path = forms.CharField(max_length=1024, label='Path')
     next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action')
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
-    nowait = forms.ChoiceField(required=False, label='NoWait', choices=(0,1))
+    nowait = forms.ChoiceField(required=False, label='NoWait', choices=[(0,0),(1,1)])
 
     def clean(self):
         cleaned_data = super().clean()
