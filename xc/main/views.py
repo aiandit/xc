@@ -1881,6 +1881,9 @@ def ajax_action(request):
             cdata = rdata.cleaned_data
             path = cdata['path']
             next_ = cdata['next_']
+
+            print('action', cdata['path'], cdata['next_'], cdata['nowait'])
+
             if len(next_) == 0:
                 next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
 
