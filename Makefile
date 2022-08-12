@@ -1,9 +1,11 @@
 
-PREFIX = /opt/ai-and-it-test
+PREFIX = /var/lib/ai-and-it
 
 PKGNAME = xc
 
 all:
+
+install-all: configure-system
 
 install:
 	@echo PWD=$(shell pwd)
@@ -11,7 +13,7 @@ install:
 	rm -rf $(DESTDIR)$(PREFIX)/$(PKGNAME)
 	git clone $(shell pwd) $(DESTDIR)$(PREFIX)/$(PKGNAME)
 
-configure-system:
+configure-system: install
 	$(DESTDIR)$(PREFIX)/$(PKGNAME)/ci/config-system.sh
 
 update:
