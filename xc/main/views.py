@@ -1897,12 +1897,13 @@ def ajax_action(request):
 
             elif cdata['nowait'] == 1:
                 result = workdir.execbg([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
-                print('xc started process:', result)
+                print('xc started process async:', result)
                 return redirect(next_)
             else:
                 result = workdir.execute([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
                 if result.returncode != 0:
                     errmsg = 'Run command failed'
+                print('xc started process sync:', result)
                 return redirect(next_)
 
     if len(errmsg):
