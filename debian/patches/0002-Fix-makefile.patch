@@ -1,20 +1,20 @@
 From: Johannes Willkomm <j.willkomm@fionec.de>
-Date: Thu, 7 Jul 2022 13:52:09 +0200
-Subject: Install dirs individually
+Date: Fri, 12 Aug 2022 16:18:24 +0200
+Subject: Fix makefile
 
 ---
- Makefile | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ Makefile | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index d5c1f9f..5d48225 100644
+index 5a94905..78a3b2a 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -9,7 +9,12 @@ install:
+@@ -11,7 +11,12 @@ install:
  	@echo PWD=$(shell pwd)
  	mkdir -p $(DESTDIR)$(PREFIX)
  	rm -rf $(DESTDIR)$(PREFIX)/$(PKGNAME)
--	cp -ra $(shell pwd) $(DESTDIR)$(PREFIX)/$(PKGNAME)
+-	git clone $(shell pwd) $(DESTDIR)$(PREFIX)/$(PKGNAME)
 +	mkdir -p $(DESTDIR)$(PREFIX)/$(PKGNAME)
 +	cp -ra $(shell pwd)/ci $(DESTDIR)$(PREFIX)/$(PKGNAME)
 +	cp -ra $(shell pwd)/data $(DESTDIR)$(PREFIX)/$(PKGNAME)
@@ -22,12 +22,5 @@ index d5c1f9f..5d48225 100644
 +	cp -ra $(shell pwd)/fontcache $(DESTDIR)$(PREFIX)/$(PKGNAME)
 +	cp -ra $(shell pwd)/xc $(DESTDIR)$(PREFIX)/$(PKGNAME)
  
- configure-system:
+ configure-system: install
  	$(DESTDIR)$(PREFIX)/$(PKGNAME)/ci/config-system.sh
-@@ -17,5 +22,6 @@ configure-system:
- update:
- 
- uninstall:
-+	rm -rf $(DESTDIR)$(PREFIX)/$(PKGNAME)
- 
- check:
