@@ -1,8 +1,8 @@
-xc (0.1.4-10) fionec-unstable; urgency=medium
+xc (0.1.4-11) fionec-unstable; urgency=medium
 
   * Postinst script
 
- -- Johannes Willkomm <j.willkomm@fionec.de>  Thu, 18 Aug 2022 16:37:23 +0200
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Thu, 18 Aug 2022 17:00:19 +0200
 
 xc (0.1.4-4) fionec-unstable; urgency=medium
 
