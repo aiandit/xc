@@ -1,3 +1,4 @@
 0001-Fix-gitignore.patch
 0002-Fix-makefile.patch
 0003-Bugfix-do-not-try-to-convert-to-int.patch
+0004-Another-small-bug-regarding-nowait.patch
