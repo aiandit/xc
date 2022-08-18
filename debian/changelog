@@ -1,3 +1,9 @@
+xc (0.1.4-2) fionec-unstable; urgency=medium
+
+  * Bugfix: do not try to convert '' to int
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Thu, 18 Aug 2022 12:11:23 +0200
+
 xc (0.1.4-1) fionec-unstable; urgency=medium
 
   * Remove nginx default site on install
