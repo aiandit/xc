@@ -1,3 +1,9 @@
+xc (0.1.4-3) fionec-unstable; urgency=medium
+
+  * Another small bug regarding nowait
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Thu, 18 Aug 2022 14:09:42 +0200
+
 xc (0.1.4-2) fionec-unstable; urgency=medium
 
   * Bugfix: do not try to convert '' to int
