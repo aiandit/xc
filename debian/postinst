@@ -8,7 +8,12 @@ python3 -m pip install Django==3.1.1
 
 $XC_HOME/ci/config-system.sh
 
-if dpkg -l xc-usense; then
+dpkgout=$(dpkg -l xc-usense)
+dpkgres=$?
+
+xcUStatus=$(echo -n "$dpkgout" | tail -n1 | cut -f 1 -d ' ')
+
+if test $dpkgres = 0 && test $xcUStatus = ii; then
     echo "XC app xc-usense is installed, reconfigure"
     dpkg-reconfigure xc-usense
 fi
