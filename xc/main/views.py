@@ -1842,7 +1842,8 @@ class ActionData(XCForm):
     path = forms.CharField(max_length=1024, label='Path')
     next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action')
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
-    nowait = forms.ChoiceField(required=False, label='NoWait', choices=[(0,0),(1,1)])
+    nowait = forms.ChoiceField(required=False, label='NoWait', choices=[('0',0),('1',1)])
+    delay = forms.IntegerField(required=False, label='Delay')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1881,11 +1882,19 @@ def ajax_action(request):
             cdata = rdata.cleaned_data
             path = cdata['path']
             next_ = cdata['next_']
+            delay = cdata['delay']
 
-            print('action', cdata['path'], cdata['next_'], cdata['nowait'])
+            print('action:', cdata['path'], cdata['next_'], cdata['nowait'], cdata['delay'])
 
             if len(next_) == 0:
                 next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
+
+            def replyRedirect():
+                if delay > 0:
+                    return render(request, 'common/delayed-redirect.html',
+                                  {'next': next_, 'delay': delay, 'errmsg': errmsg})
+                else:
+                    return redirect(next_)
 
             lsl = workdir.stat(path)
 #            print('lsl', lsl)
@@ -1898,13 +1907,13 @@ def ajax_action(request):
             elif int(cdata['nowait']) == 1:
                 result = workdir.execbg([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
                 print('xc started process async:', result)
-                return redirect(next_)
+                return replyRedirect()
             else:
                 result = workdir.execute([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
                 if result.returncode != 0:
                     errmsg = 'Run command failed'
                 print('xc started process sync:', result)
-                return redirect(next_)
+                return replyRedirect()
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
