@@ -17,7 +17,7 @@
     <script id="script-xerp" src="{% static "js/xc.js" %}" type="text/javascript"></script>
     {% block meta %}{% endblock %}
   </head>
-  <body onload="runxc(this, event)">
+  <body onload="{% block init3 %}runxc(this, event){% endblock %}">
     <div id="sidebar">
       {% block sidebar %}
       <ul>

@@ -4,10 +4,15 @@
 <meta http-equiv="refresh" content="{{ delay }};url={{ next }}"/>
 {% endblock %}
 
+{% block init3 %}
+{% endblock %}
+
 {% block title %}Redirect{% endblock %}
 
 {% block SIDEBAR %}{% endblock %}
 
 {% block content %}
-Redirecting to <a href="{{ next }}">{{ next }}</a> in <b>{{ delay }}</b> seconds...
+<div>
+  Redirecting to <a href="{{ next }}">{{ next }}</a> in <b>{{ delay }}</b> seconds...
+</div>
 {% endblock %}
