@@ -1851,6 +1851,8 @@ class ActionData(XCForm):
         return cleaned_data
 
 def action(request):
+    if request.method == "POST":
+        return ajax_action(request)
     context = {'xapp': 'main', 'view': 'action', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
