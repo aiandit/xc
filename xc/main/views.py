@@ -1910,7 +1910,7 @@ def ajax_action(request):
             elif lsl['info']['exec'] == 0:
                 errmsg = 'File is not executable'
 
-            elif int(cdata['nowait']) == 1:
+            elif cdata['nowait'] == '1':
                 result = workdir.execbg([workdir.realpath(path)],  {'user': request.user.username, 'comment': cdata['comment']})
                 print('xc started process async:', result)
                 return replyRedirect()
