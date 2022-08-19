@@ -434,7 +434,7 @@ var setFormCallback = function(subtree, handle) {
         if (forms[k].elements.csrfmiddlewaretoken == undefined) {
             forms[k].innerHTML += "<input type='hidden' name='csrfmiddlewaretoken' value=''/>"
         }
-    }
+    })
 }
 
 var setLinkCallback = function(subtree, handle) {
