@@ -1896,7 +1896,7 @@ def ajax_action(request):
                     next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
 
             def replyRedirect():
-                if delay > 0:
+                if delay is not None and delay > 0:
                     return render(request, 'common/delayed-redirect.html',
                                   {'next': next_, 'delay': delay, 'errmsg': errmsg})
                 else:
