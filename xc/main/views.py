@@ -1844,6 +1844,7 @@ class ActionData(XCForm):
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
     nowait = forms.ChoiceField(required=False, label='NoWait', choices=[('0',0),('1',1)])
     delay = forms.IntegerField(required=False, label='Delay')
+    reply = forms.ChoiceField(required=False, label='NoWait', choices=[('xml','xml'),('html','html')])
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1887,7 +1888,10 @@ def ajax_action(request):
             print('action:', cdata['path'], cdata['next_'], cdata['nowait'], cdata['delay'])
 
             if len(next_) == 0:
-                next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
+                if reply == 'html':
+                    next_ = reverse('main:action') + '?path=%s' % (path,)
+                else:
+                    next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
 
             def replyRedirect():
                 if delay > 0:
