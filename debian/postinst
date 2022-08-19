@@ -11,6 +11,9 @@ $XC_HOME/ci/config-system.sh
 dpkgout=$(dpkg -l xc-usense)
 dpkgres=$?
 
+echo "dpkg -l xc-usense"
+echo $dpkgout
+
 xcUStatus=$(echo -n "$dpkgout" | tail -n1 | cut -f 1 -d ' ')
 
 if test $dpkgres = 0 && test $xcUStatus = ii; then
