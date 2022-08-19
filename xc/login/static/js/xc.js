@@ -429,7 +429,7 @@ var setFormCallback = function(subtree, handle) {
     Object.keys(forms).forEach(function(k) {
 //        console.log(name + ': set form submit event for: ' + forms[k].id);
         forms[k].onsubmit = function(x, y) {
-	    ffunc(x, y, forms[k])
+	    return ffunc(x, y, forms[k])
 	}
         if (forms[k].elements.csrfmiddlewaretoken == undefined) {
             forms[k].innerHTML += "<input type='hidden' name='csrfmiddlewaretoken' value=''/>"
