@@ -1,3 +1,12 @@
+xc (0.1.5-1) fionec-unstable; urgency=medium
+
+  * Also implement xc-nocatch for forms
+  * Option for delayed redirect
+  * Add param reply for action view
+  * When POST, return ajax_action
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Fri, 19 Aug 2022 10:47:20 +0200
+
 xc (0.1.4-11) fionec-unstable; urgency=medium
 
   * Postinst script
