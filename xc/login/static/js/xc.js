@@ -418,17 +418,19 @@ var renderPostProc = function(ev, request, subreq, done) {
 
 var setFormCallback = function(subtree, handle) {
     var forms = subtree.querySelectorAll('form')
-    var ffunc = function(ev) {
+    var ffunc = function(ev, x, formk) {
         console.log(name + ': form submit  event for: ' + ev);
+        if (formk.classList.contains('xc-nocatch')) return true
 	xc.clearIntervals();
         var res = handle(ev)
         console.log(name + ': form submit  event returned: ' + res);
         return res
     }
-//    console.log(name + ': ' + forms.length + ' forms found');
-    for (var k=0; k < forms.length; ++k) {
+    Object.keys(forms).forEach(function(k) {
 //        console.log(name + ': set form submit event for: ' + forms[k].id);
-        forms[k].onsubmit = ffunc;
+        forms[k].onsubmit = function(x, y) {
+	    ffunc(x, y, forms[k])
+	}
         if (forms[k].elements.csrfmiddlewaretoken == undefined) {
             forms[k].innerHTML += "<input type='hidden' name='csrfmiddlewaretoken' value=''/>"
         }
