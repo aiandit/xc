@@ -1,0 +1,21 @@
+From: Johannes Willkomm <j.willkomm@fionec.de>
+Date: Fri, 19 Aug 2022 11:02:55 +0200
+Subject: Bugfix: delay may be none
+
+---
+ xc/main/views.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xc/main/views.py b/xc/main/views.py
+index 4f2fee6..11ae759 100644
+--- a/xc/main/views.py
++++ b/xc/main/views.py
+@@ -1896,7 +1896,7 @@ def ajax_action(request):
+                     next_ = reverse('main:ajax_action') + '?path=%s' % (path,)
+ 
+             def replyRedirect():
+-                if delay > 0:
++                if delay is not None and delay > 0:
+                     return render(request, 'common/delayed-redirect.html',
+                                   {'next': next_, 'delay': delay, 'errmsg': errmsg})
+                 else:
