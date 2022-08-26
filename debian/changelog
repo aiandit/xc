@@ -1,3 +1,12 @@
+xc (0.1.7-1) fionec-unstable; urgency=medium
+
+  * Print email settings on start
+  * views plain_status and plain_ps use same response
+  * Polls can accept XML, also document fragments (forests)
+  * Bugfixes
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Fri, 26 Aug 2022 13:08:40 +0200
+
 xc (0.1.6-1) fionec-unstable; urgency=medium
 
   * Bugfixes
