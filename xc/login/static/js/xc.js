@@ -534,17 +534,23 @@ var ppPolls = function(subtree, done) {
     var tms = subtree.querySelectorAll('.xc-sl-poll')
 
     var doPoll = function(el, eldone) {
+	const tlaunch = (new Date()).getTime()
 	var getf = function(ciid, count, tlast) {
 	    el = document.getElementById(ciid)
 	    if (!xc.isChainedInterval(ciid)) {
 //		console.log('Chained interval ' + ciid + ' was cancelled')
 		return
 	    }
+	    if (!el) {
+//		console.log('poll target element ' + ciid + ' disappeared')
+		return
+	    }
 	    var url = el.dataset.pollUrl
 	    var t0 = (new Date()).getTime()
+	    var tres = t0
 //	    console.log('getf: ' + (t0 - globtO) + ': '  + url)
 	    var ppFun = eval(el.dataset.postprocess)
-	    var handleData = function(text) {
+	    var handleTextData = function(text, done) {
 		var res
 		try {
 		    res = ppFun(text, el)
@@ -563,9 +569,29 @@ var ppPolls = function(subtree, done) {
 		} else {
 		    el.innerHTML = res
 		}
+		done(res)
+	    }
+	    var handleXMLData = function(text, done) {
+		var ppFilter = el.dataset.pollFilter
+		var ppContainer = el.dataset.pollContainer || el.nodeName
+		var localframes = [ {toDoc: false, container: ppContainer, target: ciid, filters: [ ppFilter ]} ]
+		var mylframes = xframes.mkXframes(localframes, xc.xslpath)
+		mylframes.render(text, done, function(x, predone) {
+		    updateTreeFinal(x, undefined, predone)
+		})
+	    }
+	    var finalStep = function() {
 		updateTreeFinal(el, undefined, function(utres) {
-		    var nexttime = el.dataset.pollInterval - (new Date()).getTime() + t0 - 1
-		    setTimeout(getf, nexttime, ciid, count+1, t0)
+		    var tnow = (new Date()).getTime()
+		    var nexttime = Number(el.dataset.pollInterval) + t0
+		    var waitInter = nexttime - tnow - 1
+		    console.log('Poll ' + ciid + ' at ' + xc.tclock(t0) + ' result ' +
+				xc.tdsecs(tres-t0) + ' complete ' + xc.tdsecs(tnow - t0) +
+				', again in ' + xc.tdsecs(waitInter))
+		    if (waitInter < 200) {
+			waitInter = 200
+		    }
+		    setTimeout(getf, waitInter, ciid, count+1, t0)
 		    if (count == 0) {
 			eldone(utres)
 		    }
@@ -573,19 +599,30 @@ var ppPolls = function(subtree, done) {
 	    }
 	    var handleResult = function(st, res) {
 		if (st == 0) {
-		    if (res.responseXML != undefined) {
-			extractXPath(res.responseXML, '/*/xcontent-cdata', false, '', function(x) {
-			    if (x.textContent.length > 0) {
-				handleData(x.textContent)
-			    } else {
-				handleData(res.responseText)
-			    }
-			})
+		    tres = (new Date()).getTime()
+		    if (el.dataset.postprocess) {
+			if (res.responseXML != undefined) {
+			    extractXPath(res.responseXML, '/*/xcontent-cdata', false, '', function(x) {
+				if (x.textContent.length > 0) {
+				    handleTextData(x.textContent, finalStep)
+				} else {
+				    handleTextData(res.responseText, finalStep)
+				}
+			    })
+			} else {
+			    handleTextData(res.responseText, finalStep)
+			}
 		    } else {
-			handleData(res.responseText)
+			if (res.responseXML != undefined) {
+			    handleXMLData(res.responseXML, finalStep)
+			} else {
+			    console.error('no XML data for filtered poll')
+			    handleTextData('', finalStep)
+			}
 		    }
 		} else {
-		    handleData('')
+		    console.error('poll with invalid status', st)
+		    handleTextData('', finalStep)
 		}
 	    }
 	    var method = el.dataset.pollMethod || 'get'
@@ -599,19 +636,25 @@ var ppPolls = function(subtree, done) {
 	    }
 	}
 	if (el.attributes.id == undefined) {
-	    el.setAttribute('id', 'pid' + String((new Date()).getTime()))
+	    var pid = el.dataset.id || 'pid'
+	    el.setAttribute('id', pid + String((new Date()).getTime()))
 	}
 	var pollid = el.attributes.id.value
 	if (el.dataset.pollRunning == undefined) {
-	    el.dataset.pollRunning = true
+	    el.dataset.pollRunning = tlaunch
 	    xc.setChainedInterval(pollid)
 	    getf(pollid, 0, (new Date()).getTime())
+	} else {
+	    eldone()
 	}
     }
 
+    if (tms.length) {
+//	console.log('polls to do:', tms)
+    }
     xlp.amap(tms, doPoll, function(res) {
 	if (tms.length > 0) {
-	    console.log('All polls done')
+//	    console.log('All polls done: ' + tms.length)
 	}
 	done(res)
     })
