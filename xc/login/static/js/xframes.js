@@ -51,6 +51,21 @@ xframes.mkXframes = function(frames, xsltbase) {
             xlps[framen] = frame.xlp
         }
     }
+    var getHTML = function(result) {
+	var html = ''
+        if (result.documentElement != null) {
+	    html = result.documentElement.outerHTML
+        } else if (result.firstElementChild) {
+	    var el = result.firstElementChild
+	    while (el) {
+		html += el.outerHTML
+		el = el.nextElementSibling
+	    }
+	} else {
+	    html = result.textContent
+	}
+	return html
+    }
     var render = function(indoc, done, preprocess) {
         var stepsDone = Array(frames.length);
         var stepsRes = Array(frames.length);
@@ -60,7 +75,12 @@ xframes.mkXframes = function(frames, xsltbase) {
         [...Array(frames.length).keys()].forEach(function(framen) {
             var frame = frames[framen]
             var x = xlps[framen]
-            x.transform(indoc, function(result) {
+	    var toDoc = true
+	    if (frame.toDoc != undefined) {
+		toDoc = frame.toDoc
+	    }
+	    var container = frame.container || 'div'
+	    x.transform(indoc, toDoc, function(result) {
 
 		var lastStep = function(res) {
                     console.log('XLP chain ' + framen + ' done')
@@ -82,28 +102,23 @@ xframes.mkXframes = function(frames, xsltbase) {
 			lastStep(resn)
                     } else if (result.nodeType == result.DOCUMENT_NODE
                                || result.nodeType == result.DOCUMENT_FRAGMENT_NODE) {
-                        if (result.documentElement != null) {
-			    var resHTML = result.documentElement.outerHTML
-			    var invNode = document.getElementById('invisible')
+			var resHTML = getHTML(result)
+			var invNode = document.getElementById('invisible')
+			console.log('Invisible children ' + invNode.childElementCount)
+			var newNode = document.createElement(container)
+			var nid = '' + (new Date()).getTime()
+			newNode.setAttribute('id', nid)
+			console.log('New Inv node ' + newNode.attributes.id.value + ' ' + nid)
+			invNode.appendChild(newNode)
+			newNode.innerHTML = resHTML
+			preprocess(newNode, function(res) {
+			    resHTML = newNode.innerHTML
+			    resn.innerHTML = resHTML
+			    var oldNode = invNode.removeChild(newNode)
+			    console.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)
 			    console.log('Invisible children ' + invNode.childElementCount)
-			    var newNode = document.createElement('div')
-			    var nid = '' + (new Date()).getTime()
-			    newNode.setAttribute('id', nid)
-			    console.log('New Inv node ' + newNode.attributes.id.value + ' ' + nid)
-			    invNode.appendChild(newNode)
-			    newNode.innerHTML = resHTML
-			    preprocess(newNode, function(res) {
-				resHTML = newNode.innerHTML
-				resn.innerHTML = resHTML
-				var oldNode = invNode.removeChild(newNode)
-				console.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)
-				console.log('Invisible children ' + invNode.childElementCount)
-				lastStep(resn)
-			    })
-                        } else {
-                            resn.innerHTML = result.textContent
 			    lastStep(resn)
-                        }
+			})
                     } else {
                         resn.innerHTML = 'Transformation error: ' + result.nodeType + ': ' + result.URL 
 			lastStep(resn)
