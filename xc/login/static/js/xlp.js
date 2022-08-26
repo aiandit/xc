@@ -186,11 +186,10 @@ xlp.reqXML = function(src, obj) {
 		var json
 		try {
 		    json = JSON.parse(request.responseText)
-                    cur_callback(json, request)
 		} catch (error) {
-                    xlp.error('No valid JSON response from server: ' + obj.URL)
-                    cur_callback(0, request, 'no JSON')
+		    xlp.error('No valid JSON response from server: ' + obj.URL)
 		}
+		cur_callback(json, request)
 	    } else if (obj.returnData) {
                 cur_callback(request.responseText, request)
 	    } else {

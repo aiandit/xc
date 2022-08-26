@@ -1844,7 +1844,7 @@ class ActionData(XCForm):
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
     nowait = forms.ChoiceField(required=False, label='NoWait', choices=[('0',0),('1',1)])
     delay = forms.IntegerField(required=False, label='Delay')
-    reply = forms.ChoiceField(required=False, label='NoWait', choices=[('xml','xml'),('html','html')])
+    reply = forms.ChoiceField(required=False, label='Reply type', choices=[('xml','xml'),('html','html')])
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1936,6 +1936,26 @@ def ajax_action(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+minCompressLen = 100
+def sendPlainRespose(request, fdata, reply=None):
+    if not reply:
+        reply = 'plain'
+    mtype = 'text/%s' % (reply,)
+    renc = None
+    if len(fdata) > minCompressLen:
+        aenc = request.headers['Accept-Encoding']
+        if 'br' in aenc:
+            fdata = brotli.compress(fdata.encode('utf8'), quality=1)
+            renc = 'br'
+        elif 'gzip' in aenc:
+            fdata = gzip.compress(fdata.encode('utf8'), compresslevel=1)
+            renc = 'gzip'
+    resp = HttpResponse(fdata, content_type=mtype)
+    if renc:
+        resp['Content-Encoding'] = renc
+    return resp
+
+
 def plain_status(request):
 
     lsl = ''
@@ -1958,6 +1978,7 @@ def plain_status(request):
     else:
         cdata = rdata.cleaned_data
         path = cdata['path']
+        reply = cdata['reply']
 
         lsl = workdir.stat(path)
         if len(lsl['info']) == 0:
@@ -1969,15 +1990,7 @@ def plain_status(request):
         else:
             result = workdir.pipe([workdir.realpath(path)])
             if result.returncode == 0:
-                aenc = request.headers['Accept-Encoding']
-                mtype = 'text/plain'
-                fdata = result.stdout
-                if 'br' in aenc:
-                    fdata = brotli.compress(fdata.encode('utf8'), quality=1)
-                resp = HttpResponse(fdata, content_type=mtype)
-                if 'br' in aenc:
-                    resp['Content-Encoding'] = 'br'
-                return resp
+                return sendPlainRespose(request, result.stdout, reply)
             else:
                 errmsg = 'Run command failed'
 
@@ -2070,11 +2083,7 @@ def ajax_ps(request, plain=False):
     data = {
         'errs': errors
     }
-    xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
-    dx = dictxml(xcontext)
-    context = { 'context_xml': dx, 'forms': [ rdata], 'xcontent': xcontent, 'xcontent_cdata': xmlesc(content) }
-    return render(request, 'common/xc-msg.xml' if not plain else 'common/xc-atom.xml',
-                  context, content_type="application/xml")
+    return sendPlainRespose(request, content)
 
 def plain_ps(request):
     return ajax_ps(request, plain=True)
