@@ -160,6 +160,14 @@ if os.path.exists(userPyPath):
 
 try:
     from email_settings import *
+    vs = vars()
+    d = {f: vs[f] for f in vs.keys() if 'EMAIL' in f}
+    import email_settings
+    print('Email settings imported from %s into %s' %(email_settings.__file__, __name__))
+    if not hasattr(sys.modules[__name__], 'DEBUG'):
+        d['EMAIL_HOST_PASSWORD'] = '*secret*'
+    for n in d:
+        print(f'{n}={d[n]}')
 except ImportError as e:
     print(e)
     pass
