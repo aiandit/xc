@@ -685,6 +685,20 @@ var ppActions = function(subtree, ev) {
     })
 }
 
+xc.tclock = function(tstamp) {
+    var d = new Date(tstamp)
+    var ts = d.toLocaleTimeString() + '.' + d.getMilliseconds()
+    return ts
+}
+xc.tdiff = function(tstamp) {
+    var d = new Date(tstamp)
+    var ts = d.toISOString().substr(11)
+    return ts
+}
+xc.tdsecs = function(tstamp) {
+    return tstamp / 1000
+}
+
 var ppTimestamps = function(subtree) {
     var tms = subtree.querySelectorAll('span.unixtm')
     tms.forEach(function(el) {
