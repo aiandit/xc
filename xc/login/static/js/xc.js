@@ -585,9 +585,9 @@ var ppPolls = function(subtree, done) {
 		    var tnow = (new Date()).getTime()
 		    var nexttime = Number(el.dataset.pollInterval) + t0
 		    var waitInter = nexttime - tnow - 1
-		    console.log('Poll ' + ciid + ' at ' + xc.tclock(t0) + ' result ' +
-				xc.tdsecs(tres-t0) + ' complete ' + xc.tdsecs(tnow - t0) +
-				', again in ' + xc.tdsecs(waitInter))
+		    // console.log('Poll ' + ciid + ' at ' + xc.tclock(t0) + ' result ' +
+		    // 		xc.tdsecs(tres-t0) + ' complete ' + xc.tdsecs(tnow - t0) +
+		    // 		', again in ' + xc.tdsecs(waitInter))
 		    if (waitInter < 200) {
 			waitInter = 200
 		    }
