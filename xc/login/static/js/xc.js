@@ -1,4 +1,4 @@
-var xc = xc || {}
+var xc = {}
 
 xc.docs = {}
 
@@ -81,6 +81,12 @@ xc.xslpath = '/main/getf/'
 
 xc.isXC = function(dclass) {
     return !(dclass == 'svg' || dclass == 'html')
+}
+
+xc.id = function id() {
+    var t = (new Date()).getTime()
+    var r = Math.random().toString(16).slice(2).substr(0, 4)
+    return t + '_' + r
 }
 
 xc.mkViewTransform = function(transformName, done) {
@@ -637,7 +643,7 @@ var ppPolls = function(subtree, done) {
 	}
 	if (el.attributes.id == undefined) {
 	    var pid = el.dataset.id || 'pid'
-	    el.setAttribute('id', pid + String((new Date()).getTime()))
+	    el.setAttribute('id', pid + xc.id())
 	}
 	var pollid = el.attributes.id.value
 	if (el.dataset.pollRunning == undefined) {
@@ -668,7 +674,7 @@ var ppViews = function(subtree, ev, done) {
 	    var viewTarget = el.dataset.viewTarget
 	    if (viewTarget == undefined) {
 		if (el.attributes.id == undefined) {
-		    el.setAttribute('id', ''+(new Date()).getTime())
+		    el.setAttribute('id', xc.id())
 		}
 		viewTarget = el.attributes.id.value
 	    }
