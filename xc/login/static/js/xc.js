@@ -648,8 +648,11 @@ var ppPolls = function(subtree, done) {
 	var pollid = el.attributes.id.value
 	if (el.dataset.pollRunning == undefined) {
 	    el.dataset.pollRunning = tlaunch
-	    xc.setChainedInterval(pollid)
-	    getf(pollid, 0, (new Date()).getTime())
+	    var delay = el.dataset.pollDelay || 0
+	    setTimeout(function() {
+		xc.setChainedInterval(pollid)
+		getf(pollid, 0, (new Date()).getTime())
+	    }, delay)
 	} else {
 	    eldone()
 	}
