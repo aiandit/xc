@@ -1,4 +1,4 @@
-var xc = xc || {}
+var xc = {}
 
 xc.docs = {}
 
@@ -81,6 +81,12 @@ xc.xslpath = '/main/getf/'
 
 xc.isXC = function(dclass) {
     return !(dclass == 'svg' || dclass == 'html')
+}
+
+xc.id = function id() {
+    var t = (new Date()).getTime()
+    var r = Math.random().toString(16).slice(2).substr(0, 4)
+    return t + '_' + r
 }
 
 xc.mkViewTransform = function(transformName, done) {
@@ -585,9 +591,9 @@ var ppPolls = function(subtree, done) {
 		    var tnow = (new Date()).getTime()
 		    var nexttime = Number(el.dataset.pollInterval) + t0
 		    var waitInter = nexttime - tnow - 1
-		    console.log('Poll ' + ciid + ' at ' + xc.tclock(t0) + ' result ' +
-				xc.tdsecs(tres-t0) + ' complete ' + xc.tdsecs(tnow - t0) +
-				', again in ' + xc.tdsecs(waitInter))
+		    // console.log('Poll ' + ciid + ' at ' + xc.tclock(t0) + ' result ' +
+		    // 		xc.tdsecs(tres-t0) + ' complete ' + xc.tdsecs(tnow - t0) +
+		    // 		', again in ' + xc.tdsecs(waitInter))
 		    if (waitInter < 200) {
 			waitInter = 200
 		    }
@@ -637,13 +643,16 @@ var ppPolls = function(subtree, done) {
 	}
 	if (el.attributes.id == undefined) {
 	    var pid = el.dataset.id || 'pid'
-	    el.setAttribute('id', pid + String((new Date()).getTime()))
+	    el.setAttribute('id', pid + xc.id())
 	}
 	var pollid = el.attributes.id.value
 	if (el.dataset.pollRunning == undefined) {
 	    el.dataset.pollRunning = tlaunch
-	    xc.setChainedInterval(pollid)
-	    getf(pollid, 0, (new Date()).getTime())
+	    var delay = el.dataset.pollDelay || 0
+	    setTimeout(function() {
+		xc.setChainedInterval(pollid)
+		getf(pollid, 0, (new Date()).getTime())
+	    }, delay)
 	} else {
 	    eldone()
 	}
@@ -668,7 +677,7 @@ var ppViews = function(subtree, ev, done) {
 	    var viewTarget = el.dataset.viewTarget
 	    if (viewTarget == undefined) {
 		if (el.attributes.id == undefined) {
-		    el.setAttribute('id', ''+(new Date()).getTime())
+		    el.setAttribute('id', xc.id())
 		}
 		viewTarget = el.attributes.id.value
 	    }
