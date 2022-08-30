@@ -1,3 +1,10 @@
+xc (0.1.8-1) fionec-unstable; urgency=medium
+
+  * Fix: unique auto-IDs for polls and views
+  * Support for initial delay on polls
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Tue, 30 Aug 2022 12:13:20 +0200
+
 xc (0.1.7-1) fionec-unstable; urgency=medium
 
   * Print email settings on start
