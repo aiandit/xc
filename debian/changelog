@@ -1,3 +1,10 @@
+xc (0.1.8-2) fionec-unstable; urgency=medium
+
+  * For sortCol, find preceding td or th as index
+  * Proper set of pkg scripts
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Wed, 31 Aug 2022 15:07:04 +0200
+
 xc (0.1.8-1) fionec-unstable; urgency=medium
 
   * Fix: unique auto-IDs for polls and views
