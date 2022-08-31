@@ -1192,7 +1192,7 @@ xc.xq = function(exp, node) {
 
 xc.sortCol = function(ev) {
     var t = event.target
-    var ind = xc.xq('count(preceding-sibling::x:td)', t)
+    var ind = xc.xq('count(preceding-sibling::x:td|preceding-sibling::x:th)', t)
     var table = xc.xq('ancestor::x:table', t)[0]
     var rows = xc.xq('x:tbody/x:tr', table)
     var vals = rows.map(function(row) {
