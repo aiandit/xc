@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 
 from django.http import HttpResponse
 
@@ -131,6 +131,41 @@ def ajax_path(request):
     context = { 'context_xml': dx, 'forms': [ rdata] }
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
+def plain_path(request):
+
+    lsl = {}
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = PathData(reqDict)
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+
+        lsl = workdir.lsl(path)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = {
+        'lsl': lsl,
+        'errs': errors
+    }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx }
+    return render(request, 'common/xc-atom.xml', context, content_type="application/xml")
+
 class NewdocData(XCForm):
     title = 'New Document'
     name = 'newdoc'
@@ -146,10 +181,12 @@ class NewdocData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def newdoc(request):
     context = {'xapp': 'main', 'view': 'newdoc', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_newdoc(request):
 
     lsl = ''
@@ -206,19 +243,22 @@ class DeleteData(XCForm):
     required_css_class = 'required'
 
     path = forms.CharField(max_length=1024, label='Path',
-                           widget=forms.TextInput(attrs={'size': 120}))
+                           widget=forms.TextInput(attrs={'size': 90}))
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
 
-    next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action', widget=forms.HiddenInput)
+    next_ = forms.CharField(required=False, max_length=1024,
+                            label='Follow-up action', widget=forms.HiddenInput)
 
     def clean(self):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def delete(request):
     context = {'xapp': 'main', 'view': 'delete', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_delete(request):
 
     lsl = ''
@@ -246,7 +286,7 @@ def ajax_delete(request):
         else:
             next_ = cdata['next_']
             if len(next_) == 0:
-                next_ = redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
+                next_ = reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path)
             return redirect(next_)
 
     if len(errmsg):
@@ -278,10 +318,12 @@ class NewdirData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def newdir(request):
     context = {'xapp': 'main', 'view': 'newdir', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_newdir(request):
 
     lsl = ''
@@ -295,6 +337,7 @@ def ajax_newdir(request):
         reqDict = request.POST
 
     rdata = NewdirData(reqDict)
+    lsl = 0
 
     if request.method == "GET":
         res = rdata.is_valid()
@@ -311,6 +354,7 @@ def ajax_newdir(request):
         res = rdata.is_valid()
         if not res:
             errmsg = 'The form data is invalid'
+            path = ''
         else:
             cdata = rdata.cleaned_data
             path = cdata['path']
@@ -328,6 +372,7 @@ def ajax_newdir(request):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
 
     data = {
+        'status': lsl,
         'errs': errors
     }
     data = { **data, **get_lsl(path) }
@@ -382,20 +427,30 @@ def ajax_view(request):
 
         lsl = workdir.stat(path)
 
-        if lsl['info']['type'] == '-':
-            (isXML, stat, fdata, fstr) = getxmlifposs(path)
-            if isXML:
-                xcontent = fstr
-            else:
-                content = fstr
+        try:
+            if lsl['info']['type'] == '-':
+                (isXML, stat, fdata, fstr) = getxmlifposs(path)
+                if isXML:
+                    xcontent = fstr
+                else:
+                    content = fstr
+        except BaseException as e:
+            errmsg = 'File "%s" does not exist' % (path)
+            print(e)
+            return HttpResponse(status=404)
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
 
-    if lsl['info']['type'] == 'd':
-        actions = diractions
-    else:
-        actions = fileactions
+    actions = []
+    try:
+        if lsl['info']['type'] == 'd':
+            actions = diractions
+        else:
+            actions = fileactions
+    except BaseException as e:
+        print(e)
+        pass
 
     data = {
         'lsl': lsl,
@@ -425,10 +480,12 @@ class EditData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def edit(request):
     context = {'xapp': 'main', 'view': 'edit', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_edit(request):
 
     lsl = ''
@@ -448,7 +505,7 @@ def ajax_edit(request):
 
     rdata = EditData(reqDict)
 
-    resultview = 'dirmanform'
+    resultview = 'edit'
     next_ = None
 
     res = rdata.is_valid()
@@ -510,10 +567,12 @@ def ajax_edit(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+@login_required
 def append(request):
     context = {'xapp': 'main', 'view': 'append', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_append(request):
 
     lsl = ''
@@ -556,7 +615,7 @@ def ajax_append(request):
                 fdata = data
                 next_ = cdata['next_']
                 if len(next_) == 0:
-                    next_ = reverse('main:ajax_edit') + '?path=%s' % (path,)
+                    next_ = reverse('main:plain_path') + '?path=%s' % (path,)
                 return redirect(next_)
 
             else:
@@ -613,10 +672,12 @@ class FileuploadData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def fileupload(request):
     context = {'xapp': 'main', 'view': 'fileupload', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_fileupload(request):
 
     lsl = ''
@@ -676,9 +737,11 @@ def ajax_fileupload(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+@login_required
 def replace(request):
     return fileupload(request)
 
+@login_required
 def ajax_replace(request):
     return ajax_fileupload(request)
 
@@ -698,10 +761,12 @@ class MoveData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def move(request):
     context = {'xapp': 'main', 'view': 'move', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_move(request):
 
     lsl = ''
@@ -803,10 +868,12 @@ class CloneData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def clone(request):
     context = {'xapp': 'main', 'view': 'clone', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_clone(request):
 
     errmsg = ''
@@ -880,10 +947,12 @@ class TransformData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def transform(request):
     context = {'xapp': 'main', 'view': 'transform', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_transform(request):
 
     lsl = ''
@@ -1054,6 +1123,7 @@ def runwhich(request):
     context = {'xapp': 'main', 'view': 'runwhich', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_runwhich(request):
 
     lsl = ''
@@ -1219,8 +1289,8 @@ def getxmlifposs(path):
     fstr = ''
     try:
        Npdata = 128
-       if Npdata > lsl['info']['statdict']['st_size']:
-           Npdata = lsl['info']['statdict']['st_size']
+       if Npdata > lsl['info']['stat']['st_size']:
+           Npdata = lsl['info']['stat']['st_size']
        fpeek = fdata[0:Npdata]
        #                print('peek %d data B: "%s"' % (Npdata, fpeek))
        canDecodePeek = False
@@ -1344,10 +1414,10 @@ def getrange(request, path, mode, start, end, transpose=False):
             start = -1
         elif mode == 'tail':
             (fdata, nmax) = workdir.tail(path, start)
-            start = nmax - start
+            start = max(0, nmax - start)
             end = nmax
         elif mode == 'range':
-            fdata = workdir.range(path, start, end)
+            (fdata, start, end) = workdir.range(path, start, end)
             t1 = time.time()
             print('Load %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
         aenc = request.headers['Accept-Encoding']
@@ -1360,10 +1430,12 @@ def getrange(request, path, mode, start, end, transpose=False):
             fdata = brotli.compress(fdata.encode('utf8'), quality=1)
             t1 = time.time()
 #            print('Compress %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
-        resp = HttpResponse(fdata, content_type=mtype[0])
+        resp = HttpResponse(fdata, content_type=mtype[0] if mtype[0] is not None else 'text/plain')
         #        resp['Content-Encoding'] = 'gzip'
         if 'br' in aenc:
             resp['Content-Encoding'] = 'br'
+        resp['X-Range-Start'] = start
+        resp['X-Range-End'] = end
         dlfname = os.path.basename(path)
         filename, file_extension = os.path.splitext(dlfname)
         dlfname = '%s-range%d-%d%s' % (filename, start, end, file_extension)
@@ -1593,6 +1665,64 @@ def nlines(request):
         'errs': errors
     }
     xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata] }
+    return render(request, 'common/xc-atom.xml', context, content_type="application/xml")
+
+
+class EraseLineData(PathData):
+    name = 'headtail'
+    path = forms.CharField(required=False, max_length=1024, label='Mode')
+    n = forms.IntegerField(label='Number', required=False)
+    repl = forms.CharField(required=False, max_length=1024, label='Replacement')
+    comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
+
+def eraseline(request):
+
+    lsl = {}
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = EraseLineData(reqDict)
+    n = 0
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+        n = cdata['n']
+        repl = cdata['repl']
+
+        stat = workdir.eraseline(path, n, repl,
+                                 {'user': request.user.username, 'comment': cdata['comment']})
+        if stat != 0:
+            errmsg = 'could not erase the line nr %d' % (n)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    actions = fileactions
+    try:
+        if lsl['info']['type'] == 'd':
+            actions = diractions
+    except:
+        pass
+
+    data = {
+        'n': n,
+        'stat': stat,
+        'errs': errors
+    }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET),
+                'data': data, 'user': userdict(request.user)}
     dx = dictxml(xcontext)
     context = { 'context_xml': dx, 'forms': [ rdata] }
     return render(request, 'common/xc-atom.xml', context, content_type="application/xml")
@@ -1847,10 +1977,12 @@ class ActionData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def action(request):
     context = {'xapp': 'main', 'view': 'action', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_action(request):
 
     lsl = ''
@@ -1913,6 +2045,7 @@ def ajax_action(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+@login_required
 def plain_status(request):
 
     lsl = ''
@@ -1992,10 +2125,12 @@ class PsData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def ps(request):
     context = {'xapp': 'main', 'view': 'ps', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
+@login_required
 def ajax_ps(request, plain=False):
 
     lsl = ''
@@ -2053,6 +2188,7 @@ def ajax_ps(request, plain=False):
     return render(request, 'common/xc-msg.xml' if not plain else 'common/xc-atom.xml',
                   context, content_type="application/xml")
 
+@login_required
 def plain_ps(request):
     return ajax_ps(request, plain=True)
 
@@ -2071,12 +2207,14 @@ class CounterData(PathData):
         cleaned_data = super().clean()
         return cleaned_data
 
+@login_required
 def counter(request):
     context = {'xapp': 'main', 'view': 'counter', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 cre = re.compile(r'>[0-9]+<')
 
+@login_required
 def ajax_counter(request, plain=False):
 
     lsl = ''
@@ -2163,16 +2301,19 @@ def ajax_counter(request, plain=False):
     return render(request, 'common/xc-msg.xml' if not plain else 'common/xc-atom.xml',
                   context, content_type="application/xml")
 
+@login_required
 def plain_counter(request):
     return ajax_counter(request, plain=True)
 
 
+@login_required
 def cid(request):
     context = {'xapp': 'main', 'view': 'cid', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/wframe.html', context)
 
 cre = re.compile(r'>[0-9]+<')
 
+@login_required
 def ajax_cid(request, plain=False):
 
     lsl = ''
@@ -2237,6 +2378,7 @@ def ajax_cid(request, plain=False):
     return render(request, 'common/xcerp-msg.xml' if not plain else 'common/xcerp-atom.xml',
                   context, content_type="application/xml")
 
+@login_required
 def plain_cid(request):
     return ajax_cid(request, plain=True)
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")

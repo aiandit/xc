@@ -32,10 +32,6 @@ body, fieldset, div.messages, div#content {
     padding: 0.5em;
 }
 
-fieldset table {
-    display: inline;
-}
-
 code.list {
     white-space: pre;
     max-width: 50rem;
@@ -52,7 +48,7 @@ code {
     padding: 0.5em;
     min-width: 25em;
 }
-code.pre {
+.pre {
     white-space: pre;
 }
 code.mono {
@@ -132,6 +128,12 @@ div.messages {
     border-radius: 0.3em;
 }
 
+div.doc-float-messages {
+    background: #ffffff00;
+    border-radius: 0.3em;
+    max-height: 15em;
+}
+
 div.errors {
     background: aliceblue;
 }
@@ -141,18 +143,18 @@ div#sidebar {
 }
 
 fieldset {
-    border: 0.3em outset grey;
-    border-radius: 0.3em;
+    border: 0.2em outset grey;
+    border-radius: 0.2em;
 }
 
-input {
+input, textarea {
     border: 0.1em solid grey;
     border-radius: 0.2em;
     background-clip: content-box;
 }
 
 .errorlist {
-    color: #f060a0;
+    color: #f06050;
     background-color: aliceblue;
     padding: 0.5em;
 }}
@@ -162,22 +164,23 @@ input.required {
 }
 
 input.error {
-    background-color: #f060a0;
+    background-color: #f06050;
     background-clip: content-box;
 }
 
 input[type='button'], input[type='submit'], input[type='reset'] {
     background-color: aliceblue;
     padding: 0.5em;
-    margin: 0.1em;
+    margin: 0.2em 0em;
     background-clip: border-box;
 }
 
-input[type='text'], input[type='text'].required, input[type='password'], input[type='password'].required, input[type='email'], input[type='email'].required {
+input[type='text'], input[type='text'].required, input[type='password'], input[type='password'].required, input[type='email'], input[type='email'].required, textarea {
     background-color: aliceblue;
     padding: 0.5em;
     margin: 0.1em;
     background-clip: content-box;
+    font-size: 12pt;
 }
 
 input#id_code {
@@ -189,7 +192,6 @@ table.collection {
 }
 
 table.collection td {
-    border-bottom: 1px solid gray;
     padding: 0.25em;
 }
 
@@ -198,7 +200,11 @@ table.collection td {
     border-radius: 0.3em;
     padding: 0.2em;
     background: lightblue;
-    float: right;
+}
+
+.doc-lsl-info {
+    border: 0.1em outset grey;
+    border-radius: 0.3em;
 }
 
 .fright {
@@ -250,6 +256,15 @@ td.ntd {
     background: aliceblue;
 }
 
+.xc-alt-pad {
+    display: none;
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    border-radius: 0.3em;
+    padding: 0.2em;
+}
+
 .xc-pad.home.logged-in {
     visibility: hidden;
 }
@@ -288,10 +303,8 @@ table, tr, th, td {
     font-size: inherit;
 }
 #document {
-    color: wheat;
 }
 #content {
-    color: wheat;
 }
 #document-actions {
     max-width: 30rem;
@@ -301,13 +314,11 @@ table, tr, th, td {
 .docinfo {
     font-size: 0.9rem;
     font-stretch: condensed;
-    float: left;
     clear: both;
 }
 .docform {
     font-size: 0.9rem;
     font-stretch: condensed;
-    float: left;
     clear: both;
 }
 
@@ -321,9 +332,12 @@ table, tr, th, td {
 }
 
 .oc-body {
-    background: aliceblue;
     visibility: hidden;
     display: none;
+    border: 0.1rem outset grey;
+    border-radius: 0.3em;
+    padding: 0.3rem;
+    margin: 0.2rem;
 }
 
 .oc-open.oc-body {
@@ -343,7 +357,8 @@ table, tr, th, td {
     padding: 0.3rem;
     margin-left: 0rem;
     display: grid;
-    grid-template-columns: 0.08fr auto;
+    grid-template-columns: auto;
+    grid-row-gap: 0.5em;
 }
 .msg.own {
     border: 0.1rem outset lightblue;
@@ -399,6 +414,69 @@ table, tr, th, td {
     content: "\2193";
 }
 
+form.inline, div.inline, img.inline  {
+    display: inline-block;
+}
+
+.flat-list {
+    padding: 0.2em 0em;
+    margin: 0.2em 0em;
+}
+
+.flat-list ul {
+    display: inline-block;
+}
+
+.flat-list > li {
+    display: inline-block;
+    padding: 0em 1em;
+}
+
 .display-none {
     display: none;
+}
+.float-right {
+    float: right;
+}
+.float-left {
+    float: left;
+}
+.clear-left {
+    clear: left;
+}
+.clear-right {
+    clear: right;
+}
+.clear-both {
+    clear: both;
+}
+.small {
+    font-size: 80%;
+}
+
+.error {
+    color: black;
+    background-color: #ff6050;
+}
+
+.warning {
+    color: black;
+    background-color: #ff8060;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.invites {
+    border-collapse: collapse;
+}
+.invites td {
+    border: 0.2em solid lightblue;
+    padding: 0.2em;
+}
+
+.uuid {
+    white-space: pre;
+    font-family: mono;
 }

@@ -31,7 +31,7 @@ ALLOWED_HOSTS = [
     'localhost'
 ]
 
-LOGIN_URL = 'login/'
+LOGIN_URL = 'login:login'
 
 # Application definition
 
@@ -135,11 +135,11 @@ MAIN_FRAME = 'xframe.html'
 
 DEFAULT_FROM_EMAIL = 'info@example.com'
 
-EMAIL_HOST = 'example.com'
-EMAIL_HOST_USER = 'user'
-EMAIL_HOST_PASSWORD = 'secret'
+EMAIL_HOST = 'smtp.example.com'
+EMAIL_HOST_USER = 'emailuser'
+EMAIL_HOST_PASSWORD = 'emailsecret'
 EMAIL_USE_TLS = True
-#EMAIL_USE_SSL = True
+EMAIL_USE_SSL = False
 
 xc_appdir = '/var/lib/xc/xc-application'
 try:
@@ -158,8 +158,30 @@ userPyPath = XC_WORKDIR + '/files/py'
 if os.path.exists(userPyPath):
     sys.path.append(userPyPath)
 
+sysPyPath = '/etc/xc/py'
+if os.path.exists(sysPyPath):
+    sys.path.append(sysPyPath)
+
 try:
-    from email_settings import *
+    from local_settings import *
 except ImportError as e:
     print(e)
     pass
+
+try:
+    from system_settings import *
+except ImportError as e:
+    print(e)
+    pass
+
+try:
+    XC_TRACE = DEBUG
+except:
+    XC_TRACE = False
+
+
+XC_INVITE = True
+XC_REGISTER = False
+
+siteDomain = 'www.example.com'
+siteName = 'XC'

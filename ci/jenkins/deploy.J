@@ -16,6 +16,7 @@ pipeline {
     stage('get-version') {
 	steps {
             sh 'ls -l'
+            sh 'whoami; hostname; env|sort'
 	    sshagent (credentials: ['dev-key']) {
 		sh 'ssh-add -l -E md5'
 	    }
@@ -50,7 +51,7 @@ pipeline {
         steps {
 	    sshagent (credentials: ['dev-key']) {
 		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir/xc && sudo ./ci/prepare-system.sh\""
-		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir/xc && sudo ./ci/config-system.sh\""
+		sh "ssh -o StrictHostKeyChecking=no ${params.user}@${params.host} \"cd $params.depldir/xc && sudo ./ci/config-system.sh ${params.host}\""
             }
 	}
     }

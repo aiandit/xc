@@ -1,6 +1,11 @@
+# render
+import django.shortcuts
+
 from django import forms
 
 from django.core.mail import send_mail
+
+from django.urls import reverse
 
 from register.models import UserIP
 
@@ -74,6 +79,8 @@ def getAllCGI(cgiobj):
     return cgidict
 
 def get_ip(ip):
+    if type(ip) != type(""):
+        ip = ip.META['REMOTE_ADDR']
     try:
         userip = UserIP.objects.get(ip=ip)
     except:
@@ -83,7 +90,7 @@ def get_ip(ip):
 
 class XCForm(forms.Form):
     method = 'POST'
-    title = 'Xc'
+    title = 'XC'
 
     def to_xml(self, field):
         f = self[field]
@@ -143,16 +150,16 @@ class XCForm(forms.Form):
 #        print('asxml', s)
         return s
 
-siteDomain = 'example.com'
-siteName = 'Xc'
+siteDomain = xc.settings.siteDomain
+siteName = xc.settings.siteName
 
-def sendActivationEmail(to, actcode):
+def sendActivationEmail(to, actcode, text = "someone, hopefully you, signed you up to {site}."):
     from email.mime.text import MIMEText
 
     msgTxt = """
 Hello,
 
-someone, hopefully you, signed you up to Xc.
+%s
 
 Please complete the registration by clicking on the link below
 
@@ -167,13 +174,14 @@ into the following form
 %s
 
 Cheers,
-Your team @ Xc
+Your team @ %s
 """
 
-    actURLPlain = "https://%s/register/activate/" % (siteDomain,)
+    actURLPlain = "https://%s%s" % (siteDomain,reverse('register:activate'))
     actURL      = "%s?code=%s" % (actURLPlain, actcode)
 
-    msgTxt = msgTxt % (actURL, actcode, actURLPlain)
+    text = text.format(site=siteName,)
+    msgTxt = msgTxt % (text, actURL, actcode, actURLPlain, siteName)
 
     msg = MIMEText(msgTxt)
 
@@ -202,9 +210,12 @@ def userdict(user):
         return dict( (key, getattr(user, key)) for key in ['username',
                                                            'is_authenticated', 'is_superuser'] )
     else:
-        return dict( (key, getattr(user, key)) for key in ['username', 'email', 'first_name',
-                                                           'last_name', 'last_login', 'date_joined',
-                                                           'is_authenticated', 'is_superuser'] )
+        res = dict( (key, getattr(user, key)) for key in ['username', 'email', 'first_name',
+                                                          'last_name', 'is_authenticated', 'is_superuser'] )
+        res['last_login'] = user.last_login.timestamp()
+        res['date_joined'] = user.date_joined.timestamp()
+        return res
+
 workdir_base = xc.settings.XC_WORKDIR
 
 if xc.settings.XC_USE_GIT:
@@ -246,3 +257,12 @@ def get_lsl(path):
     else:
         actions = fileactions
     return {'lsl': lsl, 'dir-actions': actions}
+
+def render(req, templ, conte, *more, **keys):
+    conte.update({'XC_TRACE': xc.settings.XC_TRACE,
+                  'XC_INVITE': xc.settings.XC_INVITE,
+                  'XC_REGISTER': xc.settings.XC_REGISTER,
+                  'siteDomain': xc.settings.siteDomain,
+                  'siteName': xc.settings.siteName,
+                  })
+    return django.shortcuts.render(req, templ, conte, *more, **keys)

@@ -7,7 +7,43 @@
 
   <xsl:output method="xml" encoding="utf-8"/>
 
-  <xsl:include href="view-utils.xsl"/>
+  <xsl:template name="pluralize">
+    <xsl:param name="word"/>
+    <xsl:param name="n"/>
+    <xsl:param name="pend" select="'s'"/>
+    <xsl:value-of select="$word"/>
+    <xsl:if test="$n != 1">
+      <xsl:value-of select="$pend"/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template name="nitems">
+    <xsl:param name="word"/>
+    <xsl:param name="n"/>
+    <xsl:param name="pend" select="'s'"/>
+    <xsl:value-of select="$n"/>
+    <xsl:text> </xsl:text>
+    <xsl:call-template name="pluralize">
+      <xsl:with-param name="word" select="$word"/>
+      <xsl:with-param name="n" select="$n"/>
+      <xsl:with-param name="pend" select="$pend"/>
+    </xsl:call-template>
+  </xsl:template>
+
+  <xsl:template name="sitems">
+    <xsl:param name="word"/>
+    <xsl:param name="n"/>
+    <xsl:param name="pend" select="'s'"/>
+    <xsl:call-template name="pluralize">
+      <xsl:with-param name="word" select="$word"/>
+      <xsl:with-param name="n" select="2"/>
+      <xsl:with-param name="pend" select="$pend"/>
+    </xsl:call-template>
+    <xsl:text> </xsl:text>
+    <xsl:text>(</xsl:text>
+    <xsl:value-of select="$n"/>
+    <xsl:text>)</xsl:text>
+  </xsl:template>
 
   <xsl:template match="x:item">
     <table style="display: inline-block;" class="actions">

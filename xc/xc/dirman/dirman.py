@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import os, sys, time, shutil, subprocess, csv, io
+import os, sys, time, shutil, subprocess, csv, io, pathlib
 
 from xc import settings
 
@@ -63,7 +63,7 @@ def getfinfo(path, relpath, follow=True):
 #            'perms': filepermletters(stat),
             'exec': isexec(stat),
 #            'stattxt': stat.__repr__(),
-            'statdict': statdict
+            'stat': statdict
 #            'stat': stat
     }
     return (data, stat)
@@ -189,13 +189,10 @@ class DirManager:
         info = getlsl(self.getpath(path), self.normalizepath(path))
         return info
 
-    def mkdir(self, name):
-        try:
-            print('mkdir', name)
-            os.makedirs(self.getpath(name))
+    def mkdir(self, name, *more):
+        stat = pathlib.Path(self.getpath(name)).mkdir(parents=True, exist_ok=True)
+        if stat is None:
             stat = 0
-        except:
-            stat = -1
         return stat
 
     def rmdir(self, name, rec=False):
@@ -320,12 +317,32 @@ class DirManager:
     def tail(self, name, n):
         # print('retrieve last %d lines of %s' % (n, name))
         # don't try to read the last line...
-        lines = self.getlines(name, self.nlines(name) - n-1,  n)
-        return (lines, self.nlines(name))
+        ltime = os.path.getctime(self.getpath(name))
+        ltd = time.time() - ltime
+        print('File %s is %g s old' %(self.getpath(name), ltd))
+        nlines = self.nlines(name)
+        offs = nlines - n
+        nmax = self.nlines(name)
+        if ltd < 2:
+            offs -= 1
+            nmax -= 1
+        lines = self.getlines(name, offs, n)
+        return (lines, nmax)
 
     def range(self, name, m, n):
+        nl = self.nlines(name)
+        m = max(0, min(m, nl))
+        n = max(0, min(n, nl))
         lines = self.getlines(name, m, n-m)
-        return lines
+        return (lines, m, n)
+
+    def eraseline(self, name, n, repl):
+        stat = 0
+        #        print('retrieve first %d lines of %s' % (n, name))
+        lns = self.getlines(name)
+        lnsnew = lns[0:n] + [repl] + lns[n+1:]
+        self.replacedoc(name, lnsnew.join('\n'))
+        return stat
 
     def renamedoc(self, name1, name2):
         stat = 0
@@ -366,7 +383,6 @@ class DirManager:
         return sout
 
     def findsort(self, name, pattern, path=True, sys=True, case=True):
-        print('findsort')
         args = self.findcmd(name, pattern, path, sys, case)
         p2 = subprocess.Popen(('sort',), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT, encoding='utf8')
@@ -482,13 +498,13 @@ def gitcommit(wdir, diffnumstat, srcfun, comment):
     ], wdir)
 
 @decorator
-def gitlog(func, wdir=settings.XC_WORKDIR, *args, **kw):
-#    print(args)
-#    print(kw)
-    result = func(*args, **kw)
-    gitadd(wdir)
-    sout = gitdiff(wdir)
-    gitcommit(wdir, sout, func.__name__, args[len(args)-1])
+def gitlog(func, dirman, path, *args, **kw):
+    fpath = dirman.realpath(path)
+    cdir = os.path.dirname(fpath)
+    result = func(dirman, path, *args, **kw)
+    gitadd(cdir)
+    sout = gitdiff(cdir)
+    gitcommit(cdir, sout, func.__name__, args[len(args)-1])
     return result
 
 class GitDirManager(DirManager):
@@ -496,43 +512,43 @@ class GitDirManager(DirManager):
     def __init__(self, base='.'):
         super().__init__(base=base)
 
-    @gitlog()
+    @gitlog
     def chroot(self, path, comment):
         return super().chroot(path)
 
-    @gitlog()
+    @gitlog
     def chdir(self, path, comment):
         return super().chdir(path)
 
-    @gitlog()
+    @gitlog
     def deletedoc(self, path, comment):
         return super().deletedoc(path)
 
-    @gitlog()
+    @gitlog
     def mkdir(self, path, comment):
         return super().mkdir(path)
 
-    @gitlog()
+    @gitlog
     def rmdir(self, path, comment):
         return super().rmdir(path)
 
-    @gitlog()
+    @gitlog
     def newdoc(self, path, comment):
         return super().newdoc(path)
 
-    @gitlog()
+    @gitlog
     def replacedoc(self, path, cont, comment):
         return super().replacedoc(path, cont)
 
-    @gitlog()
+    @gitlog
     def appenddoc(self, path, cont, comment):
         return super().appenddoc(path, cont)
 
-    @gitlog()
+    @gitlog
     def renamedoc(self, path, newpath, comment):
         return super().renamedoc(path, newpath)
 
-    @gitlog()
+    @gitlog
     def execute(self, args, comment):
         return super().execute(args)
 
