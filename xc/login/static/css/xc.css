@@ -402,3 +402,20 @@ table, tr, th, td {
 .display-none {
     display: none;
 }
+
+span.led {
+    display: inline-block;
+    border: 0.15em outset lightgreen;
+    width: 2em;
+    height: 2em;
+    border-radius: 1.15em;
+    margin: 0.5em 0.5em 1em 0.5em;
+}
+
+span.led.green {
+    background: green;
+}
+
+span.led.off {
+    background: #103010;
+}
