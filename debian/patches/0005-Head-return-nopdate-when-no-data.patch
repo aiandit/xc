@@ -1,0 +1,20 @@
+From: Johannes Willkomm <j.willkomm@fionec.de>
+Date: Thu, 1 Sep 2022 14:18:57 +0200
+Subject: Head return nopdate when no data
+
+---
+ xc/login/static/js/xc.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/xc/login/static/js/xc.js b/xc/login/static/js/xc.js
+index 9e6e3da..235fc98 100644
+--- a/xc/login/static/js/xc.js
++++ b/xc/login/static/js/xc.js
+@@ -509,6 +509,7 @@ xc.psHTML = function(data) {
+ }
+ xc.psHead = function(n) {
+     return function(data) {
++	if (!data) return {noupdate: true}
+ 	var lines = data.split('\n')
+ 	return lines.slice(0, n).join('\n')
+     }

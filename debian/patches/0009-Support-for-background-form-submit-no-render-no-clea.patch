@@ -1,0 +1,59 @@
+From: Johannes Willkomm <j.willkomm@fionec.de>
+Date: Thu, 1 Sep 2022 14:23:28 +0200
+Subject: Support for background form submit: no render, no clearIntevals()
+
+---
+ xc/login/static/js/xc.js      |  5 +++--
+ xc/login/static/js/xframes.js | 16 ++++++++++------
+ 2 files changed, 13 insertions(+), 8 deletions(-)
+
+diff --git a/xc/login/static/js/xc.js b/xc/login/static/js/xc.js
+index fb58376..dd8061e 100644
+--- a/xc/login/static/js/xc.js
++++ b/xc/login/static/js/xc.js
+@@ -353,7 +353,9 @@ var dohandleFormSubmit = function(form, ev) {
+         var res = evres(ev)
+         return false
+     } else {
+-	xc.clearIntervals();
++	if (!(form.dataset && form.dataset.formSubmitBackground)) {
++	    xc.clearIntervals()
++	}
+         myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
+             // console.log('A form POST submit is handled completely')
+             renderPostProc(ev, request)
+@@ -427,7 +429,6 @@ var setFormCallback = function(subtree, handle) {
+     var ffunc = function(ev, x, formk) {
+         console.log(name + ': form submit  event for: ' + ev);
+         if (formk.classList.contains('xc-nocatch')) return true
+-	xc.clearIntervals();
+         var res = handle(ev)
+         console.log(name + ': form submit  event returned: ' + res);
+         return res
+diff --git a/xc/login/static/js/xframes.js b/xc/login/static/js/xframes.js
+index 0f9700c..d8b294e 100644
+--- a/xc/login/static/js/xframes.js
++++ b/xc/login/static/js/xframes.js
+@@ -133,12 +133,16 @@ xframes.mkXframes = function(frames, xsltbase) {
+         if ((typeof indoc == "undefined") || (indoc === null)) {
+             console.error('Xframes: no XML response from ' + src + '(' + url + ')')
+         } else {
+-            render(indoc, function(res) {
+-                done(request, res)
+-            }, function(res, done) {
+-		console.log('No preprocess')
+-		done(res)
+-            })
++	    if (src.dataset && src.dataset.formSubmitBackground) {
++		console.log('Form submitted in BG: ' + status)
++	    } else {
++		render(indoc, function(res) {
++                    done(request, res)
++		}, function(res, done) {
++		    console.log('No preprocess')
++		    done(res)
++		})
++	    }
+         }
+     }
+     var renderLink = function(src, url, done, cached) {

@@ -1,0 +1,66 @@
+From: Johannes Willkomm <j.willkomm@fionec.de>
+Date: Thu, 1 Sep 2022 14:22:16 +0200
+Subject: XLP support timeouts
+
+---
+ xc/login/static/js/xlp.js | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
+
+diff --git a/xc/login/static/js/xlp.js b/xc/login/static/js/xlp.js
+index a6e4658..123cdbf 100644
+--- a/xc/login/static/js/xlp.js
++++ b/xc/login/static/js/xlp.js
+@@ -64,13 +64,14 @@ xlp.parseXMLC = function(xmlStr) {
+     }
+ }
+ 
+-xlp.sendRequest = function(URL, method, callback, headers, data) {
++xlp.sendRequest = function(URL, method, callback, headers, data, timeout) {
+     if (typeof URL == 'object') {
+         return xlp.sendRequest(URL.URL || URL.src || URL.href,
+                                URL.method || undefined,
+                                URL.callback || undefined,
+                                URL.headers || undefined,
+-                               URL.data || undefined)
++                               URL.data || undefined,
++                               URL.timeout || undefined)
+     }
+ 
+     if (!method) method = 'GET'
+@@ -86,6 +87,10 @@ xlp.sendRequest = function(URL, method, callback, headers, data) {
+         request = new XMLHttpRequest()
+     }
+ 
++    if (timeout) {
++	request.timeout = timeout
++    }
++
+     request.onreadystatechange = function () {
+         if (request.readyState == 4) {
+             if (request.status == 200) {
+@@ -115,21 +120,21 @@ xlp.sendRequest = function(URL, method, callback, headers, data) {
+     request.send(data)
+ }
+ 
+-xlp.sendGet = function(URL, callback) {
++xlp.sendGet = function(URL, callback, timeout) {
+     if (typeof URL == 'object') {
+         URL.method = 'GET'
+         xlp.sendRequest(URL)
+     } else {
+-        xlp.sendRequest(URL, 'GET', callback)
++        xlp.sendRequest({URL: URL, method: 'GET', callback: callback, timeout: timeout})
+     }
+ }
+ 
+-xlp.sendPost = function(URL, data, headers, callback) {
++xlp.sendPost = function(URL, data, headers, callback, timeout) {
+     if (typeof URL == 'object') {
+         URL.method = 'POST'
+         xlp.sendRequest(URL)
+     } else {
+-        xlp.sendRequest(URL, 'POST', callback, headers, data)
++        xlp.sendRequest({URL: URL, method: 'POST', data: data, callback: callback, headers: headers, timeout: timeout})
+     }
+ }
+ 
