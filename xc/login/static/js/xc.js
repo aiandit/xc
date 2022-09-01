@@ -521,6 +521,23 @@ var psSingleField = function(data) {
 var psText = function(data) {
     return '<span>' + data + '</span>'
 }
+xc.psNonEmpty = function(a, b) {
+    return function(data) {
+	if (data) { return a } else { return b }
+    }
+}
+xc.psNonEmptySetClass = function(a, b) {
+    return function(data, el) {
+	if (data) {
+	    el.classList.add(a)
+	    el.classList.remove(b)
+	} else {
+	    el.classList.add(b)
+	    el.classList.remove(a)
+	}
+	return {noupdate: true}
+    }
+}
 
 xc.getCSRFToken = function() {
     var csrf = ''
