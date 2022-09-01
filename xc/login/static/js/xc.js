@@ -509,6 +509,7 @@ xc.psHTML = function(data) {
 }
 xc.psHead = function(n) {
     return function(data) {
+	if (!data) return {noupdate: true}
 	var lines = data.split('\n')
 	return lines.slice(0, n).join('\n')
     }
