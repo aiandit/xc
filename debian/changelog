@@ -1,3 +1,11 @@
+xc (0.1.8-3) fionec-unstable; urgency=medium
+
+  * Polls support request timeouts
+  * Two new JS data handlers (LED on/off)
+  * Support for background form submit
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Thu, 01 Sep 2022 14:23:40 +0200
+
 xc (0.1.8-2) fionec-unstable; urgency=medium
 
   * For sortCol, find preceding td or th as index
