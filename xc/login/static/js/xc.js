@@ -650,13 +650,14 @@ var ppPolls = function(subtree, done) {
 		}
 	    }
 	    var method = el.dataset.pollMethod || 'get'
+	    var timeout = el.dataset.pollTimeout
 	    if (method.toLowerCase() == 'post') {
 		var parts = url.split('?')
 		var rdata = parts[1] + '&csrfmiddlewaretoken=' + xc.getCSRFToken()
 		var headers = {'Content-type': 'application/x-www-form-urlencoded'}
-		xlp.sendPost(parts[0], rdata, headers, handleResult)
+		xlp.sendPost(parts[0], rdata, headers, handleResult, timeout)
 	    } else {
-		xlp.sendGet(url, handleResult)
+		xlp.sendGet(url, handleResult, timeout)
 	    }
 	}
 	if (el.attributes.id == undefined) {
