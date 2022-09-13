@@ -353,7 +353,9 @@ var dohandleFormSubmit = function(form, ev) {
         var res = evres(ev)
         return false
     } else {
-	xc.clearIntervals();
+	if (!(form.dataset && form.dataset.formSubmitBackground)) {
+	    xc.clearIntervals()
+	}
         myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
             // console.log('A form POST submit is handled completely')
             renderPostProc(ev, request)
@@ -427,7 +429,6 @@ var setFormCallback = function(subtree, handle) {
     var ffunc = function(ev, x, formk) {
         console.log(name + ': form submit  event for: ' + ev);
         if (formk.classList.contains('xc-nocatch')) return true
-	xc.clearIntervals();
         var res = handle(ev)
         console.log(name + ': form submit  event returned: ' + res);
         return res
