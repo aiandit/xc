@@ -1,3 +1,11 @@
+xc (0.1.9-1) fionec-unstable; urgency=medium
+
+  * For sortCol, find preceding td or th as index
+  * Two new JS data handlers
+  * XLP, polls support timeouts
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Tue, 13 Sep 2022 09:25:34 +0200
+
 xc (0.1.8-3) fionec-unstable; urgency=medium
 
   * Polls support request timeouts
