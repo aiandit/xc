@@ -353,7 +353,9 @@ var dohandleFormSubmit = function(form, ev) {
         var res = evres(ev)
         return false
     } else {
-	xc.clearIntervals();
+	if (!(form.dataset && form.dataset.formSubmitBackground)) {
+	    xc.clearIntervals()
+	}
         myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
             // console.log('A form POST submit is handled completely')
             renderPostProc(ev, request)
@@ -427,7 +429,6 @@ var setFormCallback = function(subtree, handle) {
     var ffunc = function(ev, x, formk) {
         console.log(name + ': form submit  event for: ' + ev);
         if (formk.classList.contains('xc-nocatch')) return true
-	xc.clearIntervals();
         var res = handle(ev)
         console.log(name + ': form submit  event returned: ' + res);
         return res
@@ -509,6 +510,7 @@ xc.psHTML = function(data) {
 }
 xc.psHead = function(n) {
     return function(data) {
+	if (!data) return {noupdate: true}
 	var lines = data.split('\n')
 	return lines.slice(0, n).join('\n')
     }
@@ -519,6 +521,23 @@ var psSingleField = function(data) {
 }
 var psText = function(data) {
     return '<span>' + data + '</span>'
+}
+xc.psNonEmpty = function(a, b) {
+    return function(data) {
+	if (data) { return a } else { return b }
+    }
+}
+xc.psNonEmptySetClass = function(a, b) {
+    return function(data, el) {
+	if (data) {
+	    el.classList.add(a)
+	    el.classList.remove(b)
+	} else {
+	    el.classList.add(b)
+	    el.classList.remove(a)
+	}
+	return {noupdate: true}
+    }
 }
 
 xc.getCSRFToken = function() {
@@ -632,13 +651,14 @@ var ppPolls = function(subtree, done) {
 		}
 	    }
 	    var method = el.dataset.pollMethod || 'get'
+	    var timeout = el.dataset.pollTimeout
 	    if (method.toLowerCase() == 'post') {
 		var parts = url.split('?')
 		var rdata = parts[1] + '&csrfmiddlewaretoken=' + xc.getCSRFToken()
 		var headers = {'Content-type': 'application/x-www-form-urlencoded'}
-		xlp.sendPost(parts[0], rdata, headers, handleResult)
+		xlp.sendPost(parts[0], rdata, headers, handleResult, timeout)
 	    } else {
-		xlp.sendGet(url, handleResult)
+		xlp.sendGet(url, handleResult, timeout)
 	    }
 	}
 	if (el.attributes.id == undefined) {
@@ -1192,7 +1212,7 @@ xc.xq = function(exp, node) {
 
 xc.sortCol = function(ev) {
     var t = event.target
-    var ind = xc.xq('count(preceding-sibling::x:td)', t)
+    var ind = xc.xq('count(preceding-sibling::x:td|preceding-sibling::x:th)', t)
     var table = xc.xq('ancestor::x:table', t)[0]
     var rows = xc.xq('x:tbody/x:tr', table)
     var vals = rows.map(function(row) {

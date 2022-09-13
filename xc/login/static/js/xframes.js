@@ -133,12 +133,16 @@ xframes.mkXframes = function(frames, xsltbase) {
         if ((typeof indoc == "undefined") || (indoc === null)) {
             console.error('Xframes: no XML response from ' + src + '(' + url + ')')
         } else {
-            render(indoc, function(res) {
-                done(request, res)
-            }, function(res, done) {
-		console.log('No preprocess')
-		done(res)
-            })
+	    if (src.dataset && src.dataset.formSubmitBackground) {
+		console.log('Form submitted in BG: ' + status)
+	    } else {
+		render(indoc, function(res) {
+                    done(request, res)
+		}, function(res, done) {
+		    console.log('No preprocess')
+		    done(res)
+		})
+	    }
         }
     }
     var renderLink = function(src, url, done, cached) {

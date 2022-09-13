@@ -64,13 +64,14 @@ xlp.parseXMLC = function(xmlStr) {
     }
 }
 
-xlp.sendRequest = function(URL, method, callback, headers, data) {
+xlp.sendRequest = function(URL, method, callback, headers, data, timeout) {
     if (typeof URL == 'object') {
         return xlp.sendRequest(URL.URL || URL.src || URL.href,
                                URL.method || undefined,
                                URL.callback || undefined,
                                URL.headers || undefined,
-                               URL.data || undefined)
+                               URL.data || undefined,
+                               URL.timeout || undefined)
     }
 
     if (!method) method = 'GET'
@@ -84,6 +85,10 @@ xlp.sendRequest = function(URL, method, callback, headers, data) {
         request = new ActiveXObject("Msxml2.XMLHTTP")
     } else if (window.XMLHttpRequest) {
         request = new XMLHttpRequest()
+    }
+
+    if (timeout) {
+	request.timeout = timeout
     }
 
     request.onreadystatechange = function () {
@@ -115,21 +120,21 @@ xlp.sendRequest = function(URL, method, callback, headers, data) {
     request.send(data)
 }
 
-xlp.sendGet = function(URL, callback) {
+xlp.sendGet = function(URL, callback, timeout) {
     if (typeof URL == 'object') {
         URL.method = 'GET'
         xlp.sendRequest(URL)
     } else {
-        xlp.sendRequest(URL, 'GET', callback)
+        xlp.sendRequest({URL: URL, method: 'GET', callback: callback, timeout: timeout})
     }
 }
 
-xlp.sendPost = function(URL, data, headers, callback) {
+xlp.sendPost = function(URL, data, headers, callback, timeout) {
     if (typeof URL == 'object') {
         URL.method = 'POST'
         xlp.sendRequest(URL)
     } else {
-        xlp.sendRequest(URL, 'POST', callback, headers, data)
+        xlp.sendRequest({URL: URL, method: 'POST', data: data, callback: callback, headers: headers, timeout: timeout})
     }
 }
 
