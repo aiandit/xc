@@ -1,9 +1,2 @@
 0001-Fix-gitignore.patch
 0002-Fix-makefile.patch
-0003-For-sortCol-find-preceding-td-or-th-as-index.patch
-0004-LED-styles.patch
-0005-Head-return-nopdate-when-no-data.patch
-0006-Two-new-JS-data-handlers.patch
-0007-XLP-support-timeouts.patch
-0008-Polls-support-request-timeouts.patch
-0009-Support-for-background-form-submit-no-render-no-clea.patch
