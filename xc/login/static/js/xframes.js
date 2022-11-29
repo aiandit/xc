@@ -133,7 +133,7 @@ xframes.mkXframes = function(frames, xsltbase) {
         if ((typeof indoc == "undefined") || (indoc === null)) {
             console.error('Xframes: no XML response from ' + src + '(' + url + ')')
         } else {
-	    if (src.dataset && src.dataset.formSubmitBackground) {
+	    if (src && src.dataset && src.dataset.formSubmitBackground) {
 		console.log('Form submitted in BG: ' + status)
 	    } else {
 		render(indoc, function(res) {
