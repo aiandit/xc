@@ -1,3 +1,9 @@
+xc (0.1.10-1) fionec-unstable; urgency=medium
+
+  * Add streaming download option
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Thu, 01 Dec 2022 15:42:24 +0100
+
 xc (0.1.9-1) fionec-unstable; urgency=medium
 
   * For sortCol, find preceding td or th as index
