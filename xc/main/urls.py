@@ -63,6 +63,7 @@ urlpatterns = [
     path('ajax_getf', views.getf, name='ajax_getf'),
 
     path('get/<path:path>', views.getp, name='getp'),
+    path('download/<path:path>', views.getdata, name='getdata'),
     path('getf/<path:pattern>', views.getfp, name='getfp'),
 
     path('getfont', views.ajax_getfont, name='getfont'),

@@ -280,6 +280,10 @@ class DirManager:
             file.close()
         return stat
 
+    def getfile(self, name):
+        file = open(self.getpath(name), 'rb')
+        return file
+
     def getdoc(self, name):
         file = open(self.getpath(name), 'rb')
         content = file.read()

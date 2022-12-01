@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -1281,6 +1281,57 @@ def getp(request, path):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+def getfileifposs(path, largeFileLimit=1e6):
+    lsl = workdir.stat(path)
+    if lsl is None or len(lsl) == 0 or len(lsl['info']) == 0 or lsl['info']['type'] != '-':
+        return (False, lsl, '', '')
+
+    print('getfileifposs', lsl['info'])
+
+    fsize = lsl['info']['statdict']['st_size']
+
+    if fsize > largeFileLimit:
+        fdata = workdir.getfile(path)
+    else:
+        fdata = workdir.getdoc(path)
+    return (lsl, fdata)
+
+def getdata(request, path):
+    errmsg = ''
+    errors = []
+
+    (lsl, fdata) = getfileifposs(path)
+
+    if len(lsl) > 0 and len(lsl['info']) > 0 and lsl['info']['type'] == '-':
+        mtype = mimetypes.guess_type(lsl['info']['name'])
+        fsize = lsl['info']['statdict']['st_size']
+        fname = lsl['info']['name']
+        if type(fdata) == type(b'') or type(fdata) == type(''):
+            resp = HttpResponse(fdata)
+        else:
+            resp = StreamingHttpResponse(fdata)
+        resp['Content-Length']     = f'{fsize}'
+        resp['Content-Type']       = f'{mtype[0]}'
+        resp['Content-Disposition']= f'attachment; filename="{fname}"'
+        return resp
+    else:
+        print('The file is not a file:', path)
+        errmsg = 'The file was not found'
+        return HttpResponse(status=404)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = {
+        'errs': errors
+    }
+    data = { **data, **lsl }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ PathData(initial={'path': path}) ] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
 def get(request):
 
     lsl = {}
@@ -1923,6 +1974,7 @@ def ajax_action(request):
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
+        print('xc action error', errmsg)
 
     actions = fileactions
 
