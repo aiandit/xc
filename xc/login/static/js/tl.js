@@ -71,6 +71,7 @@ tl.tlelem = function(str) {
 
 tl.transl = function(str) {
     var cl = tl.getCurrentLanguage()
+    if (!str) return str
     if (str in tl.invtable) {
 	var key = tl.invtable[str]
 	return tl.get(key)
