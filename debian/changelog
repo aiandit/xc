@@ -1,3 +1,9 @@
+xc (0.1.11-1) fionec-unstable; urgency=medium
+
+  * Several small enhancements
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Mon, 05 Dec 2022 12:37:32 +0100
+
 xc (0.1.10-1) fionec-unstable; urgency=medium
 
   * Add streaming download option
