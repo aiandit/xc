@@ -979,6 +979,9 @@ var updateTree = function(subtree, ev) {
     Object.keys(forms).forEach(function(k) {
         var f = forms[k]
         var t = f.nextElementSibling
+	if (f.dataset.target) {
+	    t = document.querySelector('#' + f.dataset.target)
+	}
         var iso = t.classList.contains('oc-open')
         f.onclick = function() {
             if (t.style.visibility == 'visible' || (t.style.visibility == "" && iso)) {
@@ -1141,16 +1144,16 @@ xc.ppActiveLink = function(ev) {
 	    a.classList.remove('xc-active-link')
 	}
     })
-	var links_button = document.querySelectorAll('button.xc-blink')
-	links_button.forEach((b) => {
-		var a = b.firstElementChild
-		if (a && a.href){
-			if (a.href == document.location.href) {
-				b.classList.add('xc-active-link')
-			} else {
-				b.classList.remove('xc-active-link')
-			}
-		}
+    var links_button = document.querySelectorAll('button.xc-blink')
+    links_button.forEach((b) => {
+	var a = b.firstElementChild
+	if (a && a.href){
+	    if (a.href == document.location.href) {
+		b.classList.add('xc-active-link')
+	    } else {
+		b.classList.remove('xc-active-link')
+	    }
+	}
     })
 }
 
