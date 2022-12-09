@@ -486,6 +486,14 @@ xc.clearChainedInterval = function(key) {
 	delete xc.cintervals[key]
     }
 }
+xc.clearChainedIntervals = function(keys) {
+    keys.forEach(xc.clearChainedInterval)
+}
+xc.clearChainedIntervalsExcept = function(key) {
+    var cis = xlp.scopy(xc.cintervals)
+    delete cis[key]
+    xc.clearChainedIntervals(Object.keys(cis))
+}
 xc.isChainedInterval = function(key) {
     if (key in xc.cintervals) {
 	return true
