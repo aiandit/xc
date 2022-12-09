@@ -446,9 +446,15 @@ var setFormCallback = function(subtree, handle) {
 
 var setLinkCallback = function(subtree, handle) {
     var forms = subtree.querySelectorAll('a')
-    var ffunc = function(ev, y, formk) {
+    var ffunc = function(ev, y, formk, oh) {
         console.log('link click event for: ' + ev);
-        if (formk.classList.contains('xc-nocatch')) return true
+        if (formk.classList.contains('xc-nocatch')) {
+	    if (oh) {
+		return oh(ev, y)
+	    } else {
+		return true
+	    }
+	}
         var res = handle(ev)
         console.log(name + ': link click event handler returned: ' + res);
         return res
@@ -456,7 +462,7 @@ var setLinkCallback = function(subtree, handle) {
     Object.keys(forms).forEach(function(k) {
         var oldHandler = forms[k].onclick
         forms[k].onclick = function(x, y) {
-            return ffunc(x, y, forms[k])
+            return ffunc(x, y, forms[k], oldHandler)
         }
     })
 }
@@ -479,6 +485,14 @@ xc.clearChainedInterval = function(key) {
     if (key in xc.cintervals) {
 	delete xc.cintervals[key]
     }
+}
+xc.clearChainedIntervals = function(keys) {
+    keys.forEach(xc.clearChainedInterval)
+}
+xc.clearChainedIntervalsExcept = function(key) {
+    var cis = xlp.scopy(xc.cintervals)
+    delete cis[key]
+    xc.clearChainedIntervals(Object.keys(cis))
 }
 xc.isChainedInterval = function(key) {
     if (key in xc.cintervals) {
@@ -578,7 +592,9 @@ var ppPolls = function(subtree, done) {
 	    var handleTextData = function(text, done) {
 		var res
 		try {
-		    res = ppFun(text, el)
+		    if (ppFun) {
+			res = ppFun(text, el)
+		    }
 		} catch (error) {
 		    console.error('ppPolls catched error in user function ' + el.dataset.postprocess);
 		    console.error(error);
@@ -591,7 +607,7 @@ var ppPolls = function(subtree, done) {
 		    if (typeof res.done == 'function') {
 			res.done()
 		    }
-		} else {
+		} else if (res != undefined) {
 		    el.innerHTML = res
 		}
 		done(res)
