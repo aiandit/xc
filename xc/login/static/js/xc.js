@@ -607,7 +607,7 @@ var ppPolls = function(subtree, done) {
 		    if (typeof res.done == 'function') {
 			res.done()
 		    }
-		} else {
+		} else if (res != undefined) {
 		    el.innerHTML = res
 		}
 		done(res)
