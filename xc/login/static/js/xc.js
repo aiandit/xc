@@ -592,7 +592,9 @@ var ppPolls = function(subtree, done) {
 	    var handleTextData = function(text, done) {
 		var res
 		try {
-		    res = ppFun(text, el)
+		    if (ppFun) {
+			res = ppFun(text, el)
+		    }
 		} catch (error) {
 		    console.error('ppPolls catched error in user function ' + el.dataset.postprocess);
 		    console.error(error);
