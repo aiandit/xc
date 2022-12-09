@@ -1,3 +1,11 @@
+xc (0.1.12-1) fionec-unstable; urgency=medium
+
+  * Respect onclick handler on nocatch links
+  * Inject results only if not undefined
+  * Fix handling of timed out requests
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Fri, 09 Dec 2022 12:19:01 +0100
+
 xc (0.1.11-1) fionec-unstable; urgency=medium
 
   * Several small enhancements
