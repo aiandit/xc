@@ -91,24 +91,23 @@ xlp.sendRequest = function(URL, method, callback, headers, data, timeout) {
 	request.timeout = timeout
     }
 
+    request.ontimeout = function () {
+        console.log('XLP: ' + URL + ': request timed out ' + request.timeout)
+        callback(-2, request)
+    }
+
     request.onreadystatechange = function () {
         if (request.readyState == 4) {
             if (request.status == 200) {
                 callback(0, request)
-            } else if (request.status == 302) {
-                // impossible to catch 302
-                // https://stackoverflow.com/questions/199099/how-to-manage-a-redirect-request-after-a-jquery-ajax-call
-                // but:
-                // https://javascriptinfo.com/view/409417/follow-redirect-302-in-xmlhttprequest
-                newurl = this.getResponseHeader("Location")
-                console.error('XLP: ' + URL + ': Redirect ' + request.status + ', to: ' + newurl)
-                callback(-2, request)
-            } else {
+            } else if (request.status != 0) {
                 console.error('XLP: ' + URL + ': Could not load ' + request.status + ', msg: ' + request.response)
                 callback(-1, request)
+            } else {
+		if (request.timeout == 0) {
+                    console.error('XLP: ' + URL + ': request status 0, msg: ' + request.response)
+		}
             }
-        } else {
-            // console.log('XLP: ' + URL + ' readyState=' + request.readyState)
         }
     }
 
@@ -116,7 +115,7 @@ xlp.sendRequest = function(URL, method, callback, headers, data, timeout) {
     for (k in headers) {
         request.setRequestHeader(k, headers[k])
     }
-//    console.log('XMLHttpRequest send: ' + method + ' ' + URL + ', headers: ' + headers + ', data: ' + data)
+
     request.send(data)
 }
 
