@@ -324,9 +324,12 @@ xc.handleLinkClickA = function(ev, elem) {
         return true;
     } else {
 	xc.clearIntervals();
+	xc.lockClicks()
         // console.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
         myframes.renderLink(elem, xframes.ajaxPathName(elem.href), function(request) {
-            renderPostProc(ev, request)
+            renderPostProc(ev, request, function(a,b) {
+		xc.unlockClicks()
+	    })
         })
         return false
     }
@@ -356,15 +359,43 @@ var dohandleFormSubmit = function(form, ev) {
 	if (!(form.dataset && form.dataset.formSubmitBackground)) {
 	    xc.clearIntervals()
 	}
+	xc.lockClicks()
         myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
             // console.log('A form POST submit is handled completely')
-            renderPostProc(ev, request)
+            renderPostProc(ev, request, function(a,b) {
+		xc.unlockClicks()
+	    })
         })
         return false
     }
 }
 var handleFormSubmit = function(ev) {
     return dohandleFormSubmit(ev.target, ev)
+}
+
+xc.lock = {}
+xc.lockClicks = function() {
+    xc.lock.clicks = true
+}
+
+xc.unlockClicks = function() {
+    xc.lock.clicks = false
+}
+
+xc.handlers = {}
+xc.handlers.onclick = function(ev) {
+    console.log('xc.onclick', ev)
+}
+xc.handlers.capclick = function(ev) {
+    console.log('xc.capclick', ev)
+    if (xc.lock.clicks) {
+	if (ev.cancelable) {
+	    console.error('XC canceled click event')
+	    ev.preventDefault()
+	    ev.cancelBubble = true
+	}
+	return false
+    }
 }
 
 var runxc = function(x, ev) {
@@ -386,16 +417,22 @@ var runxc = function(x, ev) {
 
     console.log('run: ajax URL ' + ajaxurl)
 
+    xc.lockClicks()
     myframes.renderLink(document, ajaxurl, function(res) {
         console.log('done xerp load')
-        renderPostProc(ev, res)
+        renderPostProc(ev, res, function(a,b) {
+	    xc.unlockClicks()
+	})
     })
 
     window.addEventListener("popstate", function (event) {
         console.log('popstate: ' + event.state)
 	if (event.state != null) {
+	    xc.lockClicks()
 	    myframes.renderLink(document, xframes.ajaxPathName(event.state), function(res) {
-		renderPostProc(event, res)
+		renderPostProc(event, res, function(a,b) {
+		    xc.unlockClicks()
+		})
 	    })
 	}
     })
@@ -404,12 +441,15 @@ var runxc = function(x, ev) {
 //        window.location = event.state
     })
 
+    document.addEventListener('click', xc.handlers.capclick, true)
+    document.addEventListener('click', xc.handlers.onclick, false)
+
     return false
 }
 
-var renderPostProc = function(ev, request, subreq, done) {
+var renderPostProc = function(ev, request, done, noPushHist) {
     console.log('render: ' + request)
-    if (subreq == undefined) {
+    if (noPushHist == undefined) {
 	xframes.pushhist(request)
     }
     if (!isNonXMLResponse(request)) {
@@ -730,7 +770,6 @@ var ppViews = function(subtree, ev, done) {
             mylframes.renderLink(ev.target, url, function(request) {
 		console.log('VIEW: sub view ' + url + ' has been rendered')
 		xc.docs[viewName] = request.responseXML
-		//renderPostProc(ev, request, true)
 		updateTreeFinal(document.getElementById(viewTarget), ev, function(result) {
 		    var onloadCode = el.dataset.viewOnload
 		    if (onloadCode != undefined) {
