@@ -1,3 +1,9 @@
+xc (0.1.14-2) fionec-unstable; urgency=medium
+
+  * Do not use cheap mode
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Fri, 16 Dec 2022 12:03:44 +0100
+
 xc (0.1.14-1) fionec-unstable; urgency=medium
 
   * Cancel click events while page is loading
