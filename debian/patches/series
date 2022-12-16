@@ -1,2 +1,3 @@
 0001-Fix-gitignore.patch
 0002-Fix-makefile.patch
+0003-Do-not-use-cheap-mode.patch

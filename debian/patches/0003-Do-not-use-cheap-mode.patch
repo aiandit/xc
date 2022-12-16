@@ -1,0 +1,21 @@
+From: Johannes Willkomm <j.willkomm@fionec.de>
+Date: Fri, 16 Dec 2022 12:03:29 +0100
+Subject: Do not use cheap mode
+
+---
+ ci/xc_uwsgi.ini | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ci/xc_uwsgi.ini b/ci/xc_uwsgi.ini
+index 5e565b3..cbb9c29 100644
+--- a/ci/xc_uwsgi.ini
++++ b/ci/xc_uwsgi.ini
+@@ -24,7 +24,7 @@ chmod-socket    = 666
+ vacuum          = true
+ 
+ lazy            = true
+-cheap           = true
++# cheap           = true
+ 
+ enable-threads  = true
+ disable-logging = true
