@@ -40,11 +40,15 @@ def xmlesc(str):
     str = str.replace('&', '&amp;')
     return str
 
+def xmlescname(str):
+    str = str.replace('/', '_')
+    return str
+
 def dictxml(dict, name='dict'):
     if type(dict) == type({}):
         res = '<%s>' % name
         for (i,k) in enumerate(dict.keys()):
-            r = '%s\n' % dictxml(dict[k], k)
+            r = '%s\n' % dictxml(dict[k], xmlescname(k))
             res = res + r
         res = res + ('</%s>' % name)
         return res
@@ -85,11 +89,44 @@ class XCForm(forms.Form):
     method = 'POST'
     title = 'Xc'
 
+    def to_xml_multiple(self, field):
+
+        f = self[field]
+        elemname = 'input'
+        s = ''
+
+        moreAttrs = ""
+        moreClasses = ""
+        fattrs = f.build_widget_attrs(f.field.subfield.widget.attrs)
+        def mapValue(v):
+            if type(v) == type(True):
+                return int(v)
+            else:
+                return v
+        moreAttrs = " " + " ".join([ '%s="%s"' % (k, mapValue(fattrs[k])) for k in fattrs if k != 'class' ])
+        moreClasses = (" " + fattrs['class']) if 'class' in fattrs else ''
+
+        fval = f.value() if f.value() is not None else []
+
+        s += '<field>'
+        for (i, sval) in enumerate(fval):
+
+            auto_id = (self.auto_id % (field,)) + f'{i}'
+            s += '<label for="%s">%s</label>\n' % (auto_id, xmlesc(f.label))
+            value = ' value="%s"' % (xmlesc(str(sval)),)
+            s += '<input id="%s" class="%s" name="%s"%s type="%s"%s/>' % (
+                auto_id, f.css_classes() + moreClasses, f.name, moreAttrs, 'text', value)
+
+        for e in f.errors:
+            s += self.renderError(f'path', e)
+
+        s += '</field>'
+
+        return s
+
+
     def to_xml(self, field):
         f = self[field]
-        ffu = f.form[field]
-        auto_id = self.auto_id % (field,)
-        s = '<field><label for="%s">%s</label>\n' % (auto_id, xmlesc(f.label))
         elemname = 'input'
         try:
             ftype = f.field.widget.input_type
@@ -98,6 +135,13 @@ class XCForm(forms.Form):
             elemname = 'textarea'
         if ftype == 'select':
             elemname = 'select'
+
+        if ftype == 'multiple':
+            return self.to_xml_multiple(field)
+
+        auto_id = self.auto_id % (field,)
+        s = '<field><label for="%s">%s</label>\n' % (auto_id, xmlesc(f.label))
+
         fval = f.value() if f.value() is not None else ''
         value = ''
         moreAttrs = ""
@@ -133,12 +177,14 @@ class XCForm(forms.Form):
                 auto_id, f.css_classes() + moreClasses, f.name, moreAttrs, fval)
         return s
 
+    def renderError(self, for_, err):
+        return '<label class="error" for="%s" >%s</label>' % (for_, err)
+
     def asxml(self):
         elems = [ self.to_xml(f) for f in self.fields ]
         s = '\n  '.join(elems)
         s += '\n'
-        s += '\n  '.join([ '<error for="%s" ><msg>%s</msg>%s</error>' % (
-              e, self.errors[e], dictxml(json.loads(self.errors[e].as_json()))) for e in self.errors ])
+        s += '\n  '.join([ self.renderError(e, self.errors[e]) for e in self.errors ])
         s += '\n'
 #        print('asxml', s)
         return s

@@ -9,6 +9,9 @@ from django.contrib.auth.decorators import login_required
 
 from django.urls import reverse
 
+from django.core.exceptions import ValidationError
+from django import forms
+
 from register.models import ActivationCode, UserIP, unsign_acode
 
 from xc.tools import *
@@ -198,6 +201,46 @@ def ajax_newdoc(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
+
+class MultiValueValidationError(ValidationError):
+    # def __init__(self, errors):
+    #     clean_errors = [
+    #         f"{err.error_list[0]} ({name} item {key})" for err, name, key, value in errors
+    #     ]
+    #     for e, name, key, value in errors:
+    #         print(f'error: {type(e.error_list[0])} {e.error_list[0].error_list[0]}')
+    #     super().__init__(','.join(clean_errors))
+    #     self.error_detail = errors
+    def __init__(self, errors):
+        super().__init__(errors)
+
+class MultiValueFieldWidget(forms.widgets.Input):
+    def __init__(self, pname):
+        super().__init__()
+        self.pname: str = pname
+        self.input_type = 'multiple'
+    def value_from_datadict(self, data, *args):
+        return data.getlist(self.pname)
+
+class MultiValueField(forms.Field):
+    def __init__(self, subfield, pname, *args, **kw):
+        super().__init__(widget=MultiValueFieldWidget(pname), *args, **kw)
+        self.subfield = subfield
+    def clean(self, values):
+        if len(values) == 0 and self.required:
+            raise ValidationError(self.error_messages["required"])
+        result = []
+        errors = []
+        for i, value in enumerate(values):
+            try:
+                result.append(self.subfield.clean(value))
+            except ValidationError as e:
+                errors.append(e)
+        if len(errors):
+            raise MultiValueValidationError(errors)
+        return result
+
+
 class DeleteData(XCForm):
     name = 'delete'
     title = 'Delete'
@@ -205,8 +248,7 @@ class DeleteData(XCForm):
     error_css_class = 'error'
     required_css_class = 'required'
 
-    path = forms.CharField(max_length=1024, label='Path',
-                           widget=forms.TextInput(attrs={'size': 120}))
+    path = MultiValueField(forms.CharField(max_length=1024, label='File name', widget=forms.TextInput(attrs={'size': 120})), 'path', label='File name')
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
 
     next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action', widget=forms.HiddenInput)
@@ -221,10 +263,21 @@ def delete(request):
 
 def ajax_delete(request):
 
-    lsl = ''
-
     errmsg = ''
     errors = []
+
+    def doDelete(path):
+        lsl = workdir.deletedoc(path, {'user': request.user.username, 'comment': cdata['comment']})
+        print(f'delete {path}: {lsl}')
+        return lsl
+
+    def doMultiDelete(paths):
+        lsl = 0
+        for path in paths:
+            lsl = doDelete(path)
+            if lsl != 0:
+                break
+        return lsl
 
     if request.method == "GET":
         reqDict = request.GET
@@ -232,34 +285,36 @@ def ajax_delete(request):
         reqDict = request.POST
 
     rdata = DeleteData(reqDict)
-    res = rdata.is_valid()
-    cdata = rdata.cleaned_data
-    path = cdata['path']
+    path = None
 
-    if not res:
+    if not rdata.is_valid():
         errmsg = 'The form data is invalid'
-    elif request.method == "POST":
-        lsl = workdir.deletedoc(path, {'user': request.user.username, 'comment': cdata['comment']})
-        print('Operation deletedoc(%s) returned: %s (type %s)' % (path, lsl, type(lsl)))
-        if lsl != 0:
-            errmsg = 'doc deletion failed'
-        else:
-            next_ = cdata['next_']
-            if len(next_) == 0:
-                next_ = redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
-            return redirect(next_)
+    else:
+
+        cdata = rdata.cleaned_data
+        path = cdata['path']
+
+        if request.method == "POST":
+            lsl = 1
+            if path:
+                lsl = doMultiDelete(path)
+            if lsl != 0:
+                errmsg = 'doc deletion failed'
+            else:
+                next_ = cdata['next_']
+                if len(next_) == 0:
+                    next_ = redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
+                return redirect(next_)
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
 
     data = {
-        'status': lsl,
         'errs': errors
     }
-    data = { **data, **get_lsl(path) }
     xcontext = {'xapp': 'main', 'view': 'dirmanform', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
     dx = dictxml(xcontext)
-    context = { 'context_xml': dx, 'forms': [ rdata] }
+    context = { 'context_xml': dx, 'forms': [ rdata ] }
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
