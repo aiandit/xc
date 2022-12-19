@@ -360,6 +360,10 @@ var dohandleFormSubmit = function(form, ev) {
 	    xc.clearIntervals()
 	}
 	xc.lockClicks()
+        if (form.elements.csrfmiddlewaretoken != undefined
+	    && form.elements.csrfmiddlewaretoken.value == '') {
+	    form.elements.csrfmiddlewaretoken.value = xc.getCSRFToken()
+	}
         myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
             // console.log('A form POST submit is handled completely')
             renderPostProc(ev, request, function(a,b) {
