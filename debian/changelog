@@ -1,3 +1,11 @@
+xc (0.1.15-1) fionec-unstable; urgency=medium
+
+  * Set csrftoken when form element exists with empty value
+  * Make sure that click locking is not forever
+  * Support for multiple deleting
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Mon, 19 Dec 2022 16:29:55 +0100
+
 xc (0.1.14-2) fionec-unstable; urgency=medium
 
   * Do not use cheap mode
