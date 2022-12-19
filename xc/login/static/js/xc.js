@@ -380,6 +380,7 @@ var handleFormSubmit = function(ev) {
 xc.lock = {}
 xc.lockClicks = function() {
     xc.lock.clicks = true
+    setTimeout(xc.unlockClicks, 1750)
 }
 
 xc.unlockClicks = function() {
@@ -388,10 +389,8 @@ xc.unlockClicks = function() {
 
 xc.handlers = {}
 xc.handlers.onclick = function(ev) {
-    console.log('xc.onclick', ev)
 }
 xc.handlers.capclick = function(ev) {
-    console.log('xc.capclick', ev)
     if (xc.lock.clicks) {
 	if (ev.cancelable) {
 	    console.error('XC canceled click event')
