@@ -360,6 +360,10 @@ var dohandleFormSubmit = function(form, ev) {
 	    xc.clearIntervals()
 	}
 	xc.lockClicks()
+        if (form.elements.csrfmiddlewaretoken != undefined
+	    && form.elements.csrfmiddlewaretoken.value == '') {
+	    form.elements.csrfmiddlewaretoken.value = xc.getCSRFToken()
+	}
         myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
             // console.log('A form POST submit is handled completely')
             renderPostProc(ev, request, function(a,b) {
@@ -376,6 +380,7 @@ var handleFormSubmit = function(ev) {
 xc.lock = {}
 xc.lockClicks = function() {
     xc.lock.clicks = true
+    setTimeout(xc.unlockClicks, 1750)
 }
 
 xc.unlockClicks = function() {
@@ -384,10 +389,8 @@ xc.unlockClicks = function() {
 
 xc.handlers = {}
 xc.handlers.onclick = function(ev) {
-    console.log('xc.onclick', ev)
 }
 xc.handlers.capclick = function(ev) {
-    console.log('xc.capclick', ev)
     if (xc.lock.clicks) {
 	if (ev.cancelable) {
 	    console.error('XC canceled click event')
