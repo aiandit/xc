@@ -250,6 +250,7 @@ class DeleteData(XCForm):
 
     path = MultiValueField(forms.CharField(max_length=1024, label='File name', widget=forms.TextInput(attrs={'size': 120})), 'path', label='File name')
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
+    confirm = forms.BooleanField(required=False, initial=True, widget=forms.HiddenInput)
 
     next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action', widget=forms.HiddenInput)
 
@@ -293,8 +294,9 @@ def ajax_delete(request):
 
         cdata = rdata.cleaned_data
         path = cdata['path']
+        confirm = cdata['confirm']
 
-        if request.method == "POST":
+        if confirm:
             lsl = 1
             if path:
                 lsl = doMultiDelete(path)
@@ -305,6 +307,9 @@ def ajax_delete(request):
                 if len(next_) == 0:
                     next_ = redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
                 return redirect(next_)
+        else:
+            cdata.update({'confirm': 1})
+            rdata = DeleteData(initial=cdata)
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
