@@ -1,3 +1,9 @@
+xc (0.1.16-1) fionec-unstable; urgency=medium
+
+  * New load/fetch events
+
+ -- Johannes Willkomm <j.willkomm@fionec.de>  Tue, 20 Dec 2022 10:47:58 +0100
+
 xc (0.1.15-1) fionec-unstable; urgency=medium
 
   * Set csrftoken when form element exists with empty value
