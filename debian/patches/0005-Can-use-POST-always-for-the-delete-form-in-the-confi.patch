@@ -1,0 +1,42 @@
+From: Johannes Willkomm <j.willkomm@fionec.de>
+Date: Tue, 20 Dec 2022 15:57:09 +0100
+Subject: Can use POST always for the delete form,
+ in the confirmation form set confirm=1
+
+---
+ xc/main/views.py | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/xc/main/views.py b/xc/main/views.py
+index 775841e..00399d7 100644
+--- a/xc/main/views.py
++++ b/xc/main/views.py
+@@ -250,6 +250,7 @@ class DeleteData(XCForm):
+ 
+     path = MultiValueField(forms.CharField(max_length=1024, label='File name', widget=forms.TextInput(attrs={'size': 120})), 'path', label='File name')
+     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
++    confirm = forms.BooleanField(required=False, initial=True, widget=forms.HiddenInput)
+ 
+     next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action', widget=forms.HiddenInput)
+ 
+@@ -293,8 +294,9 @@ def ajax_delete(request):
+ 
+         cdata = rdata.cleaned_data
+         path = cdata['path']
++        confirm = cdata['confirm']
+ 
+-        if request.method == "POST":
++        if confirm:
+             lsl = 1
+             if path:
+                 lsl = doMultiDelete(path)
+@@ -305,6 +307,9 @@ def ajax_delete(request):
+                 if len(next_) == 0:
+                     next_ = redirect(reverse('main:ajax_path') + '?path=%s' % os.path.dirname(path))
+                 return redirect(next_)
++        else:
++            cdata.update({'confirm': 1})
++            rdata = DeleteData(initial=cdata)
+ 
+     if len(errmsg):
+         errors.append({'errmsg': errmsg, 'type': 'fatal'})

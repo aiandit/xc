@@ -1,0 +1,35 @@
+From: Johannes Willkomm <j.willkomm@fionec.de>
+Date: Tue, 20 Dec 2022 15:56:17 +0100
+Subject: For better rendering, create separate "fields" for multiple values
+
+---
+ xc/xc/tools.py | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/xc/xc/tools.py b/xc/xc/tools.py
+index cb5462b..f569b27 100644
+--- a/xc/xc/tools.py
++++ b/xc/xc/tools.py
+@@ -108,20 +108,19 @@ class XCForm(forms.Form):
+ 
+         fval = f.value() if f.value() is not None else []
+ 
+-        s += '<field>'
+         for (i, sval) in enumerate(fval):
+ 
++            s += '<field>'
+             auto_id = (self.auto_id % (field,)) + f'{i}'
+             s += '<label for="%s">%s</label>\n' % (auto_id, xmlesc(f.label))
+             value = ' value="%s"' % (xmlesc(str(sval)),)
+             s += '<input id="%s" class="%s" name="%s"%s type="%s"%s/>' % (
+                 auto_id, f.css_classes() + moreClasses, f.name, moreAttrs, 'text', value)
++            s += '</field>'
+ 
+         for e in f.errors:
+             s += self.renderError(f'path', e)
+ 
+-        s += '</field>'
+-
+         return s
+ 
+ 
