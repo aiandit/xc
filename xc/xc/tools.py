@@ -108,19 +108,18 @@ class XCForm(forms.Form):
 
         fval = f.value() if f.value() is not None else []
 
-        s += '<field>'
         for (i, sval) in enumerate(fval):
 
+            s += '<field>'
             auto_id = (self.auto_id % (field,)) + f'{i}'
             s += '<label for="%s">%s</label>\n' % (auto_id, xmlesc(f.label))
             value = ' value="%s"' % (xmlesc(str(sval)),)
             s += '<input id="%s" class="%s" name="%s"%s type="%s"%s/>' % (
                 auto_id, f.css_classes() + moreClasses, f.name, moreAttrs, 'text', value)
+            s += '</field>'
 
         for e in f.errors:
             s += self.renderError(f'path', e)
-
-        s += '</field>'
 
         return s
 
