@@ -324,11 +324,11 @@ xc.handleLinkClickA = function(ev, elem) {
         return true;
     } else {
 	xc.clearIntervals();
-	xc.lockClicks()
+	xc.beginFetch('get', elem.href, elem)
         // console.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
         myframes.renderLink(elem, xframes.ajaxPathName(elem.href), function(request) {
             renderPostProc(ev, request, function(a,b) {
-		xc.unlockClicks()
+		xc.endFetch('get', elem.href, elem)
 	    })
         })
         return false
@@ -359,7 +359,7 @@ var dohandleFormSubmit = function(form, ev) {
 	if (!(form.dataset && form.dataset.formSubmitBackground)) {
 	    xc.clearIntervals()
 	}
-	xc.lockClicks()
+	xc.beginFetch(form.method, form.action, form)
         if (form.elements.csrfmiddlewaretoken != undefined
 	    && form.elements.csrfmiddlewaretoken.value == '') {
 	    form.elements.csrfmiddlewaretoken.value = xc.getCSRFToken()
@@ -367,7 +367,7 @@ var dohandleFormSubmit = function(form, ev) {
         myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
             // console.log('A form POST submit is handled completely')
             renderPostProc(ev, request, function(a,b) {
-		xc.unlockClicks()
+		xc.endFetch(form.method, form.action, form)
 	    })
         })
         return false
@@ -375,6 +375,16 @@ var dohandleFormSubmit = function(form, ev) {
 }
 var handleFormSubmit = function(ev) {
     return dohandleFormSubmit(ev.target, ev)
+}
+
+xc.beginFetch = function(method, url, target) {
+    xc.lockClicks()
+    xlp.createEvent('xc-startfetch', {method: method, url: url, target: target})
+}
+
+xc.endFetch = function(method, url, target) {
+    xc.unlockClicks()
+    xlp.createEvent('xc-endfetch', {method: method, url: url, target: target})
 }
 
 xc.lock = {}
@@ -416,25 +426,24 @@ var runxc = function(x, ev) {
         paramss = '?' + paramss.substr(1)
     }
 
+    var url = '/' + xframe_xapp + '/' + xframe_view + paramss
     var ajaxurl = '/' + xframe_xapp + '/ajax_' + xframe_view + paramss
 
-    console.log('run: ajax URL ' + ajaxurl)
-
-    xc.lockClicks()
+    xc.beginFetch('get', url, document)
     myframes.renderLink(document, ajaxurl, function(res) {
         console.log('done xerp load')
         renderPostProc(ev, res, function(a,b) {
-	    xc.unlockClicks()
+	    xc.endFetch('get', url, document)
 	})
     })
 
     window.addEventListener("popstate", function (event) {
         console.log('popstate: ' + event.state)
 	if (event.state != null) {
-	    xc.lockClicks()
+	    xc.beginFetch('get', event.state, document)
 	    myframes.renderLink(document, xframes.ajaxPathName(event.state), function(res) {
 		renderPostProc(event, res, function(a,b) {
-		    xc.unlockClicks()
+		    xc.endFetch('get', event.state, document)
 		})
 	    })
 	}
