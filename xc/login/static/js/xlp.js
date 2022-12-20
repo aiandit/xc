@@ -244,6 +244,11 @@ xlp.loadData = function(path, callback) {
     xlp.reqData(document,  {'method': 'GET', 'URL': path, 'callback': callback})
 }
 
+xlp.createEvent = function(name, data) {
+    var ev = new CustomEvent(name, {detail: data})
+    document.dispatchEvent(ev)
+}
+
 xlp.mkLoadCached = function() {
     var requested = {}, docs = {}
     var loadCached = function(url, done) {
