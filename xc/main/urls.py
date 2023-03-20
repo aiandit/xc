@@ -43,31 +43,30 @@ urlpatterns = [
     path('ajax_id', views.ajax_cid, name='ajax_cid'),
     path('plain_id', views.plain_cid, name='plain_cid'),
 
-    path('get', views.get, name='get'),
-    path('ajax_get', views.get, name='ajax_get'),
-
-    path('nlines', views.nlines, name='nlines'),
-    path('ajax_nlines', views.nlines, name='ajax_nlines'),
-
-    path('head', views.get_head, name='head'),
-    path('ajax_head', views.get_head, name='ajax_head'),
-
-    path('tail', views.get_tail, name='tail'),
-    path('ajax_tail', views.get_tail, name='ajax_tail'),
-
-    path('range/<path:path>', views.get_rangep, name='get_rangep'),
-    path('range/', views.get_range, name='range'),
-    path('ajax_range/', views.get_range, name='ajax_range'),
-
-    path('dlrange/<path:path>', views.view_dlrange, name='dlrange'),
-    path('dlrange/', views.view_dlrange, name='dlrange'),
-
-    path('getf', views.getf, name='getf'),
-    path('ajax_getf', views.getf, name='ajax_getf'),
-
+    path('get/', views.get, name='get'),
     path('get/<path:path>', views.getp, name='getp'),
-    path('download/<path:path>', views.getdata, name='getdata'),
+    path('ajax_get/', views.get, name='ajax_get'),
+
+    path('nlines/', views.nlines, name='nlines'),
+    path('nlines/<path:path>', views.nlines, name='nlines'),
+
+    path('head/', views.get_head, name='head'),
+    path('head/<path:path>', views.get_head, name='head'),
+
+    path('tail/', views.get_tail, name='tail'),
+    path('tail/<path:path>', views.get_tail, name='tail'),
+
+    path('range/', views.get_range, name='range'),
+    path('range/<path:path>', views.get_range, name='range'),
+
+    path('dlrange/<path:path>', views.get_dlrange, name='dlrange'),
+    path('dlrange/', views.get_dlrange, name='dlrange'),
+
+    path('getf/', views.getf, name='getf'),
     path('getf/<path:pattern>', views.getfp, name='getfp'),
+    path('ajax_getf/', views.getf, name='ajax_getf'),
+
+    path('download/<path:path>', views.getdata, name='getdata'),
 
     path('getfont', views.ajax_getfont, name='getfont'),
 

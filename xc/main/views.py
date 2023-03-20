@@ -1516,7 +1516,7 @@ class SecData(PathData):
     end = forms.IntegerField(label='End', required=False)
 
 
-def get_head(request):
+def get_head(request, path=None):
 
     lsl = {}
 
@@ -1535,7 +1535,8 @@ def get_head(request):
         errmsg = 'The form data is invalid'
     else:
         cdata = rdata.cleaned_data
-        path = cdata['path']
+        if path is None:
+            path = cdata['path']
         n = cdata['n']
         if n is None:
             n = 10
@@ -1562,7 +1563,7 @@ def get_head(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
-def get_tail(request):
+def get_tail(request, path=None):
 
     lsl = {}
 
@@ -1581,7 +1582,8 @@ def get_tail(request):
         errmsg = 'The form data is invalid'
     else:
         cdata = rdata.cleaned_data
-        path = cdata['path']
+        if path is None:
+            path = cdata['path']
         n = cdata['n']
         if n is None:
             n = 10
@@ -1608,7 +1610,7 @@ def get_tail(request):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
-def get_range(request):
+def get_range(request, path=None):
 
     errmsg = ''
     errors = []
@@ -1625,36 +1627,8 @@ def get_range(request):
         errmsg = 'The form data is invalid'
     else:
         cdata = rdata.cleaned_data
-        path = cdata['path']
-        return get_rangep(request, path)
-
-    if len(errmsg):
-        errors.append({'errmsg': errmsg, 'type': 'fatal'})
-
-    data = { 'errs': errors }
-    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
-    dx = dictxml(xcontext)
-    context = { 'context_xml': dx, 'forms': [ rdata] }
-    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
-
-
-def get_rangep(request, path):
-
-    errmsg = ''
-    errors = []
-
-    if request.method == "GET":
-        reqDict = request.GET
-    elif request.method == "POST":
-        reqDict = request.POST
-
-    rdata = SecData(reqDict)
-
-    res = rdata.is_valid()
-    if not res:
-        errmsg = 'The form data is invalid'
-    else:
-        cdata = rdata.cleaned_data
+        if path is None:
+            path = cdata['path']
         start = cdata['start']
         end = cdata['end']
 
@@ -1670,7 +1644,7 @@ def get_rangep(request, path):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
-def view_dlrange(request, path=None):
+def get_dlrange(request, path=None):
 
     errmsg = ''
     errors = []
@@ -1704,7 +1678,7 @@ def view_dlrange(request, path=None):
     return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
 
 
-def nlines(request):
+def nlines(request, path=None):
 
     lsl = {}
 
@@ -1724,7 +1698,8 @@ def nlines(request):
         errmsg = 'The form data is invalid'
     else:
         cdata = rdata.cleaned_data
-        path = cdata['path']
+        if path is None:
+            path = cdata['path']
 
         n = workdir.nlines(path)
 
