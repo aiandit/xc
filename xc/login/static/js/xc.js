@@ -499,15 +499,13 @@ var setFormCallback = function(subtree, handle) {
 var setLinkCallback = function(subtree, handle) {
     var forms = subtree.querySelectorAll('a')
     var ffunc = function(ev, y, formk, oh) {
-        console.log('link click event for: ' + ev);
-        if (formk.classList.contains('xc-nocatch')) {
-	    if (oh) {
-		return oh(ev, y)
-	    } else {
-		return true
-	    }
+        console.log('link click event for: ' + ev + ' with handler ' + oh)
+        var res = true
+	if (oh) {
+	    res = oh(ev, y)
+	} else if (!formk.classList.contains('xc-nocatch')) {
+	    var res = handle(ev)
 	}
-        var res = handle(ev)
         console.log(name + ': link click event handler returned: ' + res);
         return res
     }
