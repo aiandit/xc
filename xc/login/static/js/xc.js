@@ -550,7 +550,7 @@ xc.isChainedInterval = function(key) {
     }
     return false
 }
-xc.clearIntervals = function() {
+xc.clearIntervals = xc.stop = function() {
     Object.keys(xc.intervals).forEach(function(k) {
 	xc.clearInterval(k)
     })
