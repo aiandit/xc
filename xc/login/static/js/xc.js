@@ -639,28 +639,37 @@ var ppPolls = function(subtree, done) {
 	    var tres = t0
 //	    console.log('getf: ' + (t0 - globtO) + ': '  + url)
 	    var ppFun = eval(el.dataset.postprocess)
-	    var handleTextData = function(text, done) {
-		var res
+	    var processData = function(text, el, done) {
 		try {
 		    if (ppFun) {
-			res = ppFun(text, el)
+			if (ppFun.length > 2) {
+			    ppFun(text, el, done)
+			} else {
+			    res = ppFun(text, el)
+			    done(res)
+			}
 		    }
 		} catch (error) {
 		    console.error('ppPolls catched error in user function ' + el.dataset.postprocess);
 		    console.error(error);
 		    res = {noupdate: true}
+		    done(res)
 		}
-		if (typeof res == typeof {}) {
-		    if (!res.noupdate) {
-			el.innerHTML = res.text
+	    }
+	    var handleTextData = function(text, done) {
+		processData(text, el, (res)=> {
+		    if (typeof res == typeof {}) {
+			if (!res.noupdate) {
+			    el.innerHTML = res.text
+			}
+			if (typeof res.done == 'function') {
+			    res.done()
+			}
+		    } else if (res != undefined) {
+			el.innerHTML = res
 		    }
-		    if (typeof res.done == 'function') {
-			res.done()
-		    }
-		} else if (res != undefined) {
-		    el.innerHTML = res
-		}
-		done(res)
+		    done(res)
+		})
 	    }
 	    var handleXMLData = function(text, done) {
 		var ppFilter = el.dataset.pollFilter
