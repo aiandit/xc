@@ -1461,6 +1461,11 @@ def getrange(request, path, mode, start, end, transpose=False):
             fdata = workdir.range(path, start, end)
             t1 = time.time()
             print('Load %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
+        elif mode == 'dlrange':
+            fdata = workdir.head(path, 1)
+            fdata += workdir.range(path, start, end)
+            t1 = time.time()
+            print('Load %d-%d (%d lines): %g' % (start, end, end-start, t1-t0))
         aenc = request.headers['Accept-Encoding']
 #        fdata = gzip.compress(fdata.encode('utf8'), compresslevel=1)
 #        t1 = time.time()
@@ -1654,6 +1659,40 @@ def get_rangep(request, path):
         end = cdata['end']
 
         return getrange(request, path, 'range', start, end)
+
+    if len(errmsg):
+        errors.append({'errmsg': errmsg, 'type': 'fatal'})
+
+    data = { 'errs': errors }
+    xcontext = {'xapp': 'main', 'view': 'path', 'cgi': getAllCGI(request.GET), 'data': data, 'user': userdict(request.user)}
+    dx = dictxml(xcontext)
+    context = { 'context_xml': dx, 'forms': [ rdata] }
+    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+
+
+def view_dlrange(request, path=None):
+
+    errmsg = ''
+    errors = []
+
+    if request.method == "GET":
+        reqDict = request.GET
+    elif request.method == "POST":
+        reqDict = request.POST
+
+    rdata = SecData(reqDict)
+
+    res = rdata.is_valid()
+    if not res:
+        errmsg = 'The form data is invalid'
+    else:
+        cdata = rdata.cleaned_data
+        start = cdata['start']
+        end = cdata['end']
+        if path is None:
+            path = cdata['path']
+
+        return getrange(request, path, 'dlrange', start, end)
 
     if len(errmsg):
         errors.append({'errmsg': errmsg, 'type': 'fatal'})

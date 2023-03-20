@@ -56,8 +56,11 @@ urlpatterns = [
     path('ajax_tail', views.get_tail, name='ajax_tail'),
 
     path('range/<path:path>', views.get_rangep, name='get_rangep'),
-    path('range', views.get_range, name='range'),
-    path('ajax_range', views.get_range, name='ajax_range'),
+    path('range/', views.get_range, name='range'),
+    path('ajax_range/', views.get_range, name='ajax_range'),
+
+    path('dlrange/<path:path>', views.view_dlrange, name='dlrange'),
+    path('dlrange/', views.view_dlrange, name='dlrange'),
 
     path('getf', views.getf, name='getf'),
     path('ajax_getf', views.getf, name='ajax_getf'),
