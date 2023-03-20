@@ -311,6 +311,10 @@ table, tr, th, td {
     clear: both;
 }
 
+.xc-hide-raw {
+    visibility: hidden;
+}
+
 .oc-head {
     background: aliceblue;
     border: 0.1rem outset grey;

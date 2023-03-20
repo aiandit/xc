@@ -824,6 +824,14 @@ var ppActions = function(subtree, ev) {
     })
 }
 
+xc.unhideRaw = function(subtree, ev) {
+    var tms = subtree.querySelectorAll('.xc-hide-raw')
+    tms.forEach(function(el) {
+	el.style.visibility = 'visible'
+	el.classList.remove('xc-hide-raw')
+    })
+}
+
 xc.tclock = function(tstamp) {
     var d = new Date(tstamp)
     var ts = d.toLocaleTimeString() + '.' + d.getMilliseconds()
@@ -1077,6 +1085,7 @@ var updateTreeFinal = function(subtree, ev, done) {
     xc.ppActiveLink(subtree, ev)
     ppPolls(subtree, function(result) {
 	ppViews(subtree, ev, function(result) {
+	    xc.unhideRaw(subtree, ev)
 	    if (typeof done == 'function') {
 		done(result)
 	    }
