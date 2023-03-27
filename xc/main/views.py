@@ -1316,7 +1316,7 @@ def getp(request, path):
             return HttpResponse(fdata, content_type=mtype[0])
             #                return HttpResponse(fdata, content_type="application/octet-stream")
         else:
-            print('The file is not a file:', path)
+#            print('The file is not a file:', path)
             errmsg = 'The file was not found'
             return HttpResponse(status=404)
 
@@ -1338,7 +1338,7 @@ def getfileifposs(path, largeFileLimit=1e6):
     if lsl is None or len(lsl) == 0 or len(lsl['info']) == 0 or lsl['info']['type'] != '-':
         return (False, lsl, '', '')
 
-    print('getfileifposs', lsl['info'])
+    print(f"get {lsl['info']['path']}")
 
     fsize = lsl['info']['statdict']['st_size']
 
@@ -1367,7 +1367,7 @@ def getdata(request, path):
         resp['Content-Disposition']= f'attachment; filename="{fname}"'
         return resp
     else:
-        print('The file is not a file:', path)
+#        print('The file is not a file:', path)
         errmsg = 'The file was not found'
         return HttpResponse(status=404)
 
@@ -1479,7 +1479,7 @@ def getrange(request, path, mode, start, end, transpose=False):
         return resp
         #                return HttpResponse(fdata, content_type="application/octet-stream")
     else:
-        print('The file is not a file:', path)
+#        print('The file is not a file:', path)
         errmsg = 'The file was not found'
 
     if len(errmsg):
