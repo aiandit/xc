@@ -1,17 +1,17 @@
 var xframes = xframes || {}
 
+xframes.sections = ['main', 'login', 'register']
+
 xframes.ajaxPathName = function(path) {
     var aurl = new URL(path)
 
     var pieces = aurl.pathname.split(/[\/]+/)
-    var lastpiece = pieces[pieces.length-1]
+    var sect = pieces.filter((k) => xframes.sections.indexOf(k) > -1)
+    var sectind = pieces.indexOf(sect[0])
+    var page = pieces[sectind+1]
 
-    if (lastpiece == '') {
-	pieces = ['', 'main', '']
-	lastpiece = 'home'
-    }
-    if (!lastpiece.startsWith('ajax_')) {
-	pieces[pieces.length-1] = 'ajax_' + lastpiece
+    if (!page.startsWith('ajax_')) {
+	pieces[sectind+1] = 'ajax_' + page
     }
 
     var res = new URL(aurl.origin + pieces.join('/') + aurl.search) + ''
@@ -22,10 +22,12 @@ xframes.unajaxPathName = function(path) {
     var aurl = new URL(path)
 
     var pieces = aurl.pathname.split(/[\/]+/)
-    var lastpiece = pieces[pieces.length-1]
+    var sect = pieces.filter((k) => xframes.sections.indexOf(k) > -1)
+    var sectind = pieces.indexOf(sect[0])
+    var page = pieces[sectind+1]
 
-    if (lastpiece.startsWith('ajax_')) {
-        pieces[pieces.length-1] = lastpiece.substr(5)
+    if (page.startsWith('ajax_')) {
+        pieces[sectind+1] = page.substr(5)
     }
 
     var res = new URL(aurl.origin + pieces.join('/') + aurl.search) + ''

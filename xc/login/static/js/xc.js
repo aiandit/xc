@@ -426,8 +426,8 @@ var runxc = function(x, ev) {
         paramss = '?' + paramss.substr(1)
     }
 
-    var url = '/' + xframe_xapp + '/' + xframe_view + paramss
-    var ajaxurl = '/' + xframe_xapp + '/ajax_' + xframe_view + paramss
+    var url = '/' + xframe_xapp + '/' + xframe_view + '/' + xframe_path + paramss
+    var ajaxurl = '/' + xframe_xapp + '/ajax_' + xframe_view + '/' + xframe_path + paramss
 
     xc.beginFetch('get', url, document)
     myframes.renderLink(document, ajaxurl, function(res) {

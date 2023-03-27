@@ -48,16 +48,7 @@ def ajax_home(request):
     if 'XC_HOME_PATH' in dir(settings):
         homepath = settings.XC_HOME_PATH
 
-    return redirect(reverse('main:ajax_%s' % (homeview,)) + '?path=%s' % homepath)
-
-    data = {
-        'lsl': lsl,
-        'errs': errors,
-    }
-    xcontext = {'xapp': 'main', 'view': 'home', 'cgi': getAllCGI(reqDict), 'data': data, 'user': userdict(request.user)}
-    dx = dictxml(xcontext)
-    context = { 'context_xml': dx, 'forms': [] }
-    return render(request, 'common/xc-msg.xml', context, content_type="application/xml")
+    return redirect(reverse(f'main:ajax_{homeview}', args=(homepath,)))
 
 
 def path(request):
@@ -410,12 +401,12 @@ class ViewData(PathData):
     title = 'XC View Document'
     mode = forms.CharField(required=False, max_length=1024, label='Mode')
 
-def view(request):
-    context = {'xapp': 'main', 'view': 'view', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
+def view_view(request, path=''):
+    context = {'xapp': 'main', 'view': 'view', 'path': path, 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
 
-def ajax_view(request):
+def ajax_view(request, path=None):
 
     lsl = ''
 
@@ -437,7 +428,8 @@ def ajax_view(request):
         errmsg = 'The form data is invalid'
     else:
         cdata = rdata.cleaned_data
-        path = cdata['path']
+        if path is None:
+            path = cdata['path']
         mode = cdata['mode']
 
         lsl = workdir.stat(path)
