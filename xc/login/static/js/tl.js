@@ -39,9 +39,15 @@ tl.updateDict = function() {
     })
 }
 
-tl.apptable = function(data) {
+tl.apptable1 = function(data) {
     tl.stringtable = Object.assign({}, tl.stringtable, data)
     tl.updateDict()
+}
+
+tl.apptable = function(data) {
+    var arr2d = (arr) => { return {...arr} }
+    var dummy = arr2d(data)
+    tl.apptable1(dummy)
 }
 
 tl.settable = function(data) {
@@ -89,9 +95,9 @@ tl.itransl = function(str) {
     return str
 }
 
-tl.deftable = {
-    lang: {en: 'Language', de: 'Sprache'}
-}
+tl.deftable = [
+    {en: 'Language', de: 'Sprache'}
+]
 
 tl.apptable(tl.deftable)
 
