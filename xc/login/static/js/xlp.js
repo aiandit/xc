@@ -6,6 +6,17 @@ var xlp = xlp || {}
 xlp.scopy = ({...str}) => { return {...str} }
 xlp.dcopy = (o) => JSON.parse(JSON.stringify(o))
 
+xlp.lookupName = function(name) {
+    var parts = name.split('.')
+    var res = window
+    parts.map((n)=> {
+	if (res != undefined) {
+	    res = res[n]
+	}
+    })
+    return res
+}
+
 //https://stackoverflow.com/questions/3362471/how-can-i-call-a-javascript-constructor-using-call-or-apply
 function callConstructor(constructor) {
     var factoryFunction = constructor.bind.apply(constructor, arguments);
