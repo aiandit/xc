@@ -130,13 +130,14 @@ xframes.mkXframes = function(frames, xsltbase) {
         })
         console.log('Xframes renderings launched')
     }
-    var renderRespHandler = function(status, request, done, src,url) {
-        var indoc = request.responseXML
+    var renderRespHandler = function(indoc, request, done, src,url) {
         if ((typeof indoc == "undefined") || (indoc === null)) {
             console.error('Xframes: no XML response from ' + src + '(' + url + ')')
+            done(request, -1)
         } else {
 	    if (src && src.dataset && src.dataset.formSubmitBackground) {
 		console.log('Form submitted in BG: ' + status)
+		done(request, 0)
 	    } else {
 		render(indoc, function(res) {
                     done(request, res)
