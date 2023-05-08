@@ -590,7 +590,7 @@ xlp.amap = function(array, func, done) {
             if (dones.every((x) => { return x>0 })) {
                 done(results)
             }
-        })
+        }, k)
     })
     if (n == 0) {
 	done(results)
