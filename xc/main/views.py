@@ -477,11 +477,11 @@ class EditData(XCForm):
         cleaned_data = super().clean()
         return cleaned_data
 
-def edit(request):
-    context = {'xapp': 'main', 'view': 'edit', 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
+def view_edit(request, path=''):
+    context = {'xapp': 'main', 'view': 'edit', 'path': path, 'cgij': xmlesc(json.dumps(getAllCGI(request.GET))), 'data': [], 'number': 0}
     return render(request, 'common/' + settings.MAIN_FRAME, context)
 
-def ajax_edit(request):
+def ajax_edit(request, path=None):
 
     lsl = ''
 
@@ -508,7 +508,8 @@ def ajax_edit(request):
         errmsg = 'The form data is invalid'
     else:
         cdata = rdata.cleaned_data
-        path = cdata['path']
+        if path is None:
+            path = cdata['path']
         formpath = path
 
         if request.method == "POST":
