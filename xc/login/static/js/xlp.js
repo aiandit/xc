@@ -75,14 +75,15 @@ xlp.parseXMLC = function(xmlStr) {
     }
 }
 
-xlp.sendRequest = function(URL, method, callback, headers, data, timeout) {
+xlp.sendRequest = function(URL, method, callback, headers, data, timeout, responseType) {
     if (typeof URL == 'object') {
         return xlp.sendRequest(URL.URL || URL.src || URL.href,
-                               URL.method || undefined,
-                               URL.callback || undefined,
-                               URL.headers || undefined,
-                               URL.data || undefined,
-                               URL.timeout || undefined)
+                               URL.method       || undefined,
+                               URL.callback     || undefined,
+                               URL.headers      || undefined,
+                               URL.data         || undefined,
+                               URL.timeout      || undefined,
+			       URL.responseType || '')
     }
 
     if (!method) method = 'GET'
@@ -107,6 +108,8 @@ xlp.sendRequest = function(URL, method, callback, headers, data, timeout) {
         callback(-2, request)
     }
 
+    request.responseType = responseType
+
     request.onreadystatechange = function () {
         if (request.readyState == 4) {
             if (request.status == 200) {
@@ -130,21 +133,21 @@ xlp.sendRequest = function(URL, method, callback, headers, data, timeout) {
     request.send(data)
 }
 
-xlp.sendGet = function(URL, callback, timeout) {
+xlp.sendGet = function(URL, callback, timeout, responseType) {
     if (typeof URL == 'object') {
         URL.method = 'GET'
         xlp.sendRequest(URL)
     } else {
-        xlp.sendRequest({URL: URL, method: 'GET', callback: callback, timeout: timeout})
+        xlp.sendRequest({URL: URL, method: 'GET', callback: callback, timeout: timeout, responseType: responseType})
     }
 }
 
-xlp.sendPost = function(URL, data, headers, callback, timeout) {
+xlp.sendPost = function(URL, data, headers, callback, timeout, responseType) {
     if (typeof URL == 'object') {
         URL.method = 'POST'
         xlp.sendRequest(URL)
     } else {
-        xlp.sendRequest({URL: URL, method: 'POST', data: data, callback: callback, headers: headers, timeout: timeout})
+        xlp.sendRequest({URL: URL, method: 'POST', data: data, callback: callback, headers: headers, timeout: timeout, responseType: responseType})
     }
 }
 
@@ -197,29 +200,10 @@ xlp.reqXML = function(src, obj) {
     var cur_callback = obj.callback
     obj.callback = function(status, request) {
         if (status == 0) {
-	    if (obj.returnJSON) {
-		var json
-		try {
-		    json = JSON.parse(request.responseText)
-		} catch (error) {
-		    xlp.error('No valid JSON response from server: ' + obj.URL)
-		}
-		cur_callback(json, request)
-	    } else if (obj.returnData) {
-                cur_callback(request.responseText, request)
+	    if (request.responseType == '' && request.responseXML) {
+		cur_callback(request.responseXML, request)
 	    } else {
-		var rdoc
-		if (xlp.isIE) {
-                    rdoc = parseXML(request.responseText)
-		} else {
-                    rdoc = request.responseXML
-		}
-		if (rdoc) {
-                    cur_callback(rdoc, request)
-		} else {
-                    xlp.error('No valid XML response from server: ' + obj.URL)
-                    cur_callback(0, request, 'no XML')
-		}
+		cur_callback(request.response, request)
 	    }
         } else {
             xlp.error('Error response: ' + request.status + ' ' + request.statusText)
@@ -230,12 +214,17 @@ xlp.reqXML = function(src, obj) {
 }
 
 xlp.reqJSON = function(src, obj) {
-    obj.returnJSON = true
+    obj.responseType = 'json'
     xlp.reqXML(src, obj)
 }
 
 xlp.reqData = function(src, obj) {
-    obj.returnData = true
+    obj.responseType = 'arraybuffer'
+    xlp.reqXML(src, obj)
+}
+
+xlp.reqText = function(src, obj) {
+    obj.responseType = 'text'
     xlp.reqXML(src, obj)
 }
 
@@ -253,6 +242,10 @@ xlp.loadJSON = function(path, callback) {
 
 xlp.loadData = function(path, callback) {
     xlp.reqData(document,  {'method': 'GET', 'URL': path, 'callback': callback})
+}
+
+xlp.loadText = function(path, callback) {
+    xlp.reqText(document,  {'method': 'GET', 'URL': path, 'callback': callback})
 }
 
 xlp.createEvent = function(name, data) {
