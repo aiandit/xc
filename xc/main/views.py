@@ -1531,7 +1531,7 @@ def get_head(request, path=None):
             path = cdata['path']
         n = cdata['n']
         if n is None:
-            n = 10
+            n = 1
         return getrange(request, path, 'head', None, n)
 
     if len(errmsg):
