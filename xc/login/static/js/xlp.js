@@ -499,10 +499,14 @@ xlp.mkXLP = function(xslts, xsltbase, options) {
             })
         } else if (typeof xslt == 'string') {
             // string: function name
-            var xsltf = eval(xslt)
-            xsltf(xml, function(res) {
-                nextStep(res)
-            })
+            var xsltf = xlp.lookupName(xslt)
+	    if (xsltf.length > 1) {
+		xsltf(xml, function(res) {
+                    nextStep(res)
+                })
+	    } else {
+		nextStep(xsltf(xml))
+	    }
         } else if (typeof xslt == 'function') {
             xslt(xml, function(res) {
                 nextStep(res)
