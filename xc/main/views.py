@@ -2161,16 +2161,12 @@ def ajax_ps(request, plain=False):
 
     if request.method == "GET":
         reqDict = request.GET
-        rdata = PsData(reqDict)
-        res = rdata.is_valid()
-        cdata = rdata.cleaned_data
-        rdata = PsData(initial=cdata)
 
     elif request.method == "POST":
         reqDict = request.POST
-        rdata = PsData(reqDict)
 
-    if request.method == "POST":
+    rdata = PsData(reqDict)
+    if request.method == "POST" or  request.method == "GET":
         res = rdata.is_valid()
         if not res:
             errmsg = 'The form data is invalid'
