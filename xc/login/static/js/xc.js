@@ -618,156 +618,159 @@ xc.getCSRFToken = function() {
     return csrf
 }
 
+xc.mkPoll = function(el, info, eldone) {
+
+    const tlaunch = (new Date()).getTime()
+    var getf = function(ciid, count, tlast) {
+	el = document.getElementById(ciid)
+	if (!xc.isChainedInterval(ciid)) {
+	    return
+	}
+	if (!el) {
+	    return
+	}
+	if (el.dataset.pollRunning != tlaunch) {
+	    return
+	}
+	var url = info.pollUrl
+	var t0 = (new Date()).getTime()
+	var tres = t0
+	//	    console.log('getf: ' + (t0 - globtO) + ': '  + url)
+	var ppFun
+	if (info.postprocess) {
+	    ppFun = xlp.lookupName(info.postprocess)
+	}
+	var processData = function(text, el, done) {
+	    try {
+		if (ppFun) {
+		    if (ppFun.length > 2) {
+			ppFun(text, el, done)
+		    } else {
+			res = ppFun(text, el)
+			done(res)
+		    }
+		}
+	    } catch (error) {
+		console.error('ppPolls catched error in user function ' + info.postprocess);
+		console.error(error);
+		res = {noupdate: true}
+		done(res)
+	    }
+	}
+	var handleTextData = function(text, done) {
+	    processData(text, el, (res)=> {
+		if (typeof res == typeof {}) {
+		    if (!res.noupdate) {
+			el.innerHTML = res.text
+		    }
+		    if (typeof res.done == 'function') {
+			res.done()
+		    }
+		} else if (res != undefined) {
+		    el.innerHTML = res
+		}
+		done(res)
+	    })
+	}
+	var handleXMLData = function(text, done) {
+	    var ppFilter = info.pollFilter
+	    var ppContainer = info.pollContainer || el.nodeName
+	    var localframes = [ {toDoc: false, container: ppContainer, target: ciid, filters: [ ppFilter ]} ]
+	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
+	    mylframes.render(text, done, function(x, predone) {
+		updateTreeFinal(x, undefined, predone)
+	    })
+	}
+	var finalStep = function() {
+	    updateTreeFinal(el, undefined, function(utres) {
+		var tnow = (new Date()).getTime()
+		var nexttime = Number(info.pollInterval) + t0
+		var waitInter = nexttime - tnow - 1
+		// console.log('Poll ' + ciid + ' at ' + xc.tclock(t0) + ' result ' +
+		// 		xc.tdsecs(tres-t0) + ' complete ' + xc.tdsecs(tnow - t0) +
+		// 		', again in ' + xc.tdsecs(waitInter))
+		if (waitInter < 200) {
+		    waitInter = 200
+		}
+		setTimeout(getf, waitInter, ciid, count+1, t0)
+		if (count == 0 && info.pollDelay == undefined) {
+		    eldone(utres)
+		}
+	    })
+	}
+	var handleResult = function(st, res) {
+	    if (st == 0) {
+		tres = (new Date()).getTime()
+		if (info.postprocess) {
+		    if (res.responseType == 'document') {
+			extractXPath(res.response, '/*/xcontent-cdata', false, '', function(x) {
+			    if (x.textContent.length > 0) {
+				handleTextData(x.textContent, finalStep)
+			    } else {
+				handleTextData(res.response, finalStep)
+			    }
+			})
+		    } else {
+			handleTextData(res.response, finalStep)
+		    }
+		} else {
+		    handleXMLData(res.response, finalStep)
+		}
+	    } else {
+		console.error('poll with invalid status', st)
+		handleTextData('', finalStep)
+	    }
+	}
+	var method = info.pollMethod || 'get'
+	var timeout = info.pollTimeout
+	var respType = info.responseType
+	if (method.toLowerCase() == 'post') {
+	    var parts = url.split('?')
+	    var rdata = parts[1] + '&csrfmiddlewaretoken=' + xc.getCSRFToken()
+	    var headers = {'Content-type': 'application/x-www-form-urlencoded'}
+	    xlp.sendPost(parts[0], rdata, headers, handleResult, timeout, respType)
+	} else {
+	    xlp.sendGet(url, handleResult, timeout, respType)
+	}
+    }
+    if (el.attributes.id == undefined) {
+	var pid = info.id || 'pid'
+	el.setAttribute('id', pid + xc.id())
+    }
+    var pollid = el.attributes.id.value
+    if (info.pollRunning == undefined) {
+	info.pollRunning = tlaunch
+	var delay = info.pollDelay || 0
+	setTimeout(function() {
+	    xc.setChainedInterval(pollid)
+	    getf(pollid, 0, (new Date()).getTime())
+	}, delay)
+	if (info.pollDelay != undefined) {
+	    eldone()
+	}
+    } else {
+	eldone()
+    }
+}
+
 //var globtO =  (new Date()).getTime()
 var ppPolls = function(subtree, done) {
     var tms = subtree.querySelectorAll('.xc-sl-poll')
-
     var doPoll = function(el, eldone) {
-	const tlaunch = (new Date()).getTime()
-	var getf = function(ciid, count, tlast) {
-	    el = document.getElementById(ciid)
-	    if (!xc.isChainedInterval(ciid)) {
-//		console.log('Chained interval ' + ciid + ' was cancelled')
-		return
-	    }
-	    if (!el) {
-//		console.log('poll target element ' + ciid + ' disappeared')
-		return
-	    }
-	    var url = el.dataset.pollUrl
-	    var t0 = (new Date()).getTime()
-	    var tres = t0
-//	    console.log('getf: ' + (t0 - globtO) + ': '  + url)
-	    var ppFun = eval(el.dataset.postprocess)
-	    var processData = function(text, el, done) {
-		try {
-		    if (ppFun) {
-			if (ppFun.length > 2) {
-			    ppFun(text, el, done)
-			} else {
-			    res = ppFun(text, el)
-			    done(res)
-			}
-		    }
-		} catch (error) {
-		    console.error('ppPolls catched error in user function ' + el.dataset.postprocess);
-		    console.error(error);
-		    res = {noupdate: true}
-		    done(res)
-		}
-	    }
-	    var handleTextData = function(text, done) {
-		processData(text, el, (res)=> {
-		    if (typeof res == typeof {}) {
-			if (!res.noupdate) {
-			    el.innerHTML = res.text
-			}
-			if (typeof res.done == 'function') {
-			    res.done()
-			}
-		    } else if (res != undefined) {
-			el.innerHTML = res
-		    }
-		    done(res)
-		})
-	    }
-	    var handleXMLData = function(text, done) {
-		var ppFilter = el.dataset.pollFilter
-		var ppContainer = el.dataset.pollContainer || el.nodeName
-		var localframes = [ {toDoc: false, container: ppContainer, target: ciid, filters: [ ppFilter ]} ]
-		var mylframes = xframes.mkXframes(localframes, xc.xslpath)
-		mylframes.render(text, done, function(x, predone) {
-		    updateTreeFinal(x, undefined, predone)
-		})
-	    }
-	    var finalStep = function() {
-		updateTreeFinal(el, undefined, function(utres) {
-		    var tnow = (new Date()).getTime()
-		    var nexttime = Number(el.dataset.pollInterval) + t0
-		    var waitInter = nexttime - tnow - 1
-		    // console.log('Poll ' + ciid + ' at ' + xc.tclock(t0) + ' result ' +
-		    // 		xc.tdsecs(tres-t0) + ' complete ' + xc.tdsecs(tnow - t0) +
-		    // 		', again in ' + xc.tdsecs(waitInter))
-		    if (waitInter < 200) {
-			waitInter = 200
-		    }
-		    setTimeout(getf, waitInter, ciid, count+1, t0)
-		    if (count == 0) {
-			eldone(utres)
-		    }
-		})
-	    }
-	    var handleResult = function(st, res) {
-		if (st == 0) {
-		    tres = (new Date()).getTime()
-		    if (el.dataset.postprocess) {
-			if (res.responseXML != undefined) {
-			    extractXPath(res.responseXML, '/*/xcontent-cdata', false, '', function(x) {
-				if (x.textContent.length > 0) {
-				    handleTextData(x.textContent, finalStep)
-				} else {
-				    handleTextData(res.responseText, finalStep)
-				}
-			    })
-			} else {
-			    handleTextData(res.responseText, finalStep)
-			}
-		    } else {
-			if (res.responseXML != undefined) {
-			    handleXMLData(res.responseXML, finalStep)
-			} else {
-			    console.error('no XML data for filtered poll')
-			    handleTextData('', finalStep)
-			}
-		    }
-		} else {
-		    console.error('poll with invalid status', st)
-		    handleTextData('', finalStep)
-		}
-	    }
-	    var method = el.dataset.pollMethod || 'get'
-	    var timeout = el.dataset.pollTimeout
-	    if (method.toLowerCase() == 'post') {
-		var parts = url.split('?')
-		var rdata = parts[1] + '&csrfmiddlewaretoken=' + xc.getCSRFToken()
-		var headers = {'Content-type': 'application/x-www-form-urlencoded'}
-		xlp.sendPost(parts[0], rdata, headers, handleResult, timeout)
-	    } else {
-		xlp.sendGet(url, handleResult, timeout)
-	    }
-	}
-	if (el.attributes.id == undefined) {
-	    var pid = el.dataset.id || 'pid'
-	    el.setAttribute('id', pid + xc.id())
-	}
-	var pollid = el.attributes.id.value
-	if (el.dataset.pollRunning == undefined) {
-	    el.dataset.pollRunning = tlaunch
-	    var delay = el.dataset.pollDelay || 0
-	    setTimeout(function() {
-		xc.setChainedInterval(pollid)
-		getf(pollid, 0, (new Date()).getTime())
-	    }, delay)
-	} else {
+	var info = el.dataset
+	xc.mkPoll(el, info, () => {
+	    console.log('poll ' + el.attributes.id.value + ' done')
 	    eldone()
-	}
-    }
-
-    if (tms.length) {
-//	console.log('polls to do:', tms)
+	})
     }
     xlp.amap(tms, doPoll, function(res) {
-	if (tms.length > 0) {
-//	    console.log('All polls done: ' + tms.length)
-	}
 	done(res)
     })
-
 }
 
-var ppViews = function(subtree, ev, done) {
+var ppViews = function(subtree, event, done) {
     var tms = subtree.querySelectorAll('.xc-sl-view')
-    var doView = function(el, eldone) {
+    var doView = function(el, eldone, index) {
 	var getf = function() {
 	    var viewTarget = el.dataset.viewTarget
 	    if (viewTarget == undefined) {
@@ -779,6 +782,9 @@ var ppViews = function(subtree, ev, done) {
 	    var viewName = el.dataset.viewName || 'unknown-view'
 	    var viewCache = el.dataset.viewCache || false
 	    var url = el.dataset.viewUrl
+	    var viewDescr = function() {
+		return 'view ' + index + '/' + tms.length + ' of ' + xc.getElID(subtree) + ' (' + url + ')'
+	    }
 	    var localframes = [
 		{target: viewTarget,
 		 filters: [
@@ -786,15 +792,15 @@ var ppViews = function(subtree, ev, done) {
 		 ]}
 	    ]
 	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
-            mylframes.renderLink(ev.target, url, function(request) {
-		console.log('VIEW: sub view ' + url + ' has been rendered')
+            mylframes.renderLink(event.target, url, function(request) {
+		console.log('VIEW: sub ' + viewDescr() + ' has been rendered')
 		xc.docs[viewName] = request.responseXML
-		updateTreeFinal(document.getElementById(viewTarget), ev, function(result) {
+		updateTreeFinal(document.getElementById(viewTarget), event, function(result) {
 		    var onloadCode = el.dataset.viewOnload
 		    if (onloadCode != undefined) {
-			eval(onloadCode)
+			xc.runMethod(onloadCode)
 		    }
-		    console.log('VIEW: sub view ' + url + ' is handled completely')
+		    console.log('VIEW: sub ' + viewDescr() + ' is handled completely')
 		    eldone(request)
 		})
             }, viewCache)
@@ -803,26 +809,49 @@ var ppViews = function(subtree, ev, done) {
 	if (el.dataset.viewDone != '1') {
 	    getf()
 	} else {
-	    console.log('view is done already')
+	    console.log('view ' + index + '/' + tms.length + ' (' + xc.getElID(el) + ') of ' + xc.getElID(subtree) + ' is done already')
 	    eldone()
 	}
         return false
     }
+    if (tms.length > 0) {
+	console.log('Start processing ' + tms.length + ' subviews of ' + xc.getElID(subtree))
+    }
     xlp.amap(tms, doView, function(res) {
 	if (tms.length > 0) {
-	    console.log('All views done')
+	    console.log('All views of ' + xc.getElID(subtree) + ' done')
 	}
 	done(res)
     })
 }
 
-var ppActions = function(subtree, ev) {
+xc.runFunction = function(name, args) {
+    return xc.runMethod(name, null, args)
+}
+
+xc.runMethod = function(name, x, args) {
+    var fn = xlp.lookupName(name)
+    var res
+    if (typeof fn != 'function') {
+	console.error('Cannot execute ' + name + ' as function or method (type ' + typeof fn + ')')
+    } else {
+	if (x == undefined) {
+	    var parts = name.split('.')
+	    x = xlp.lookupName(parts.slice(0, parts.length-1).join('.'))
+	}
+	res = fn.apply(x, args)
+    }
+    return res
+}
+
+xc.ppActions = function(subtree, ev) {
     var tms = subtree.querySelectorAll('.xc-action')
     tms.forEach(function(el) {
 	var getf = function() {
-	    var actionCode = el.dataset.action
-	    var res = eval(actionCode)
-	    el.dataset.actionResult = res
+	    var res = xc.runFunction(el.dataset.action)
+	    if (el.dataset.actionResult != undefined) {
+		el.dataset.actionResult = res
+	    }
 	}
 	if (el.dataset.actionDone != '1') {
 	    el.dataset.actionDone = 1
@@ -1086,7 +1115,7 @@ var updateTree = function(subtree, ev) {
 
 var updateTreeFinal = function(subtree, ev, done) {
     updateTree(subtree, ev)
-    ppActions(subtree, ev)
+    xc.ppActions(subtree, ev)
     tl.update(subtree)
     ppSorts(subtree, ev)
     xc.ppActiveLink(subtree, ev)
@@ -1191,10 +1220,9 @@ xc.submitForm = function(form, url, done) {
 xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done) {
     var updateconfxlp = xlp.mkXLP(filters, '/main/getf/')
     updateconfxlp.transform(doc, toDoc, function(resconf) {
-	form.path.value = ofname
 	form.data.value = toDoc ? resconf.documentElement.outerHTML : resconf.textContent
 	form.csrfmiddlewaretoken.value = xc.getCSRFToken()
-	xlp.submitForm(form, '/main/ajax_edit', function(status) {
+	xlp.submitForm(form, '/main/ajax_edit/' + ofname, function(status) {
 	    console.log('Doc ' + doc.URL + ' transformed with ' + filters + ' and saved as ' + ofname)
 	    done()
 	})
@@ -1363,6 +1391,30 @@ xc.sortCol = function(ev) {
     }
 
     return false
+}
+
+xc.findAncestorByClass = function(x, cname) {
+    if (x.classList.contains(cname)) {
+	return x
+    } else if (x.parentElement) {
+	return xc.findAncestorByClass(x.parentElement, cname)
+    }
+}
+
+xc.findAncestorByNodeName = function(x, cname) {
+    if (x.nodeName.toLowerCase() == cname.toLowerCase()) {
+	return x
+    } else if (x.parentElement) {
+	return xc.findAncestorByNodeName(x.parentElement, cname)
+    }
+}
+
+xc.getElID = function(el) {
+    if (el.attributes && el.attributes.id)
+	return el.attributes.id.value
+    else if (el.nodeType)
+	return el.nodeName
+    return 'unknown-id'
 }
 
 xc.getID = function(path, done) {
