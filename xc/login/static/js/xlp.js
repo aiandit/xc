@@ -12,8 +12,14 @@ xlp.lookupName = function(name) {
     parts.map((n)=> {
 	if (res != undefined) {
 	    res = res[n]
+	    if (res == undefined) {
+		console.error('Name lookup for ' + name + ' failed at step ' + n)
+	    }
 	}
     })
+    if (res == undefined) {
+	console.error('Name lookup for ' + name + ' failed')
+    }
     return res
 }
 
