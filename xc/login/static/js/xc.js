@@ -579,6 +579,7 @@ xc.psHead = function(n) {
 	return lines.slice(0, n).join('\n')
     }
 }
+xc.psHead2 = xc.psHead(2)
 var psSingleField = function(data) {
     if (data.length == 0) return ''
     return '<span>' + data.split('\n')[1] + '</span>'
