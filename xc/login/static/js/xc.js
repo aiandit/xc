@@ -643,13 +643,15 @@ xc.mkPoll = function(el, info, eldone) {
 	}
 	var processData = function(text, el, done) {
 	    try {
-		if (ppFun) {
+		if (typeof ppFun == 'function') {
 		    if (ppFun.length > 2) {
 			ppFun(text, el, done)
 		    } else {
 			res = ppFun(text, el)
 			done(res)
 		    }
+		} else {
+			done(res)
 		}
 	    } catch (error) {
 		console.error('ppPolls catched error in user function ' + info.postprocess);
