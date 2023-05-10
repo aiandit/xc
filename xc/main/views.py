@@ -525,7 +525,7 @@ def ajax_edit(request, path=None):
                 return redirect(next_)
 
             else:
-                errmsg = 'file write failed: "%s"' % (stat)
+                errmsg = f'file write "{path}" failed: {stat}'
                 fdata = ''
             xcontent = fdata
 
@@ -549,6 +549,7 @@ def ajax_edit(request, path=None):
     dict['data'] = ''
 
     if len(errmsg):
+        print('errmsg:', errmsg)
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
 
     data = {
@@ -612,7 +613,7 @@ def ajax_append(request):
                 return redirect(next_)
 
             else:
-                errmsg = 'file write failed: "%s"' % (stat)
+                errmsg = f'file write "{path}" failed: {stat}'
                 fdata = ''
             xcontent = fdata
 
@@ -801,7 +802,7 @@ def ajax_move(request):
             if stat == 0:
                 return redirect(reverse('main:ajax_path') + '?path=%s' % base)
             else:
-                errmsg = 'File write failed: %d' % stat
+                errmsg = f'file write "{path}" failed: {stat}'
                 fdata = ''
 
     path = cdata['path']
@@ -893,7 +894,7 @@ def ajax_clone(request):
             if stat == 0:
                 return redirect(reverse('main:ajax_path') + '?path=%s' % outpath)
             else:
-                errmsg = 'file write failed'
+                errmsg = f'file write "{path}" failed: {stat}'
                 fdata = ''
 
     (filename, file_extension) = os.path.splitext(path)
@@ -984,7 +985,7 @@ def ajax_transform(request):
                     if stat == 0:
                         return redirect(reverse('main:ajax_path') + '?path=%s' % outpath)
                     else:
-                        errmsg = 'file write failed'
+                        errmsg = f'file write "{path}" failed: {stat}'
                         fdata = ''
 
     (filename, file_extension) = os.path.splitext(path)
