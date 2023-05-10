@@ -488,7 +488,6 @@ def ajax_edit(request, path=None):
     errmsg = ''
     errors = []
     xcontent = ''
-    path = ''
     fdata = ''
     mtype = ''
 
