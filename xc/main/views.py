@@ -468,7 +468,7 @@ class EditData(XCForm):
     error_css_class = 'error'
     required_css_class = 'required'
 
-    path = forms.CharField(max_length=1024, label='Path')
+    path = forms.CharField(required=False, max_length=1024, label='Path')
     data = forms.CharField(required=False, max_length=1024000, label='Content', widget=forms.Textarea)
     comment = forms.CharField(required=False, max_length=1024, label='Comment', widget=forms.Textarea)
     next_ = forms.CharField(required=False, max_length=1024, label='Follow-up action')
@@ -521,7 +521,7 @@ def ajax_edit(request, path=None):
                 fdata = data
                 next_ = cdata['next_']
                 if len(next_) == 0:
-                    next_ = reverse('main:ajax_edit') + '?path=%s' % (path,)
+                    next_ = reverse('main:ajax_edit', args=(path,))
                 return redirect(next_)
 
             else:
@@ -549,7 +549,7 @@ def ajax_edit(request, path=None):
     dict['data'] = ''
 
     if len(errmsg):
-        print('errmsg:', errmsg)
+        print(f'view_edit("{path}") errmsg: {errmsg}')
         errors.append({'errmsg': errmsg, 'type': 'fatal'})
 
     data = {
