@@ -1,6 +1,7 @@
 var xframes = xframes || {}
 
 xframes.sections = ['main', 'login', 'register']
+xframes.homepage = 'home'
 
 xframes.ajaxPathName = function(path) {
     var aurl = new URL(path)
@@ -8,10 +9,17 @@ xframes.ajaxPathName = function(path) {
     var pieces = aurl.pathname.split(/[\/]+/)
     var sect = pieces.filter((k) => xframes.sections.indexOf(k) > -1)
     var sectind = pieces.indexOf(sect[0])
-    var page = pieces[sectind+1]
+    if (sectind >= 0) {
 
-    if (!page.startsWith('ajax_')) {
-	pieces[sectind+1] = 'ajax_' + page
+	var page = pieces[sectind+1]
+	if (!page.startsWith('ajax_')) {
+	    pieces[sectind+1] = 'ajax_' + page
+	}
+
+    } else {
+
+	pieces = ['', xframes.sections[0], 'ajax_' + xframes.homepage]
+
     }
 
     var res = new URL(aurl.origin + pieces.join('/') + aurl.search) + ''
