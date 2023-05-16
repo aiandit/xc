@@ -158,12 +158,6 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
 }
 
 xc.getClassViewFunction = function(dclass, mode, done) {
-    var verb = 'view'
-    var vparam = xc.curresp.querySelector('cgi > v')
-    if (vparam != null) {
-	verb = vparam.textContent
-    }
-    dclass += '-' + verb
     var key = dclass + '-' + mode
     var incache = xc.classViewFunctions[key]
     if (typeof incache == 'undefined') {
@@ -184,6 +178,48 @@ var updateXView = function(ev, done) {
     })
 }
 
+xc.getDocumentClass = function(xcontdoc, done) {
+    var dclass = 'default', mode = 'html'
+
+    var modeForm = document.forms['xc-control']
+    if (modeForm) {
+	mode = modeForm.elements['mode'].value
+    }
+
+    var verb = 'view'
+    var vparam = xc.curresp.querySelector('cgi > v')
+    if (vparam != null) {
+	verb = vparam.textContent
+    }
+
+    if (!xcontdoc.startsWith('<')) {
+
+	dclass = xc.curtype.replace('/', '_')
+	dclass += '-' + verb
+	done(dclass, mode)
+
+    } else {
+
+	var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
+	xinfo.transform(xcontdoc, false, function(jinfo) {
+            if (! jinfo) {
+                console.error('XC: failed to get doc class info in JSON format')
+            } else {
+                var info = JSON.parse(jinfo.textContent)
+                if (info.class.length>0) {
+		    dclass = info.class
+                } else {
+		    console.error('XC: No Xdata class found in the JSON structure')
+                }
+            }
+	    console.log('XC: class is ' + dclass + '-' + mode)
+	    dclass += '-' + verb
+	    done(dclass, mode)
+	})
+
+    }
+}
+
 var updateXDataView = function(ev, done) {
     updateTree(document, ev)
 
@@ -199,49 +235,19 @@ var updateXDataView = function(ev, done) {
         editForm.data.value = xcontdoc
     }
 
-    if (!xcontdoc.startsWith('<')) {
-        console.log('No XML data')
+    xc.getDocumentClass(xcontdoc, function(dclass, mode) {
 
-	var dclass = xc.curtype.replace('/', '_')
-        xc.getClassViewFunction(dclass, mode, function(xcontdoc) {
+        xc.getClassViewFunction(dclass, mode, function(res) {
 	    res.render(xcontdoc, function(res) {
                 console.log('Done with class based render cycle')
                 lastStep(res)
+	    }, function(res, pdone) {
+                console.log('Done with class based content generation: ' + dclass + ', ' + mode)
+		updateTreeFinal(res, ev, pdone)
 	    })
         })
 
-    } else {
-	var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
-	xinfo.transform(xcontdoc, false, function(jinfo) {
-            var dclass = 'default'
-            if (! jinfo) {
-                console.error('XC: failed to get doc class info in JSON format')
-            } else {
-                var info = JSON.parse(jinfo.textContent)
-                if (info.class.length>0) {
-		    dclass = info.class
-                } else {
-		    console.error('XC: No Xdata class found in the JSON structure')
-                }
-            }
-            var modeForm = document.forms['xc-control']
-            if (modeForm) {
-		mode = modeForm.elements['mode'].value
-            }
-	    console.log('XC: class is ' + dclass)
-	    xc.docs[dclass] = xcontdoc
-            xc.getClassViewFunction(dclass, mode, function(res) {
-		res.render(xcontdoc, function(res) {
-                    console.log('Done with class based render cycle: ' + dclass + ', ' + mode)
-                    lastStep(res)
-		}, function(res, pdone) {
-                    console.log('Done with class based content generation: ' + dclass + ', ' + mode)
-		    updateTreeFinal(res, ev, pdone)
-		})
-            })
-	})
-    }
-
+    })
 }
 
 var getXDataXML = function(inxml) {
@@ -675,8 +681,13 @@ xc.mkPoll = function(el, info, eldone) {
 		done(res)
 	    })
 	}
-	var handleXMLData = function(text, done) {
-	    var ppFilter = info.pollFilter
+	var handleXMLData = function(text, ppFilter, done) {
+	    if (ppFilter == undefined) {
+		xc.getDocumentClass(text, function(dclass, mode) {
+		    handleXMLData(text, dclass + '-' + mode + '.xsl', done)
+		})
+		return
+	    }
 	    var ppContainer = info.pollContainer || el.nodeName
 	    var localframes = [ {toDoc: false, container: ppContainer, target: ciid, filters: [ ppFilter ]} ]
 	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
@@ -717,7 +728,7 @@ xc.mkPoll = function(el, info, eldone) {
 			handleTextData(res.response, finalStep)
 		    }
 		} else {
-		    handleXMLData(res.response, finalStep)
+		    handleXMLData(res.response, info.pollFilter, finalStep)
 		}
 	    } else {
 		console.error('poll with invalid status', st)
