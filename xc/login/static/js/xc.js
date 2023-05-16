@@ -648,6 +648,7 @@ xc.mkPoll = function(el, info, eldone) {
 	    ppFun = xlp.lookupName(info.postprocess)
 	}
 	var processData = function(text, el, done) {
+	    var res
 	    try {
 		if (typeof ppFun == 'function') {
 		    if (ppFun.length > 2) {
@@ -657,7 +658,7 @@ xc.mkPoll = function(el, info, eldone) {
 			done(res)
 		    }
 		} else {
-			done(res)
+		    done(text)
 		}
 	    } catch (error) {
 		console.error('ppPolls catched error in user function ' + info.postprocess);
