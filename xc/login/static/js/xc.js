@@ -801,6 +801,7 @@ var ppViews = function(subtree, event, done) {
 	    }
 	    var localframes = [
 		{target: viewTarget,
+		 params: el.dataset,
 		 filters: [
 		     el.dataset.viewFilter
 		 ]}

@@ -56,7 +56,7 @@ xframes.mkXframes = function(frames, xsltbase) {
     for (var framen in frames) {
         var frame = frames[framen]
         if (frame.xlp == undefined) {
-            xlps[framen] = xlp.mkXLP(frame.filters, xsltbase)
+            xlps[framen] = xlp.mkXLP(frame.filters, xsltbase, null, frame.params)
         } else {
             xlps[framen] = frame.xlp
         }
@@ -76,7 +76,7 @@ xframes.mkXframes = function(frames, xsltbase) {
 	}
 	return html
     }
-    var render = function(indoc, done, preprocess) {
+    var render = function(indoc, done, preprocess, params) {
         var stepsDone = Array(frames.length);
         var stepsRes = Array(frames.length);
         [...Array(frames.length).keys()].forEach(function(framen) {
@@ -142,7 +142,7 @@ xframes.mkXframes = function(frames, xsltbase) {
 			lastStep(resn)
                     }
                 }
-            })
+            }, params || this.params)
         })
         //console.log('Xframes renderings launched')
     }

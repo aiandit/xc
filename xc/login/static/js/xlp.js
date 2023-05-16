@@ -296,7 +296,18 @@ xlp.fixKonqTransformationResult = function(doc) {
     }
 }
 
-xlp.transform = function(xslt, xml) {
+xlp.setupXSLT = function(xslt, params) {
+    var xsltproc = new XSLTProcessor()
+    xsltproc.importStylesheet(xslt)
+    if (params) {
+	Object.keys(params).map((k)=> {
+	    xsltproc.setParameter(null, k, params[k])
+	})
+    }
+    return xsltproc
+}
+
+xlp.transform = function(xslt, xml, params) {
     var result, xsltproc
 
     // IE method
@@ -306,8 +317,7 @@ xlp.transform = function(xslt, xml) {
 
         // Other browsers
     } else {
-        xsltproc = new XSLTProcessor()
-        xsltproc.importStylesheet(xslt)
+        xsltproc = xlp.setupXSLT(xslt, params)
         result = xsltproc.transformToDocument(xml)
         if (xlp.isKonq) {
             fixKonqTransformationResult(result)
@@ -326,27 +336,14 @@ xlp.xPath_selectString = function(doc, xpath) {
     return res.stringValue
 }
 
-xlp.transformToFragment = function(xslt, xml) {
+xlp.transformToFragment = function(xslt, xml, params) {
     var result, xsltproc
 
     if (xlp.isIE) {
         result = parseXML(xml.transformNode(xslt))
     } else {
-        xsltproc = new XSLTProcessor()
-        try {
-            xsltproc.importStylesheet(xslt)
-        } catch(e) {
-            console.error('Failed to import stylesheet: ' + xslt.URL)
-            console.error(e)
-        }
-        if (xsltproc) {
-            try {
-                result = xsltproc.transformToFragment(xml, document)
-            } catch(e) {
-                console.error('Failed to transform: ' + xslt.URL)
-                console.error(e)
-            }
-        }
+        xsltproc = xlp.setupXSLT(xslt, params)
+        result = xsltproc.transformToFragment(xml, document)
     }
 
     return result
@@ -432,34 +429,37 @@ xlp.attach = function(elid, htmlfrag, done) {
 }
 
 xlp.XSL =
-xlp.mkXSL = function(xslt, xsltbase) {
-    function step(xml, done, toDoc) {
+    xlp.mkXSL = function(xslt, xsltbase, params) {
+    function step(xml, done, toDoc, params) {
         xlp.getxsl(xslt, xsltbase, function(xsl) {
             xlp.getdoc(xml, {}, function(xmldoc) {
                 var res
-//                console.log('XSLT: ' + xslt)
+		//                console.log('XSLT: ' + xslt)
                 if (toDoc) {
-                    res = xlp.transform(xsl, xmldoc)
+                    res = xlp.transform(xsl, xmldoc, params)
                 } else {
-                    res = xlp.transformToFragment(xsl, xmldoc)
+                    res = xlp.transformToFragment(xsl, xmldoc, params)
                 }
                 done(res)
             })
         })
     }
-    var transform = function(indoc, toDoc, done) {
+    var transform = function(indoc, toDoc, done, params) {
         if (typeof done == "undefined") {
             done = toDoc
             toDoc = true
         }
-        step(indoc, done, toDoc)
+	if (params == undefined) params = this.params
+        step(indoc, done, toDoc, params)
     }
-    var transformToFragment = function(indoc, done) {
-        transform(indoc, false, done)
+    var transformToFragment = function(indoc, done, params) {
+	if (params == undefined) params = this.params
+        transform(indoc, false, done, params)
     }
     var XSL = {
         xslt: xslt,
         xsltbase: xsltbase,
+	params: params,
         transform: transform,
         transformToFragment: transformToFragment,
         getdoc: xlp.getdoc,
@@ -469,14 +469,13 @@ xlp.mkXSL = function(xslt, xsltbase) {
     return XSL
 }
 
-xlp.XLP =
-xlp.mkXLP = function(xslts, xsltbase, options) {
-    function step(xml, toDoc, done, j) {
+xlp.XLP = xlp.mkXLP = function(xslts, xsltbase, options, params) {
+    function step(xml, toDoc, done, params, j) {
         if (j == undefined) j = 0
         var xslt = xslts[j]
         var nextStep = function(res) {
             if (j < xslts.length - 1) {
-                step(res, toDoc, done, j+1)
+                step(res, toDoc, done, params, j+1)
             } else {
                 if (res != undefined
                     && res.documentElement != undefined
@@ -495,10 +494,11 @@ xlp.mkXLP = function(xslts, xsltbase, options) {
             var xsl = xlp.XSL(xslts[j], xsltbase)
             xsl.transform(xml, toDoc || j < xslts.length - 1, function(res) {
                 nextStep(res)
-            })
+            }, params)
         } else if ((typeof xslt == 'string' && xslt.endsWith('.xml'))) {
             // another pipeline
             xlp.loadXLP(xsltbase + xslt, xsltbase, function(sxlp) {
+		sxlp.setParams(params)
                 sxlp.transform(xml, toDoc || j < xslts.length - 1, function(res) {
                     nextStep(res)
                 })
@@ -523,37 +523,35 @@ xlp.mkXLP = function(xslts, xsltbase, options) {
             done(xslt)
         }
     }
-    var transform = function(indoc, toDoc, done) {
+    var transform = function(indoc, toDoc, done, params) {
         if (typeof done == "undefined") {
             done = toDoc
             toDoc = (options != undefined && options.output == 'text') ? false : true
         }
-        step(indoc, toDoc,
-             function(outfrag) {
-//                 if (outfrag.nodeType == outfrag.DOCUMENT_FRAGMENT_NODE) {
-//                     outfrag = outfrag.textContent
-//                 }
-                 done(outfrag)
-             })
+	if (params == undefined) params = this.params
+        step(indoc, toDoc, done, params)
     }
-    var transformTxt = function(instr, toDoc, done) {
+    var transformTxt = function(instr, toDoc, done, params) {
         if (typeof done == "undefined") {
             done = toDoc
             toDoc = true
         }
+	if (params == undefined) params = this.params
         var indoc = xlp.parseXML(instr)
-        transform(indoc, toDoc,
-                  function(outfrag) {
-                      done(outfrag)
-                  })
+        transform(indoc, toDoc, done, params)
+    }
+    var setParams = function(params) {
+        this.params = params
     }
     var XLP = {
         xslts: xslts,
         xsltbase: xsltbase,
+        step: step,
         transform: transform,
         transformTxt: transformTxt,
         attach: xlp.attach,
         mkpre: xlp.mkpre,
+        params: params,
 	options: options
     }
     return XLP
