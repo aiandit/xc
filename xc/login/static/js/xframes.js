@@ -77,6 +77,11 @@ xframes.mkXframes = function(frames, xsltbase) {
 	return html
     }
     var render = function(indoc, done, preprocess, params) {
+	if (preprocess == undefined) {
+	    preprocess = function(a, done) {
+		done(a)
+	    }
+	}
         var stepsDone = Array(frames.length);
         var stepsRes = Array(frames.length);
         [...Array(frames.length).keys()].forEach(function(framen) {
@@ -130,7 +135,7 @@ xframes.mkXframes = function(frames, xsltbase) {
 			newNode.innerHTML = resHTML
 			preprocess(newNode, function(res) {
 //			    console.log('Xframes XLP chain ' + (framen+1) + ' preprocessed')
-			    resHTML = newNode.innerHTML
+			    resHTML = res.innerHTML
 			    resn.innerHTML = resHTML
 			    var oldNode = invNode.removeChild(newNode)
 //			    console.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)

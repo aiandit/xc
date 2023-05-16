@@ -192,7 +192,7 @@ xc.getDocumentClass = function(xcontdoc, done) {
 	verb = vparam.textContent
     }
 
-    if (!xcontdoc.startsWith('<')) {
+    if (typeof xcontdoc == 'string' && !xcontdoc.startsWith('<')) {
 
 	dclass = xc.curtype.replace('/', '_')
 	dclass += '-' + verb
@@ -690,7 +690,7 @@ xc.mkPoll = function(el, info, eldone) {
 		return
 	    }
 	    var ppContainer = info.pollContainer || el.nodeName
-	    var localframes = [ {toDoc: false, container: ppContainer, target: ciid, filters: [ ppFilter ]} ]
+	    var localframes = [ {toDoc: false, container: ppContainer, target: ciid, filters: [ ppFilter ], params: info} ]
 	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
 	    mylframes.render(text, done, function(x, predone) {
 		updateTreeFinal(x, undefined, predone)
@@ -800,26 +800,38 @@ var ppViews = function(subtree, event, done) {
 	    var viewDescr = function() {
 		return 'view ' + index + '/' + tms.length + ' of ' + xc.getElID(subtree) + ' (' + url + ')'
 	    }
-	    var localframes = [
-		{target: viewTarget,
-		 params: el.dataset,
-		 filters: [
-		     el.dataset.viewFilter
-		 ]}
-	    ]
-	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
-            mylframes.renderLink(event.target, url, function(request) {
-		console.log('VIEW: sub ' + viewDescr() + ' has been rendered')
-		xc.docs[viewName] = request.responseXML
-		updateTreeFinal(document.getElementById(viewTarget), event, function(result) {
-		    var onloadCode = el.dataset.viewOnload
-		    if (onloadCode != undefined) {
-			xc.runMethod(onloadCode)
-		    }
-		    console.log('VIEW: sub ' + viewDescr() + ' is handled completely')
-		    eldone(request)
+	    var getfun = viewCache ? xlp.loadCached : xlp.loadXML
+
+	    var handleResult = function(text, filter, done) {
+		if (filter == undefined) {
+		    xc.getDocumentClass(text, function(dclass, mode) {
+			handleResult(text, dclass + '-' + mode + '.xsl', done)
+		    })
+		    return
+		}
+
+		var localframes = [ {target: viewTarget, params: el.dataset, filters: [ filter ]} ]
+		var mylframes = xframes.mkXframes(localframes, xc.xslpath)
+
+		mylframes.render(text, done)
+	    }
+
+	    getfun(url, (a,b)=>{
+		var viewFilter = el.dataset.viewFilter
+		handleResult(a, viewFilter, function(request) {
+		    console.log('VIEW: sub ' + viewDescr() + ' has been rendered')
+		    xc.docs[viewName] = request.responseXML
+		    updateTreeFinal(document.getElementById(viewTarget), event, function(result) {
+			var onloadCode = el.dataset.viewOnload
+			if (onloadCode != undefined) {
+			    xc.runMethod(onloadCode)
+			}
+			console.log('VIEW: sub ' + viewDescr() + ' is handled completely')
+			eldone(request)
+		    })
 		})
-            }, viewCache)
+	    })
+
 	    el.dataset.viewDone = '1'
 	}
 	if (el.dataset.viewDone != '1') {
@@ -1139,7 +1151,7 @@ var updateTreeFinal = function(subtree, ev, done) {
 	ppViews(subtree, ev, function(result) {
 	    xc.unhideRaw(subtree, ev)
 	    if (typeof done == 'function') {
-		done(result)
+		done(subtree)
 	    }
 	})
     })
