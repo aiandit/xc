@@ -586,6 +586,10 @@ xc.psHead = function(n) {
     }
 }
 xc.psHead2 = xc.psHead(2)
+xc.psHead3 = xc.psHead(3)
+xc.psHead4 = xc.psHead(4)
+xc.psHead5 = xc.psHead(5)
+
 var psSingleField = function(data) {
     if (data.length == 0) return ''
     return '<span>' + data.split('\n')[1] + '</span>'
@@ -598,17 +602,17 @@ xc.psNonEmpty = function(a, b) {
 	if (data) { return a } else { return b }
     }
 }
-xc.psNonEmptySetClass = function(a, b) {
-    return function(data, el) {
-	if (data) {
-	    el.classList.add(a)
-	    el.classList.remove(b)
-	} else {
-	    el.classList.add(b)
-	    el.classList.remove(a)
-	}
-	return {noupdate: true}
+xc.psNonEmptySetClass = function(data, el) {
+    var tagEmpty = el.dataset.classEmpty || 'off'
+    var tagNonEmpty = el.dataset.classNonEmpty || 'on'
+    if (data) {
+	el.classList.add(tagNonEmpty)
+	el.classList.remove(tagEmpty)
+    } else {
+	el.classList.add(tagEmpty)
+	el.classList.remove(tagNonEmpty)
     }
+    return {noupdate: true}
 }
 
 xc.getCSRFToken = function() {
