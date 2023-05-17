@@ -6,6 +6,25 @@ var xlp = xlp || {}
 xlp.scopy = ({...str}) => { return {...str} }
 xlp.dcopy = (o) => JSON.parse(JSON.stringify(o))
 
+xlp.names = {pre: Object.keys(window)}
+
+xlp.checkNamespace = function(oknames) {
+    if (oknames == undefined) {
+	oknames = ['xlp']
+    }
+    xlp.names.cur = Object.keys(window)
+    xlp.names.cur.map((n)=> {
+	if (xlp.names.pre.indexOf(n) >= 0) {
+	} else {
+	    if (oknames.indexOf(n) >= 0) {
+		console.log('Name ' + n + ' is marked as OK')
+	    } else {
+		console.log('Name ' + n + ' is new')
+	    }
+	}
+    })
+}
+
 xlp.lookupName = function(name) {
     var parts = name.split('.')
     var res = window
@@ -526,7 +545,7 @@ xlp.XLP = xlp.mkXLP = function(xslts, xsltbase, options, params) {
     var transform = function(indoc, toDoc, done, params) {
         if (typeof done == "undefined") {
             done = toDoc
-            toDoc = (options != undefined && options.output == 'text') ? false : true
+            toDoc = true
         }
 	if (params == undefined) params = this.params
         step(indoc, toDoc, done, params)

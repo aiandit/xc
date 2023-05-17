@@ -93,16 +93,18 @@ xframes.mkXframes = function(frames, xsltbase) {
 	    var toDoc = true
 	    if (frame.toDoc != undefined) {
 		toDoc = frame.toDoc
+	    } else {
+		toDoc = x.options && x.options.output && x.options.output == 'text' ? false : true
 	    }
 	    var container = frame.container || 'div'
 
-            console.log('Xframes XLP chain ' + (framen+1) + ' of ' + frames.length + ' launched')
+            console.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' of ' + frames.length + ' launched')
             console.log(frames[framen])
 	    x.transform(indoc, toDoc, function(result) {
 
 //                console.log('Xframes XLP chain ' + (framen+1) + ' transformed')
 		var lastStep = function(res) {
-                    console.log('Xframes XLP chain ' + (framen+1) + ' of ' + frames.length + ' done')
+                    console.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' of ' + frames.length + ' done')
                     stepsDone[framen] = 1
                     stepsRes[framen] = result
                     if (stepsDone.every(function(x) { return x > 0 })) {
@@ -133,8 +135,9 @@ xframes.mkXframes = function(frames, xsltbase) {
 //			console.log('New Inv node ' + newNode.attributes.id.value + ' ' + nid)
 			invNode.appendChild(newNode)
 			newNode.innerHTML = resHTML
+			console.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' preprocess')
 			preprocess(newNode, function(res) {
-//			    console.log('Xframes XLP chain ' + (framen+1) + ' preprocessed')
+			    console.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' preprocessed')
 			    resHTML = res.innerHTML
 			    resn.innerHTML = resHTML
 			    var oldNode = invNode.removeChild(newNode)
@@ -193,15 +196,5 @@ xframes.mkXframes = function(frames, xsltbase) {
 }
 
 xframes.spath = function(path) {
-    return xframes.staticurl + path
+    return xframes.xframe.staticurl + path
 }
-
-xframes.init = function() {
-    console.log('xframes.init')
-}
-
-function xframes_init() {
-    xframes.init()
-}
-
-console.log('xframes loaded')

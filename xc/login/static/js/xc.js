@@ -2,27 +2,60 @@ var xc = {}
 
 xc.docs = {}
 
-if (typeof xframe == "undefined") {
-    xframe = 'index'
+if (typeof xframes.xframe == "undefined") {
+    xframes.xframe = { app: 'main', view: 'view', path: 'index.xml', cgi: [], staticurl: ''}
 }
 
-var frames = [
-    {target: 'content',
-     xlp: xlp.mkXLP(['xc.xsl'], '/static/xsl/')},
-    {target: 'title',
-     xlp: xlp.mkXLP(['xc-title.xsl'], '/static/xsl/', {output: 'text'})}
-]
+xc.showTree = function(el, indent) {
+    if (indent == undefined) indent = 0
+    line = ''
+    for (var i = 0; i < indent; ++i) {
+	line += ' '
+    }
+    line += el.nodeName
+    if (el.attributes && el.attributes.id) {
+	line += '#' + el.attributes.id.value
+    }
+    if (el.classList.length > 0) {
+	line += '.' + '[' + el.classList + ']'
+    }
+    if (el.classList.contains('xc-sl-poll')) {
+	line += ' ' + el.dataset.pollUrl
+	if (el.dataset.pollState != undefined) {
+	    line += ' ' + el.dataset.pollState
+	}
+    }
+    if (el.classList.contains('xc-sl-view')) {
+	line += ' ' + el.dataset.viewUrl
+	if (el.dataset.viewState != undefined) {
+	    line += ' ' + el.dataset.viewState
+	}
+    }
+    console.log(line)
+    var elems = Array.from(el.children)
+    elems.map((s)=> {
+	xc.showTree(s, indent+1)
+    })
+}
 
-var myframes = xframes.mkXframes(frames, '/static/xsl/')
+xc.myframes = function() {
+    var frames = [
+	{target: 'content',
+	 xlp: xlp.mkXLP(['xc.xsl'], '/static/xsl/')},
+	{target: 'title',
+	 xlp: xlp.mkXLP(['xc-title.xsl'], '/static/xsl/', {output: 'text'})}
+    ]
+    return xframes.mkXframes(frames, '/static/xsl/')
+}()
 
-var unescapeXML = function(x) {
+xc.unescapeXML = function(x) {
     return x.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
 }
 
 var extractXPath_XPath = function(doc, xpath, toDoc, wrap, done) {
     var rtype = toDoc ? XPathResult.UNORDERED_NODE_ITERATOR_TYPE : XPathResult.STRING_TYPE
     var r = document.evaluate(xpath, doc, null, rtype, null)
-    var n = toDoc ? r.iterateNext() : unescapeXML(r.stringValue)
+    var n = toDoc ? r.iterateNext() : xc.unescapeXML(r.stringValue)
     done(n)
     // want a document as result...
 }
@@ -40,7 +73,7 @@ var extractXPath = function(doc, xpath, toDoc, wrap, done) {
         seltrans.transform(doc, toDoc, function(result) {
             if (xlp.isMozilla) {
                 if (!toDoc) {
-                    result.textContent = unescapeXML(result.textContent)
+                    result.textContent = xc.unescapeXML(result.textContent)
                 }
             }
             done(result)
@@ -92,9 +125,9 @@ xc.id = function id() {
 xc.mkViewTransform = function(transformName, done) {
     var res = {}
     xlp.loadXML('/main/getf/pipelines/' + transformName + '.xml', function(st, t) {
-        if (isErrorResponse(t)) {
+        if (xc.isErrorResponse(t)) {
             xlp.loadXML(xc.xslpath + transformName + '.xsl', function(st, t) {
-                if (isErrorResponse(t)) {
+                if (xc.isErrorResponse(t)) {
                     console.error('mkTransform: No transformation functions found for "' + transformName + '"')
                     var viewTransform = xlp.mkXLP(['default-view-html.xsl'], '/main/getf/xsl/')
                     done(viewTransform)
@@ -221,10 +254,10 @@ xc.getDocumentClass = function(xcontdoc, done) {
 }
 
 var updateXDataView = function(ev, done) {
-    updateTree(document, ev)
+    xc.updateTree(document, ev)
 
     var lastStep = function(r) {
-        updateTreeFinal(document, ev, done)
+        xc.updateTreeFinal(document, ev, done)
     }
 
     var xcontdoc = xc.getCurDocText(xc.curdoc)
@@ -243,14 +276,14 @@ var updateXDataView = function(ev, done) {
                 lastStep(res)
 	    }, function(res, pdone) {
                 console.log('Done with class based content generation: ' + dclass + ', ' + mode)
-		updateTreeFinal(res, ev, pdone)
+		xc.updateTreeFinal(res, ev, pdone)
 	    })
         })
 
     })
 }
 
-var getXDataXML = function(inxml) {
+xc.getXDataXML = function(inxml) {
     var doc = null
     var indoc = xlp.parseXMLC(inxml)
     if (indoc != undefined) {
@@ -272,7 +305,7 @@ var getXDataXML = function(inxml) {
     return doc
 }
 
-var getXData = function(ev, request, done) {
+xc.getXData = function(ev, request, done) {
     extractXPath(request.responseXML, '/*/xcontent', true, '', function(xcontdoc) {
         if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE && xcontdoc.childElementCount > 0
             && xcontdoc.documentElement.childElementCount >= 1) {
@@ -291,7 +324,7 @@ var getXData = function(ev, request, done) {
 		    if (mimetype.length > 0) {
                         done(xcontdoc, mimetype)
 		    } else {
-			var indoc = getXDataXML(xcontdoc.textContent)
+			var indoc = xc.getXDataXML(xcontdoc.textContent)
 			if (indoc != null) {
                             done(indoc)
 			} else {
@@ -304,9 +337,9 @@ var getXData = function(ev, request, done) {
     })
 }
 
-var processXData = function(ev, request, done) {
+xc.processXData = function(ev, request, done) {
     xc.curresp = request.responseXML
-    getXData(ev, request, function(xcontdoc, mimetype) {
+    xc.getXData(ev, request, function(xcontdoc, mimetype) {
         if (xcontdoc.nodeType == xcontdoc.DOCUMENT_NODE) {
             xc.curdoc = xcontdoc
         } else if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
@@ -332,7 +365,7 @@ xc.handleLinkClickA = function(ev, elem) {
 	xc.clearIntervals();
 	xc.beginFetch('get', elem.href, elem)
         // console.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
-        myframes.renderLink(elem, xframes.ajaxPathName(elem.href), function(request) {
+        xc.myframes.renderLink(elem, xframes.ajaxPathName(elem.href), function(request) {
             renderPostProc(ev, request, function(a,b) {
 		xc.endFetch('get', elem.href, elem)
 	    })
@@ -370,7 +403,7 @@ var dohandleFormSubmit = function(form, ev) {
 	    && form.elements.csrfmiddlewaretoken.value == '') {
 	    form.elements.csrfmiddlewaretoken.value = xc.getCSRFToken()
 	}
-        myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
+        xc.myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
             // console.log('A form POST submit is handled completely')
             renderPostProc(ev, request, function(a,b) {
 		xc.endFetch(form.method, form.action, form)
@@ -417,26 +450,26 @@ xc.handlers.capclick = function(ev) {
     }
 }
 
-var runxc = function(x, ev) {
+xc.runxc = function(x, ev) {
     console.log('run: x ' + x)
     console.log('run: ev ' + ev)
 
-    console.log('run: xframe ' + xframe)
+    console.log('run: xframe ' + xframes.xframe)
 
     var paramss = ''
-    if (xframes.cgij.length > 0) {
-        var params = JSON.parse(xframes.cgij)
+    if (xframes.xframe.cgi.length > 0) {
+        var params = JSON.parse(xframes.xframe.cgi)
         for (k in params) {
             paramss += '&' + k + '=' + params[k]
         }
         paramss = '?' + paramss.substr(1)
     }
 
-    var url = '/' + xframe_xapp + '/' + xframe_view + '/' + xframe_path + paramss
-    var ajaxurl = '/' + xframe_xapp + '/ajax_' + xframe_view + '/' + xframe_path + paramss
+    var url = '/' + xframes.xframe.app + '/' + xframes.xframe.view + '/' + xframes.xframe.path + paramss
+    var ajaxurl = '/' + xframes.xframe.app + '/ajax_' + xframes.xframe.view + '/' + xframes.xframe.path + paramss
 
     xc.beginFetch('get', url, document)
-    myframes.renderLink(document, ajaxurl, function(res) {
+    xc.myframes.renderLink(document, ajaxurl, function(res) {
         console.log('done xerp load')
         renderPostProc(ev, res, function(a,b) {
 	    xc.endFetch('get', url, document)
@@ -447,7 +480,7 @@ var runxc = function(x, ev) {
         console.log('popstate: ' + event.state)
 	if (event.state != null) {
 	    xc.beginFetch('get', event.state, document)
-	    myframes.renderLink(document, xframes.ajaxPathName(event.state), function(res) {
+	    xc.myframes.renderLink(document, xframes.ajaxPathName(event.state), function(res) {
 		renderPostProc(event, res, function(a,b) {
 		    xc.endFetch('get', event.state, document)
 		})
@@ -470,8 +503,8 @@ var renderPostProc = function(ev, request, done, noPushHist) {
     if (noPushHist == undefined) {
 	xframes.pushhist(request)
     }
-    if (!isNonXMLResponse(request)) {
-        processXData(ev, request, function(a, b) {
+    if (!xc.isNonXMLResponse(request)) {
+        xc.processXData(ev, request, function(a, b) {
             console.log('processXData done')
 	    if (done) {
 		done(a, b)
@@ -653,6 +686,7 @@ xc.mkPoll = function(el, info, eldone) {
 	}
 	var processData = function(text, el, done) {
 	    var res
+	    info.pollState = 'processData'
 	    try {
 		if (typeof ppFun == 'function') {
 		    if (ppFun.length > 2) {
@@ -665,6 +699,7 @@ xc.mkPoll = function(el, info, eldone) {
 		    done(text)
 		}
 	    } catch (error) {
+		info.pollState = 'processError'
 		console.error('ppPolls catched error in user function ' + info.postprocess);
 		console.error(error);
 		res = {noupdate: true}
@@ -697,11 +732,12 @@ xc.mkPoll = function(el, info, eldone) {
 	    var localframes = [ {toDoc: false, container: ppContainer, target: ciid, filters: [ ppFilter ], params: info} ]
 	    var mylframes = xframes.mkXframes(localframes, xc.xslpath)
 	    mylframes.render(text, done, function(x, predone) {
-		updateTreeFinal(x, undefined, predone)
+		xc.updateTreeFinal(x, undefined, predone)
 	    })
 	}
 	var finalStep = function() {
-	    updateTreeFinal(el, undefined, function(utres) {
+	    info.pollState = 'updateTree'
+	    xc.updateTreeFinal(el, undefined, function(utres) {
 		var tnow = (new Date()).getTime()
 		var nexttime = Number(info.pollInterval) + t0
 		var waitInter = nexttime - tnow - 1
@@ -712,6 +748,7 @@ xc.mkPoll = function(el, info, eldone) {
 		    waitInter = 200
 		}
 		setTimeout(getf, waitInter, ciid, count+1, t0)
+		info.pollState = 'done'
 		if (count == 0 && info.pollDelay == undefined) {
 		    eldone(utres)
 		}
@@ -719,6 +756,7 @@ xc.mkPoll = function(el, info, eldone) {
 	}
 	var handleResult = function(st, res) {
 	    if (st == 0) {
+		info.pollState = 'received'
 		tres = (new Date()).getTime()
 		if (info.postprocess) {
 		    if (res.responseType == 'document') {
@@ -738,11 +776,13 @@ xc.mkPoll = function(el, info, eldone) {
 	    } else {
 		console.error('poll with invalid status', st)
 		handleTextData('', finalStep)
+		info.pollState = 'loadError'
 	    }
 	}
 	var method = info.pollMethod || 'get'
 	var timeout = info.pollTimeout
 	var respType = info.responseType
+	info.pollState = 'loading'
 	if (method.toLowerCase() == 'post') {
 	    var parts = url.split('?')
 	    var rdata = parts[1] + '&csrfmiddlewaretoken=' + xc.getCSRFToken()
@@ -760,6 +800,7 @@ xc.mkPoll = function(el, info, eldone) {
     if (info.pollRunning == undefined) {
 	info.pollRunning = tlaunch
 	var delay = info.pollDelay || 0
+	info.pollState = 'waiting'
 	setTimeout(function() {
 	    xc.setChainedInterval(pollid)
 	    getf(pollid, 0, (new Date()).getTime())
@@ -790,6 +831,8 @@ var ppPolls = function(subtree, done) {
 var ppViews = function(subtree, event, done) {
     var tms = subtree.querySelectorAll('.xc-sl-view')
     var doView = function(el, eldone, index) {
+	el.dataset.viewState = ''
+
 	var getf = function() {
 	    var viewTarget = el.dataset.viewTarget
 	    if (viewTarget == undefined) {
@@ -820,28 +863,32 @@ var ppViews = function(subtree, event, done) {
 		mylframes.render(text, done)
 	    }
 
+	    el.dataset.viewState = 'load'
 	    getfun(url, (a,b)=>{
 		var viewFilter = el.dataset.viewFilter
+		el.dataset.viewState = 'process'
 		handleResult(a, viewFilter, function(request) {
 		    console.log('VIEW: sub ' + viewDescr() + ' has been rendered')
 		    xc.docs[viewName] = request.responseXML
-		    updateTreeFinal(document.getElementById(viewTarget), event, function(result) {
+		    el.dataset.viewState = 'updateTree'
+		    xc.updateTreeFinal(document.getElementById(viewTarget), event, function(result) {
 			var onloadCode = el.dataset.viewOnload
 			if (onloadCode != undefined) {
 			    xc.runMethod(onloadCode)
 			}
+			el.dataset.viewState = 'done'
 			console.log('VIEW: sub ' + viewDescr() + ' is handled completely')
 			eldone(request)
 		    })
 		})
 	    })
 
-	    el.dataset.viewDone = '1'
 	}
-	if (el.dataset.viewDone != '1') {
+	if (el.dataset.viewState == '') {
 	    getf()
 	} else {
 	    console.log('view ' + index + '/' + tms.length + ' (' + xc.getElID(el) + ') of ' + xc.getElID(subtree) + ' is done already')
+	    el.dataset.viewState = 'done'
 	    eldone()
 	}
         return false
@@ -914,7 +961,7 @@ xc.tdsecs = function(tstamp) {
     return tstamp / 1000
 }
 
-var ppTimestamps = function(subtree) {
+xc.ppTimestamps = function(subtree) {
     var tms = subtree.querySelectorAll('span.unixtm')
     tms.forEach(function(el) {
         if (el.dataset.unixtm != 1) {
@@ -930,7 +977,7 @@ var ppTimestamps = function(subtree) {
     })
 }
 
-var ppMarkup = function(subtree) {
+xc.ppMarkup = function(subtree) {
     var tms = subtree.querySelectorAll('.markup')
     tms.forEach(function(el) {
         if (el.dataset.markupDone != 1) {
@@ -944,7 +991,7 @@ var displayNumber = function(str) {
     return String(str).replace('.', ',')
 }
 
-var ppUnits = function(subtree) {
+xc.ppUnits = function(subtree) {
     var tms = subtree.querySelectorAll('span.value-with-unit')
     tms.forEach(function(el) {
         if (el.dataset.unit != el.dataset.targetunit) {
@@ -969,7 +1016,7 @@ var ppUnits = function(subtree) {
     })
 }
 
-var ppSliders = function(subtree) {
+xc.ppSliders = function(subtree) {
     var tms = subtree.querySelectorAll('.xc-slider')
     tms.forEach(function(el) {
 	var rin = el.querySelector('[type="range"]')
@@ -1042,7 +1089,7 @@ xc.createElement = function(ev, name) {
     var indoc = xlp.parseXML(inxml)
     sframes.render(indoc, function(res) {
         console.log('Done with xc.createElement ' + name)
-        updateTree(document, ev)
+        xc.updateTree(document, ev)
     })
 }
 
@@ -1114,7 +1161,7 @@ var xcRender = function(done) {
     })
 }
 
-var updateTree = function(subtree, ev) {
+xc.updateTree = function(subtree, ev) {
     setFormCallback(subtree, handleFormSubmit)
     setLinkCallback(subtree, handleLinkClick)
 
@@ -1137,16 +1184,16 @@ var updateTree = function(subtree, ev) {
         }
     })
 
-    ppMarkup(subtree)
-    ppTimestamps(subtree)
-    ppUnits(subtree)
-    ppSliders(subtree)
+    xc.ppMarkup(subtree)
+    xc.ppTimestamps(subtree)
+    xc.ppUnits(subtree)
+    xc.ppSliders(subtree)
     xc.setButtonLinkHandlers(subtree)
 //    document.forms[0].scrollIntoView()
 }
 
-var updateTreeFinal = function(subtree, ev, done) {
-    updateTree(subtree, ev)
+xc.updateTreeFinal = function(subtree, ev, done) {
+    xc.updateTree(subtree, ev)
     xc.ppActions(subtree, ev)
     tl.update(subtree)
     ppSorts(subtree, ev)
@@ -1161,13 +1208,13 @@ var updateTreeFinal = function(subtree, ev, done) {
     })
 }
 
-var isNonXMLResponse = function(request) {
+xc.isNonXMLResponse = function(request) {
     return (request.responseXML === null
             || request.responseXML.documentElement === null)
 }
 
-var isErrorResponse = function(request) {
-    return (isNonXMLResponse(request)
+xc.isErrorResponse = function(request) {
+    return (xc.isNonXMLResponse(request)
             || request.responseXML.documentElement.nodeName == "xc")
 }
 
