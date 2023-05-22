@@ -17,9 +17,9 @@ xlp.checkNamespace = function(oknames) {
 	if (xlp.names.pre.indexOf(n) >= 0) {
 	} else {
 	    if (oknames.indexOf(n) >= 0) {
-		console.log('Name ' + n + ' is marked as OK')
+		xlp.log('Name ' + n + ' is marked as OK')
 	    } else {
-		console.log('Name ' + n + ' is new')
+		xlp.log('Name ' + n + ' is new')
 	    }
 	}
     })
@@ -32,12 +32,12 @@ xlp.lookupName = function(name) {
 	if (res != undefined) {
 	    res = res[n]
 	    if (res == undefined) {
-		console.error('Name lookup for ' + name + ' failed at step ' + n)
+		xlp.error('Name lookup for ' + name + ' failed at step ' + n)
 	    }
 	}
     })
     if (res == undefined) {
-	console.error('Name lookup for ' + name + ' failed')
+	xlp.error('Name lookup for ' + name + ' failed')
     }
     return res
 }
@@ -129,7 +129,7 @@ xlp.sendRequest = function(URL, method, callback, headers, data, timeout, respon
     }
 
     request.ontimeout = function () {
-        console.log('XLP: ' + URL + ': request timed out ' + request.timeout)
+        xlp.log('XLP: ' + URL + ': request timed out ' + request.timeout)
         callback(-2, request)
     }
 
@@ -140,11 +140,11 @@ xlp.sendRequest = function(URL, method, callback, headers, data, timeout, respon
             if (request.status == 200) {
                 callback(0, request)
             } else if (request.status != 0) {
-                console.error('XLP: ' + URL + ': Could not load ' + request.status + ', msg: ' + request.response)
+                xlp.error('XLP: ' + URL + ': Could not load ' + request.status + ', msg: ' + request.response)
                 callback(-1, request)
             } else {
 		if (request.timeout == 0) {
-                    console.error('XLP: ' + URL + ': request status 0, msg: ' + request.response)
+                    xlp.error('XLP: ' + URL + ': request status 0, msg: ' + request.response)
 		}
             }
         }
@@ -393,7 +393,7 @@ xlp.mkpre = function(text) {
     return pre
 }
 
-xlp.log = function(txt) { console.log('XLP: ' + txt) }
+xlp.log = function(txt) { if (xlp.debug) { console.log('XLP: ' + txt) } }
 xlp.error = function(txt) { console.error('XLP: ' + txt) }
 
 xlp.getdoc = function(docstr, opts, done) {
@@ -453,7 +453,7 @@ xlp.XSL =
         xlp.getxsl(xslt, xsltbase, function(xsl) {
             xlp.getdoc(xml, {}, function(xmldoc) {
                 var res
-		//                console.log('XSLT: ' + xslt)
+		//                xlp.log('XSLT: ' + xslt)
                 if (toDoc) {
                     res = xlp.transform(xsl, xmldoc, params)
                 } else {
@@ -538,7 +538,7 @@ xlp.XLP = xlp.mkXLP = function(xslts, xsltbase, options, params) {
             })
         } else {
             // unknown type: return filter (constant)
-            console.error('XLP filter step type ' + (typeof xslt) + ' not implemented')
+            xlp.error('XLP filter step type ' + (typeof xslt) + ' not implemented')
             done(xslt)
         }
     }
@@ -632,11 +632,11 @@ xlp.getbase = function() {
 }
 
 xlp.init = function() {
-    console.log('xlp.init')
+    xlp.log('xlp.init')
 }
 
 function xlp_init() {
     xlp.init()
 }
 
-console.log('xlp loaded')
+xlp.log('xlp loaded')

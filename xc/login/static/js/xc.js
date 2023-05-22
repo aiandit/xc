@@ -1,5 +1,22 @@
 var xc = {}
 
+xc.log = function(txt) { if (xc.debug) { console.log('XC: ' + txt) } }
+xc.error = function(txt) { console.error('XC: ' + txt) }
+
+xc.setDebug = function(v) {
+    if (!v) {
+	xc.debug = xframes.debug = xlp.debug = v
+    } else {
+	xc.debug = v
+	if (v > 1) {
+	    xframes.debug = v
+	    if (v > 2) {
+		xlp.debug = v
+	    }
+	}
+    }
+}
+
 xc.docs = {}
 
 if (typeof xframes.xframe == "undefined") {
@@ -31,7 +48,7 @@ xc.showTree = function(el, indent) {
 	    line += ' ' + el.dataset.viewState
 	}
     }
-    console.log(line)
+    xc.log(line)
     var elems = Array.from(el.children)
     elems.map((s)=> {
 	xc.showTree(s, indent+1)
@@ -104,7 +121,7 @@ var getActionLSL = function(cname, done) {
                 return xc.getXDoc(findlists[k], classes[k])
             })
             var findlists = findlists.join('\n')
-            console.log('action findlist XML: ' + findlists)
+            xc.log('action findlist XML: ' + findlists)
             done(0, findlists)
         })
     })
@@ -128,7 +145,7 @@ xc.mkViewTransform = function(transformName, done) {
         if (xc.isErrorResponse(t)) {
             xlp.loadXML(xc.xslpath + transformName + '.xsl', function(st, t) {
                 if (xc.isErrorResponse(t)) {
-                    console.error('mkTransform: No transformation functions found for "' + transformName + '"')
+                    xc.error('mkTransform: No transformation functions found for "' + transformName + '"')
                     var viewTransform = xlp.mkXLP(['default-view-html.xsl'], '/main/getf/xsl/')
                     done(viewTransform)
                     //done(res)
@@ -174,10 +191,10 @@ xc.mkClassViewFunction = function(dclass, mode, done) {
                     var indoc = xc.getCurDoc(xcontdoc, xc.cgiParams() + infoxml)
 
                     sframes.render(indoc, function(res) {
-                        console.log('Class render complete')
+                        xc.log('Class render complete')
                         done(res, sframes)
                     }, function(res, pdone) {
-                        console.log('Class generation complete')
+                        xc.log('Class generation complete')
                         preprocess(res, pdone)
                     })
 
@@ -206,7 +223,7 @@ xc.getClassViewFunction = function(dclass, mode, done) {
 
 var updateXView = function(ev, done) {
     updateXDataView(ev, function(a, b) {
-        console.log('XView render by event ' + ev + ' complete')
+        xc.log('XView render by event ' + ev + ' complete')
 	done(a, b)
     })
 }
@@ -236,16 +253,16 @@ xc.getDocumentClass = function(xcontdoc, done) {
 	var xinfo = xlp.mkXLP(['xc-info-json.xsl'], xc.xslpath)
 	xinfo.transform(xcontdoc, false, function(jinfo) {
             if (! jinfo) {
-                console.error('XC: failed to get doc class info in JSON format')
+                xc.error('XC: failed to get doc class info in JSON format')
             } else {
                 var info = JSON.parse(jinfo.textContent)
                 if (info.class.length>0) {
 		    dclass = info.class
                 } else {
-		    console.error('XC: No Xdata class found in the JSON structure')
+		    xc.error('XC: No Xdata class found in the JSON structure')
                 }
             }
-	    console.log('XC: class is ' + dclass + '-' + mode)
+	    xc.log('XC: class is ' + dclass + '-' + mode)
 	    dclass += '-' + verb
 	    done(dclass, mode)
 	})
@@ -272,15 +289,16 @@ var updateXDataView = function(ev, done) {
 
         xc.getClassViewFunction(dclass, mode, function(res) {
 	    res.render(xcontdoc, function(res) {
-                console.log('Done with class based render cycle')
+                xc.log('Done with class based render cycle')
                 lastStep(res)
 	    }, function(res, pdone) {
-                console.log('Done with class based content generation: ' + dclass + ', ' + mode)
+                xc.log('Done with class based content generation: ' + dclass + ', ' + mode)
 		xc.updateTreeFinal(res, ev, pdone)
 	    })
         })
 
     })
+
 }
 
 xc.getXDataXML = function(inxml) {
@@ -364,7 +382,7 @@ xc.handleLinkClickA = function(ev, elem) {
     } else {
 	xc.clearIntervals();
 	xc.beginFetch('get', elem.href, elem)
-        // console.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
+        // xc.log('A: redirect to ajax source: ' + xframes.ajaxPathName(ev.target.href))
         xc.myframes.renderLink(elem, xframes.ajaxPathName(elem.href), function(request) {
             renderPostProc(ev, request, function(a,b) {
 		xc.endFetch('get', elem.href, elem)
@@ -383,15 +401,15 @@ var handleLinkClick = function(ev) {
 }
 
 var dohandleFormSubmit = function(form, ev) {
-    console.log('Form ' + form.name + ' has been submitted')
-    // console.log(form)
-    // console.log(form.action)
+    xc.log('Form ' + form.name + ' has been submitted')
+    // xc.log(form)
+    // xc.log(form.action)
     if (form.attributes.action == undefined || form.attributes.action.value.length == 0) {
         return true
     } else if (form.action.startsWith('javascript:')) {
         var this_ = form
         var evres = eval(form.action.substr(11))
-        console.log(evres)
+        xc.log(evres)
         var res = evres(ev)
         return false
     } else {
@@ -404,7 +422,7 @@ var dohandleFormSubmit = function(form, ev) {
 	    form.elements.csrfmiddlewaretoken.value = xc.getCSRFToken()
 	}
         xc.myframes.renderFormSubmit(form, xframes.ajaxPathName(form.action), function(request) {
-            // console.log('A form POST submit is handled completely')
+            // xc.log('A form POST submit is handled completely')
             renderPostProc(ev, request, function(a,b) {
 		xc.endFetch(form.method, form.action, form)
 	    })
@@ -442,7 +460,7 @@ xc.handlers.onclick = function(ev) {
 xc.handlers.capclick = function(ev) {
     if (xc.lock.clicks) {
 	if (ev.cancelable) {
-	    console.error('XC canceled click event')
+	    xc.error('XC canceled click event')
 	    ev.preventDefault()
 	    ev.cancelBubble = true
 	}
@@ -451,10 +469,10 @@ xc.handlers.capclick = function(ev) {
 }
 
 xc.runxc = function(x, ev) {
-    console.log('run: x ' + x)
-    console.log('run: ev ' + ev)
+    xc.log('run: x ' + x)
+    xc.log('run: ev ' + ev)
 
-    console.log('run: xframe ' + xframes.xframe)
+    xc.log('run: xframe ' + xframes.xframe)
 
     var paramss = ''
     if (xframes.xframe.cgi.length > 0) {
@@ -470,14 +488,14 @@ xc.runxc = function(x, ev) {
 
     xc.beginFetch('get', url, document)
     xc.myframes.renderLink(document, ajaxurl, function(res) {
-        console.log('done xerp load')
+        xc.log('done xerp load')
         renderPostProc(ev, res, function(a,b) {
 	    xc.endFetch('get', url, document)
 	})
     })
 
     window.addEventListener("popstate", function (event) {
-        console.log('popstate: ' + event.state)
+        xc.log('popstate: ' + event.state)
 	if (event.state != null) {
 	    xc.beginFetch('get', event.state, document)
 	    xc.myframes.renderLink(document, xframes.ajaxPathName(event.state), function(res) {
@@ -488,7 +506,7 @@ xc.runxc = function(x, ev) {
 	}
     })
     window.addEventListener( "pageshow", function ( event ) {
-//        console.log('pageshow')
+//        xc.log('pageshow')
 //        window.location = event.state
     })
 
@@ -499,33 +517,33 @@ xc.runxc = function(x, ev) {
 }
 
 var renderPostProc = function(ev, request, done, noPushHist) {
-    console.log('render: ' + request)
+    xc.log('render: ' + request)
     if (noPushHist == undefined) {
 	xframes.pushhist(request)
     }
     if (!xc.isNonXMLResponse(request)) {
         xc.processXData(ev, request, function(a, b) {
-            console.log('processXData done')
+            xc.log('processXData done')
 	    if (done) {
 		done(a, b)
 	    }
         })
     } else {
-        console.error('Got non XML response')
+        xc.error('Got non XML response')
     }
 }
 
 var setFormCallback = function(subtree, handle) {
     var forms = subtree.querySelectorAll('form')
     var ffunc = function(ev, x, formk) {
-        console.log(name + ': form submit  event for: ' + ev);
+        xc.log(name + ': form submit  event for: ' + ev);
         if (formk.classList.contains('xc-nocatch')) return true
         var res = handle(ev)
-        console.log(name + ': form submit  event returned: ' + res);
+        xc.log(name + ': form submit  event returned: ' + res);
         return res
     }
     Object.keys(forms).forEach(function(k) {
-//        console.log(name + ': set form submit event for: ' + forms[k].id);
+//        xc.log(name + ': set form submit event for: ' + forms[k].id);
         forms[k].onsubmit = function(x, y) {
 	    return ffunc(x, y, forms[k])
 	}
@@ -538,14 +556,14 @@ var setFormCallback = function(subtree, handle) {
 var setLinkCallback = function(subtree, handle) {
     var forms = subtree.querySelectorAll('a')
     var ffunc = function(ev, y, formk, oh) {
-        console.log('link click event for: ' + ev + ' with handler ' + oh)
+        xc.log('link click event for: ' + ev + ' with handler ' + oh)
         var res = true
 	if (oh) {
 	    res = oh(ev, y)
 	} else if (!formk.classList.contains('xc-nocatch')) {
 	    var res = handle(ev)
 	}
-        console.log(name + ': link click event handler returned: ' + res);
+        xc.log(name + ': link click event handler returned: ' + res);
         return res
     }
     Object.keys(forms).forEach(function(k) {
@@ -679,7 +697,7 @@ xc.mkPoll = function(el, info, eldone) {
 	var url = info.pollUrl
 	var t0 = (new Date()).getTime()
 	var tres = t0
-	//	    console.log('getf: ' + (t0 - globtO) + ': '  + url)
+	//	    xc.log('getf: ' + (t0 - globtO) + ': '  + url)
 	var ppFun
 	if (info.postprocess) {
 	    ppFun = xlp.lookupName(info.postprocess)
@@ -700,8 +718,8 @@ xc.mkPoll = function(el, info, eldone) {
 		}
 	    } catch (error) {
 		info.pollState = 'processError'
-		console.error('ppPolls catched error in user function ' + info.postprocess);
-		console.error(error);
+		xc.error('ppPolls catched error in user function ' + info.postprocess);
+		xc.error(error);
 		res = {noupdate: true}
 		done(res)
 	    }
@@ -741,7 +759,7 @@ xc.mkPoll = function(el, info, eldone) {
 		var tnow = (new Date()).getTime()
 		var nexttime = Number(info.pollInterval) + t0
 		var waitInter = nexttime - tnow - 1
-		// console.log('Poll ' + ciid + ' at ' + xc.tclock(t0) + ' result ' +
+		// xc.log('Poll ' + ciid + ' at ' + xc.tclock(t0) + ' result ' +
 		// 		xc.tdsecs(tres-t0) + ' complete ' + xc.tdsecs(tnow - t0) +
 		// 		', again in ' + xc.tdsecs(waitInter))
 		if (waitInter < 200) {
@@ -774,7 +792,7 @@ xc.mkPoll = function(el, info, eldone) {
 		    handleXMLData(res.response, info.pollFilter, finalStep)
 		}
 	    } else {
-		console.error('poll with invalid status', st)
+		xc.error('poll with invalid status', st)
 		handleTextData('', finalStep)
 		info.pollState = 'loadError'
 	    }
@@ -819,7 +837,7 @@ var ppPolls = function(subtree, done) {
     var doPoll = function(el, eldone) {
 	var info = el.dataset
 	xc.mkPoll(el, info, () => {
-	    console.log('poll ' + el.attributes.id.value + ' done')
+	    xc.log('poll ' + el.attributes.id.value + ' done')
 	    eldone()
 	})
     }
@@ -868,7 +886,7 @@ var ppViews = function(subtree, event, done) {
 		var viewFilter = el.dataset.viewFilter
 		el.dataset.viewState = 'process'
 		handleResult(a, viewFilter, function(request) {
-		    console.log('VIEW: sub ' + viewDescr() + ' has been rendered')
+		    xc.log('VIEW: sub ' + viewDescr() + ' has been rendered')
 		    xc.docs[viewName] = request.responseXML
 		    el.dataset.viewState = 'updateTree'
 		    xc.updateTreeFinal(document.getElementById(viewTarget), event, function(result) {
@@ -877,7 +895,7 @@ var ppViews = function(subtree, event, done) {
 			    xc.runMethod(onloadCode)
 			}
 			el.dataset.viewState = 'done'
-			console.log('VIEW: sub ' + viewDescr() + ' is handled completely')
+			xc.log('VIEW: sub ' + viewDescr() + ' is handled completely')
 			eldone(request)
 		    })
 		})
@@ -887,18 +905,18 @@ var ppViews = function(subtree, event, done) {
 	if (el.dataset.viewState == '') {
 	    getf()
 	} else {
-	    console.log('view ' + index + '/' + tms.length + ' (' + xc.getElID(el) + ') of ' + xc.getElID(subtree) + ' is done already')
+	    xc.log('view ' + index + '/' + tms.length + ' (' + xc.getElID(el) + ') of ' + xc.getElID(subtree) + ' is done already')
 	    el.dataset.viewState = 'done'
 	    eldone()
 	}
         return false
     }
     if (tms.length > 0) {
-	console.log('Start processing ' + tms.length + ' subviews of ' + xc.getElID(subtree))
+	xc.log('Start processing ' + tms.length + ' subviews of ' + xc.getElID(subtree))
     }
     xlp.amap(tms, doView, function(res) {
 	if (tms.length > 0) {
-	    console.log('All views of ' + xc.getElID(subtree) + ' done')
+	    xc.log('All views of ' + xc.getElID(subtree) + ' done')
 	}
 	done(res)
     })
@@ -912,7 +930,7 @@ xc.runMethod = function(name, x, args) {
     var fn = xlp.lookupName(name)
     var res
     if (typeof fn != 'function') {
-	console.error('Cannot execute ' + name + ' as function or method (type ' + typeof fn + ')')
+	xc.error('Cannot execute ' + name + ' as function or method (type ' + typeof fn + ')')
     } else {
 	if (x == undefined) {
 	    var parts = name.split('.')
@@ -995,7 +1013,7 @@ xc.ppUnits = function(subtree) {
     var tms = subtree.querySelectorAll('span.value-with-unit')
     tms.forEach(function(el) {
         if (el.dataset.unit != el.dataset.targetunit) {
-//            console.log('GG: ' + el.innerHTML)
+//            xc.log('GG: ' + el.innerHTML)
             var flval = Number(el.firstElementChild.innerText)
             if (el.dataset.unit == 'B' && el.dataset.targetunit == 'KB') {
                 el.innerHTML = '<span title="' + flval + el.dataset.unit + '">'
@@ -1052,16 +1070,16 @@ xc.getCGIXML = function(form, exclude) {
         exclude = {data:1}
     }
     var cgiData = xlp.mkFormDataDict(form)
-    // console.log(cgiData)
+    // xc.log(cgiData)
     var cgixml = {}
     Object.keys(cgiData).forEach(function(k) {
         if (k in exclude) return
         var r = '<' + k + '>' + cgiData[k] + '</' + k + '>\n'
-        // console.log(k)
-        // console.log(r)
+        // xc.log(k)
+        // xc.log(r)
         cgixml[k] = r
     })
-    // console.log(cgixml)
+    // xc.log(cgixml)
     return xc.getXDoc(Object.values(cgixml).join(''), 'cgi')
 }
 
@@ -1085,10 +1103,10 @@ xc.createElement = function(ev, name) {
     ]
     var sframes = xframes.mkXframes(frames, '/main/ajax_runwhich?action=get&submit=1&which=*/xsl/')
     var inxml = '<x>' + xc.cgiParams() + '</x>'
-    console.log(inxml)
+    xc.log(inxml)
     var indoc = xlp.parseXML(inxml)
     sframes.render(indoc, function(res) {
-        console.log('Done with xc.createElement ' + name)
+        xc.log('Done with xc.createElement ' + name)
         xc.updateTree(document, ev)
     })
 }
@@ -1123,9 +1141,9 @@ xc.performAction = function(ev, name) {
     var genxsl = xlp.mkXLP(filters, xc.xslpath)
     genxsl.transform(inxml, function(res) {
         xc.curdoc = res
-        console.log('Done with performAction ' + name)
+        xc.log('Done with performAction ' + name)
         updateXDataView(ev, function(res) {
-            console.log('Perform action complete')
+            xc.log('Perform action complete')
         })
     })
 }
@@ -1138,9 +1156,9 @@ xc.createDoctype = function(ev, name) {
                                   dt.documentElement.outerHTML + '</cont>', 'x')
         genxsl.transform(inxml, function(res) {
             xc.curdoc = res
-            console.log('Done with performAction ' + name)
+            xc.log('Done with performAction ' + name)
             updateXDataView(ev, function(res) {
-                console.log('Perform action complete')
+                xc.log('Perform action complete')
             })
         })
     })
@@ -1155,8 +1173,8 @@ var xcRender = function(done) {
     ]
     var sframes = xframes.mkXframes(frames, xframes.spath('xsl/'))
     sframes.render(xc.curdoc, function(res) {
-        console.log('Done with xc render')
-        console.log(res)
+        xc.log('Done with xc render')
+        xc.log(res)
         done(status, res)
     })
 }
@@ -1244,12 +1262,12 @@ xc.readCSV = function(text) {
 	    allitems[i].push(Number(items[i]))
 	}
     })
-//    console.log('Read ' + lines.length + ' lines, total items: ' + allitems.length*lines.length)
+//    xc.log('Read ' + lines.length + ' lines, total items: ' + allitems.length*lines.length)
     return allitems
 }
 
 xc.csv2xmlfilt = function(text, done) {
-    console.log('xc.csv2xml')
+    xc.log('xc.csv2xml')
     extractXPath(text, '/*/x:cont/text()', false, '', function(xcontdoc) {
         if (xcontdoc.nodeType == xcontdoc.DOCUMENT_FRAGMENT_NODE) {
 	    var indoc = xcontdoc.textContent
@@ -1302,7 +1320,7 @@ xc.transformAndSaveAs = function(doc, filters, ofname, form, toDoc, done) {
 	form.data.value = toDoc ? resconf.documentElement.outerHTML : resconf.textContent
 	form.csrfmiddlewaretoken.value = xc.getCSRFToken()
 	xlp.submitForm(form, '/main/ajax_edit/' + ofname, function(status) {
-	    console.log('Doc ' + doc.URL + ' transformed with ' + filters + ' and saved as ' + ofname)
+	    xc.log('Doc ' + doc.URL + ' transformed with ' + filters + ' and saved as ' + ofname)
 	    done()
 	})
     })

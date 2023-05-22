@@ -1,5 +1,8 @@
 var xframes = xframes || {}
 
+xframes.log = function(txt) { if (xframes.debug) { console.log('XFr: ' + txt) } }
+xframes.error = function(txt) { console.error('XFr: ' + txt) }
+
 xframes.sections = ['main', 'login', 'register']
 xframes.homepage = 'home'
 
@@ -48,7 +51,7 @@ xframes.pushhist = function(request) {
     var retrTitle = 'XCerp - ' + retrURL
 //    history.pushState({title: retrTitle, URL: retrURL}, retrTitle, retrURL)
     history.pushState(retrURL, '', retrURL)
-//    console.log('history.pushState', retrURL)
+//    xframes.log('history.pushState', retrURL)
 }
 
 xframes.mkXframes = function(frames, xsltbase) {
@@ -98,24 +101,24 @@ xframes.mkXframes = function(frames, xsltbase) {
 	    }
 	    var container = frame.container || 'div'
 
-            console.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' of ' + frames.length + ' launched')
-            console.log(frames[framen])
+            xframes.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' of ' + frames.length + ' launched')
+            xframes.log(frames[framen])
 	    x.transform(indoc, toDoc, function(result) {
 
-//                console.log('Xframes XLP chain ' + (framen+1) + ' transformed')
+//                xframes.log('Xframes XLP chain ' + (framen+1) + ' transformed')
 		var lastStep = function(res) {
-                    console.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' of ' + frames.length + ' done')
+                    xframes.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' of ' + frames.length + ' done')
                     stepsDone[framen] = 1
                     stepsRes[framen] = result
                     if (stepsDone.every(function(x) { return x > 0 })) {
-			console.log('Xframes all ' + frames.length + ' XLP chains done')
+			xframes.log('Xframes all ' + frames.length + ' XLP chains done')
 			done(stepsRes[stepsRes.length-1], stepsDone)
                     }
 		}
 
                 var resn = document.getElementById(frame.target)
                 if (resn === null) {
-                    console.error('XFrame target ' +  frame.target + ' not found')
+                    xframes.error('XFrame target ' +  frame.target + ' not found')
 		    lastStep()
                 } else {
                     if (typeof result == 'string') {
@@ -128,21 +131,21 @@ xframes.mkXframes = function(frames, xsltbase) {
 						   || result.nodeType == result.DOCUMENT_FRAGMENT_NODE)) {
 			var resHTML = getHTML(result)
 			var invNode = document.getElementById('invisible')
-//			console.log('Invisible children ' + invNode.childElementCount)
+//			xframes.log('Invisible children ' + invNode.childElementCount)
 			var newNode = document.createElement(container)
 			var nid = '' + (new Date()).getTime()
 			newNode.setAttribute('id', nid)
-//			console.log('New Inv node ' + newNode.attributes.id.value + ' ' + nid)
+//			xframes.log('New Inv node ' + newNode.attributes.id.value + ' ' + nid)
 			invNode.appendChild(newNode)
 			newNode.innerHTML = resHTML
-			console.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' preprocess')
+			xframes.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' preprocess')
 			preprocess(newNode, function(res) {
-			    console.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' preprocessed')
+			    xframes.log('Xframes XLP chain ' + (framen+1) + ' ' + frame.target + ' preprocessed')
 			    resHTML = res.innerHTML
 			    resn.innerHTML = resHTML
 			    var oldNode = invNode.removeChild(newNode)
-//			    console.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)
-//			    console.log('Invisible children ' + invNode.childElementCount)
+//			    xframes.log('Inv node removed ' + oldNode.attributes.id.value + ' ' + nid)
+//			    xframes.log('Invisible children ' + invNode.childElementCount)
 			    lastStep(resn)
 			})
                     } else {
@@ -152,21 +155,21 @@ xframes.mkXframes = function(frames, xsltbase) {
                 }
             }, params || this.params)
         })
-        //console.log('Xframes renderings launched')
+        //xframes.log('Xframes renderings launched')
     }
     var renderRespHandler = function(indoc, request, done, src,url) {
         if ((typeof indoc == "undefined") || (indoc === null)) {
-            console.error('Xframes: no XML response from ' + src + '(' + url + ')')
+            xframes.error('Xframes: no XML response from ' + src + '(' + url + ')')
             done(request, -1)
         } else {
 	    if (src && src.dataset && src.dataset.formSubmitBackground) {
-		console.log('Form submitted in BG: ' + status)
+		xframes.log('Form submitted in BG: ' + status)
 		done(request, 0)
 	    } else {
 		render(indoc, function(res) {
                     done(request, res)
 		}, function(res, done) {
-		    console.log('No preprocess')
+		    xframes.log('No preprocess')
 		    done(res)
 		})
 	    }
